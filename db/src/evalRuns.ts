@@ -22,6 +22,19 @@ export class EvalRunsRepository {
   constructor(private readonly pool: Pool) {}
 
   async save(input: { topicId: number; result: EvalResult }): Promise<number> {
+    // The pipeline knows a decision by its key ("d1"). The scorecard has to link to the
+    // decision card, so the database id is looked up here.
+    const matches = await Promise.all(
+      input.result.matches.map(async (match) => {
+        if (!match.decisionKey) return { ...match, decisionId: null };
+        const row = await this.pool.query<{ id: number }>(
+          "SELECT id FROM decisions WHERE topic_id = $1 AND decision_key = $2 LIMIT 1",
+          [input.topicId, match.decisionKey],
+        );
+        return { ...match, decisionId: row.rows[0]?.id ?? null };
+      }),
+    );
+
     const result = await this.pool.query<{ id: number }>(
       `INSERT INTO eval_runs (topic_id, pep_number, ground_truth, matches, recall, reason_agreement, extra_ideas)
             VALUES ($1, $2, $3::jsonb, $4::jsonb, $5, $6, $7)
@@ -30,7 +43,7 @@ export class EvalRunsRepository {
         input.topicId,
         input.result.pepNumber,
         JSON.stringify(input.result.groundTruth),
-        JSON.stringify(input.result.matches),
+        JSON.stringify(matches),
         input.result.recall,
         input.result.reasonAgreement,
         input.result.extraIdeas,

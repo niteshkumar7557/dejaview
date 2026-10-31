@@ -18,6 +18,8 @@ export function jobsRouter(context: ApiContext): Router {
         res.status(404).json({ error: `No job with id ${id}` });
         return;
       }
+      // The job this one started, so the dashboard can follow ingest -> extract -> link.
+      const nextJobId = await context.jobs.nextJobId(job.id);
       res.json({
         id: job.id,
         type: job.type,
@@ -25,6 +27,7 @@ export function jobsRouter(context: ApiContext): Router {
         stage: job.stage,
         progress: job.progress,
         error: job.error,
+        nextJobId,
         createdAt: job.created_at.toISOString(),
         updatedAt: job.updated_at.toISOString(),
       });

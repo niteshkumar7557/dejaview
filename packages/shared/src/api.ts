@@ -138,6 +138,11 @@ export interface JobView {
   /** 0..1 */
   progress: number;
   error: string | null;
+  /**
+   * The job this one started, if any. The worker puts the parent's id in the child's payload, so
+   * the web can follow ingest -> extract -> link without guessing.
+   */
+  nextJobId: number | null;
   createdAt: string;
   updatedAt: string;
 }

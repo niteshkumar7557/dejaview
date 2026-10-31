@@ -114,6 +114,18 @@ export class JobsRepository {
     return result.rows[0] ?? null;
   }
 
+  /**
+   * The job this one started, if any. The worker puts the parent's id in the child's payload,
+   * so the dashboard can follow ingest -> extract -> link without guessing the ids.
+   */
+  async nextJobId(id: number): Promise<number | null> {
+    const result = await this.pool.query<{ id: number }>(
+      "SELECT id FROM jobs WHERE payload->>'parentJobId' = $1 ORDER BY id LIMIT 1",
+      [String(id)],
+    );
+    return result.rows[0]?.id ?? null;
+  }
+
   async list(limit = 50): Promise<JobRow[]> {
     const result = await this.pool.query<JobRow>(
       "SELECT * FROM jobs ORDER BY id DESC LIMIT $1",

@@ -55,6 +55,7 @@ export async function fetchThreadForJob(payload: Record<string, unknown>): Promi
     return threadFromUpload(filePath, {
       topicSlug: payloadString(payload, "topicSlug") || undefined,
       pepNumber: payloadNumber(payload, "pepNumber"),
+      title: payloadString(payload, "topicTitle") || undefined,
     });
   }
 
@@ -84,6 +85,8 @@ export async function handleIngest(job: JobRow, context: WorkerContext): Promise
     topicId: saved.topicId,
     sourceId: saved.sourceId,
     topicSlug: thread.topic.slug,
+    // So GET /api/jobs/:id can tell the dashboard which job comes next.
+    parentJobId: job.id,
   });
 }
 
@@ -123,6 +126,7 @@ export async function handleExtract(job: JobRow, context: WorkerContext): Promis
     topicId,
     sourceId,
     topicSlug: thread.topic.slug,
+    parentJobId: job.id,
   });
 }
 
