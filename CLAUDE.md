@@ -17,16 +17,52 @@ its "Rejected Ideas" and the reasons.
 
 **Hard deadline: final push by 6:30 AM, 1 Nov 2026 (IST).** Commits after that don't count and may cost marks.
 
+## AI agents never commit (team rule)
+
+Claude Code, MiniMax M3 or any other AI agent working in this repo **must not run `git commit`, `git push`,
+merge, or open PRs.** Humans do all of that. Creating or switching branches is fine.
+
+At the end of every completed, committable task, the agent **outputs a ready-to-use commit message and a PR
+description** and stops. Use exactly this shape:
+
+````
+**Commit message**
+```
+<imperative summary, ≤ 72 chars>
+
+<what changed and why, wrapped at ~72 chars>
+
+Coding agent: <the agent that did the work>
+Models used in project: Qwen3.5 9B, Qwen3.5 4B
+```
+
+**PR description** (fills .github/pull_request_template.md)
+```
+## What this PR does
+...
+## Changes
+- ...
+## How it was tested
+- ...
+## AI disclosure (required by hackathon rules)
+Coding agent: <the agent that did the work>
+Models used in project: Qwen3.5 9B, Qwen3.5 4B
+```
+````
+
+Before handing over, the agent runs `npm run typecheck` and `npm test` and reports the real result.
+
 ## Non-negotiable rules (they affect scoring)
 
-1. **Never push to `main`.** Every change: new branch → PR → CI green → merge.
-2. **Every commit message ends with these lines** (plus any attribution trailer):
+1. **Nothing goes to `main` directly.** Every change: new branch → PR → CI green → merge (done by humans).
+2. **Every commit message ends with these lines** (CI fails the PR otherwise):
    ```
    Coding agent: Claude Code
    Models used in project: Qwen3.5 9B, Qwen3.5 4B
    ```
-   Use the coding agent that actually helped (team also uses MiniMax M3).
-3. **Every PR description** names the coding agent and the models used in the project (fill the PR template).
+   Use the coding agent that actually helped (the team uses Claude Code and MiniMax M3).
+3. **Every PR description** names the coding agent and the models used in the project (fill the PR template;
+   the `Conventions` workflow fails the PR otherwise).
 4. **Models in the product: only `qwen3.5:9b` and `qwen3.5:4b`** via Ollama. Both must really be used by the
    code (9B: extract/consolidate/eval-judge; 4B: triage). Naming a model the code doesn't use = 0 points for
    AI use and −5 overall. Never add a closed API (OpenAI, Claude, Gemini, …) to the product. If a model
@@ -63,4 +99,17 @@ its "Rejected Ideas" and the reasons.
 
 ## Commands
 
-No code is scaffolded yet. When it is, list the install / dev / test / migrate commands here.
+| Command | What it does |
+|---|---|
+| `npm install` | Install dependencies (Node ≥ 22; CI uses Node 24) |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | Vitest, all tests (CI runs this with `LLM_MODE=replay`) |
+| `BASE_SHA=origin/main npm run check:conventions` | Check that every commit on the branch has the `Coding agent:` / `Models used in project:` lines (add `PR_BODY="..."` to check a PR description too) |
+
+## CI
+
+- `.github/workflows/ci.yml` — on every PR and push to `main`: `npm ci` → typecheck → `npm run migrate`
+  (once it exists) against a Postgres 16 service (`DATABASE_URL` is set) → `npm test`. No secrets.
+- `.github/workflows/conventions.yml` — on every PR (also when its description is edited): runs
+  `scripts/check-conventions.ts` over the PR's commits and description.
+- When adding a workspace (`apps/*`, `packages/*`), make sure root `npm run typecheck` and `npm test` cover it.

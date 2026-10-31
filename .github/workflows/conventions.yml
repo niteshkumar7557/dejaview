@@ -1,0 +1,38 @@
+name: Conventions
+
+# Hackathon rule: every commit message and every PR names the AI coding agent and the
+# models the project uses. Re-runs when the PR description is edited.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  ai-disclosure:
+    name: Commit messages and PR description name agent and models
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Check commits and PR description
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          # Passed through env (not inlined into the script) so PR text can't inject shell.
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: npm run check:conventions
