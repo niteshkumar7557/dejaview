@@ -276,8 +276,10 @@ function highlightTerminal(text: string): string {
     .split("\n")
     .map((line) => {
       const escaped = escapeHtml(line);
+      // A file name that happens to contain "error" is not a failure.
+      if (/^\s+\S+\.test\.ts$/.test(line)) return `<span class="d">${escaped}</span>`;
+      if (/\bFAIL\b|\bfailed\b|\bAssertionError\b/.test(line)) return `<span class="r">${escaped}</span>`;
       if (/passed/.test(line)) return `<span class="g">${escaped}</span>`;
-      if (/FAIL|failed|error/i.test(line)) return `<span class="r">${escaped}</span>`;
       if (/Test Files|Tests|Duration|RUN|test files:/.test(line)) return `<span class="b">${escaped}</span>`;
       if (/npm|>|audit/.test(line)) return `<span class="y">${escaped}</span>`;
       if (/^ {2,}\S/.test(line)) return `<span class="d">${escaped}</span>`;
@@ -329,14 +331,17 @@ async function main(): Promise<void> {
     .join("\n")
     .replace(/\s\/Users\/[^\s]+/, "  dejaview");
   const files = run("npx", ["vitest", "list", "--filesOnly"]).trim().split("\n");
-  const inventory = ["8 test files:", ...files.map((file) => `  ${file}`)].join("\n");
+  const inventory = [`${files.length} test files:`, ...files.map((file) => `  ${file}`)].join("\n");
+  // The counts come from the run itself, so the picture cannot claim a number that is not true.
+  const testCount = /Tests\s+(\d+) passed/.exec(summary)?.[1] ?? "?";
+  const fileCount = /Test Files\s+(\d+) passed/.exec(summary)?.[1] ?? "?";
   await shoot(
     "mudit-tests",
     terminalHtml(
-      "npm test — 89 tests, no network, no model",
+      `npm test — ${testCount} tests in ${fileCount} files, no network, no model`,
       `${highlightTerminal(summary)}\n\n${highlightTerminal(inventory)}`,
     ),
-    900,
+    1100,
     true,
   );
 
