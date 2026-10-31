@@ -1,5 +1,82 @@
 {
-  "decisions": [],
-  "similarRejected": [],
-  "commentMarkdown": "<!-- dejaview -->\n\n**📜 DejaView check**\n\nHistorical context is informational; it does not automatically reject this pull request.\n\n### Related accepted architectural decisions\n\nNo related accepted decisions were found.\n\n### Previously rejected similar proposals\n\nNo similar previously rejected proposals were found.\n\nOpen the DejaView dashboard for the full decision history."
+  "decisions": [
+    {
+      "id": 9,
+      "topic": {
+        "slug": "pep-698",
+        "title": "PEP 698: A typing.override decorator",
+        "pepNumber": 698
+      },
+      "title": "Accepted proposals: providing a TYPE_CHECKING shim for third-party decorators and adopting the main @typing.override decorator",
+      "status": "accepted",
+      "confidence": "high",
+      "reasons": [
+        "One way of handling this kind of thing is to do a typing.TYPE_CHECKING shim, like so: from typing import TYPE_CHECKING if TYPE_CHECKING: from typing import override as override else: def override(func):",
+        "The SC has decided to accept this PEP!"
+      ],
+      "anchors": [
+        {
+          "repo": "python/cpython",
+          "symbol": "typing.override",
+          "originalPath": "Lib/typing.py",
+          "originalCommit": null,
+          "currentPath": "Lib/typing.py",
+          "relocatedBy": null,
+          "linkMethod": "symbol_mention",
+          "evidencePostId": 8
+        }
+      ],
+      "verifiedEvidence": 2,
+      "totalEvidence": 2
+    }
+  ],
+  "similarRejected": [
+    {
+      "id": 7,
+      "topic": {
+        "slug": "pep-698",
+        "title": "PEP 698: A typing.override decorator",
+        "pepNumber": 698
+      },
+      "title": "Rejecting built-in runtime enforcement or parent-class specification due to low utility and library-level implementability",
+      "status": "rejected",
+      "confidence": "high",
+      "reasons": [
+        "if in a single commit you move a method from one base to another, you as the author are likely aware of what you did, so the safety benefits are relatively small",
+        "I'm guessing there wouldn't be too much use of this feature. Since it's relatively easy to implement this capability using runtime logic in a library, that makes me thing we don't need to bake it into typing.py all of the type checkers."
+      ],
+      "anchors": [
+        {
+          "repo": "python/cpython",
+          "symbol": "typing.override",
+          "originalPath": "Lib/typing.py",
+          "originalCommit": null,
+          "currentPath": "Lib/typing.py",
+          "relocatedBy": null,
+          "linkMethod": "symbol_mention",
+          "evidencePostId": 4
+        }
+      ],
+      "verifiedEvidence": 2,
+      "totalEvidence": 2
+    },
+    {
+      "id": 8,
+      "topic": {
+        "slug": "pep-698",
+        "title": "PEP 698: A typing.override decorator",
+        "pepNumber": 698
+      },
+      "title": "Requiring the decorator specifically for abstract method overrides (rejected in favor of a strict mode option)",
+      "status": "rejected",
+      "confidence": "medium",
+      "reasons": [
+        "I'm not sure there is much need for special treatment of abstract methods. The PEP recommends type checkers support a strict mode where all method overrides must be marked with the decorator, whether abstract or not."
+      ],
+      "anchors": [],
+      "verifiedEvidence": 1,
+      "totalEvidence": 1
+    }
+  ],
+  "commentMarkdown": "<!-- dejaview -->\n\n**📜 DejaView check — 3 past decisions touch this code or proposal**\n\nHistorical context is informational; it does not automatically reject this pull request.\n\n### Related accepted architectural decisions\n\n**[PEP 698 · ACCEPTED: Accepted proposals: providing a TYPE\\_CHECKING shim for third\\-party decorators and adopting the main @typing\\.override decorator](<http://localhost:3100/decisions/9>)**\nWhy: One way of handling this kind of thing is to do a typing\\.TYPE\\_CHECKING shim, like so: from typing import TYPE\\_CHECKING if TYPE\\_CHECKING: from typing import override as override else: def override\\(func\\):; The SC has decided to accept this PEP\\!\nLinked via: `Lib/typing.py`\nEvidence and source links: [view decision](<http://localhost:3100/decisions/9>)\n\n### Previously rejected similar proposals\n\n⚠️ This looks similar to a **previously rejected idea**: “Rejecting built\\-in runtime enforcement or parent\\-class specification due to low utility and library\\-level implementability” (PEP 698). Reason: if in a single commit you move a method from one base to another, you as the author are likely aware of what you did, so the safety benefits are relatively small; I'm guessing there wouldn't be too much use of this feature\\. Since it's relatively easy to implement this capability using runtime logic in a library, that makes me thing we don't need to bake it into typing\\.py all of the type checkers\\.\n[View source discussion and decision](<http://localhost:3100/decisions/7>)\n\n⚠️ This looks similar to a **previously rejected idea**: “Requiring the decorator specifically for abstract method overrides \\(rejected in favor of a strict mode option\\)” (PEP 698). Reason: I'm not sure there is much need for special treatment of abstract methods\\. The PEP recommends type checkers support a strict mode where all method overrides must be marked with the decorator, whether abstract or not\\.\n[View source discussion and decision](<http://localhost:3100/decisions/8>)\n\n[Open the DejaView dashboard](<http://localhost:3100/>)"
 }

@@ -1,0 +1,141 @@
+{
+  "promptHash": "a90a60113fa0369c8ff2db355e2d77db50e9736836bd9d1ea1a48ea4b458fc45",
+  "model": "qwen3.5:9b",
+  "stage": "extract",
+  "prompt": "You read part of a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nFind the ideas in these posts that were proposed or discussed: the main proposal, alternative designs,\ndifferent spellings or names, extra features people asked for, and ideas that were turned down.\nList at most 5 ideas, most important first (prefer ideas that were rejected or decided).\n\nFor each idea give:\n- title: a short name for the idea itself (at most 12 words), without labels like \"Rejected:\" or \"Proposal:\"\n- kind: \"proposal\" for the main proposal or a new feature, \"alternative\" for a different way of doing it\n- status: \"accepted\" if it was adopted, \"rejected\" if the authors or deciders turned it down,\n  \"withdrawn\" if its own proposer dropped it, \"open\" if no outcome is visible in these posts\n- summary: one short sentence on what happened to the idea\n- reasons: at most 2 reasons why it got that status, each with exactly one evidence item (post_id and quote).\n\nRules for quotes:\n- Copy the quote WORD FOR WORD from the post with that post_id. Do not paraphrase, fix or shorten words.\n- At most 25 words per quote. Never invent a quote.\n- Only use posts shown below.\n\nPosts:\n\n[post 112] guido (2023-01-03):\nThanks, this actually makes sense.\n\nTrying to get the discussion back on track (away from .join()) a bit, have you thought about my parenthetical remark about using \\{ and \\} to escape curlies instead of, or in addition to, {{ and }}? I believe that when PEP 498 was discussed, there was a good reason to use the latter, but somehow I can’t find that reason in the PEP, and I can’t recall what it was. Maybe it was for compatibility with str.format()? The doubling has always irked me, and I think I’ve forgotten that it existed several times over the years (because I so rarely have a real need to put a curly brace in an f-string).\n\n[post 114] pablogsal (2023-01-03):\nNot yet, I want to discuss this in detail with @lys.nikolaou and @isidentical and currently we are focusing on making the tokenize.py changes and acting on the feedback so far. We will discuss it and check if is too hard to support. If it proves to be trivial and we all agree we can add it to the proposal. If it proves to be tricky we can do it as a follow-up (maybe in an issue and not in a PEP).\n\nIn any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement but I don’t think there is a way around supporting it\n\n[post 117] zufuliu (2023-01-05):\nIt’s unclear from the PEP whether following (new line in f-expression) are valid or not:\n\nf'{1\n+\n1}'\n\nf'{1\\\n+\\\n1}'\n\n# triple-quoted f-string\nf'''{1\n+\n1}'''\n\nf'''{1\\\n+\\\n1}'''\n\nsimilar code is valid in string interpolation, e.g. C# (see [Proposal]: Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines. · Issue #4935 · dotnet/csharplang · GitHub), Kotlin (see Kotlin language specification).\n\n[post 118] pablogsal (2023-01-05):\nThanks for your comment! I answered this partially here:\n\nBut I can confirm that this will be incorporated soon into the PEP document\n\n[post 119] thomas (2023-03-14):\nThe SC (sans Pablo, who didn’t get a vote since he’s one of the PEP authors) is happy to accept PEP 701. Thanks for the hard work in getting f-strings in an even better place\n\n[post 120] erictraut (2023-05-19):\nA big thanks to the authors of this PEP and its implementation. This is a nice improvement!\n\nI’m implementing support for PEP 701 in pyright, which has its own tokenizer and parser. I tried to implement it based on the documentation in the PEP, but I found that there’s an important detail missing in the “How to produce these tokens” section. Step 3 doesn’t say anything special about what happens after a : character is encountered. It says that the tokenizer should go back to step 2 after emitting a : token and popping the current tokenizer mode from the stack. However, when in “format specifier” mode (i.e. after the : is encountered), I think the rules for step 2 need to change so double braces ({{ or }}) are no longer assumed to be part of an FSTRING_MIDDLE token.\n\nTo test this, I tried f\"{'':{{1}.pop()}}\" with the latest CPython implementation. This f-string parses without error. The {{ after the : is clearly being treated as two separate { tokens rather than part of an FSTRING_MIDDLE token.\n\nIf I use the same subexpression prior to the :, it works consistently with the PEP’s “step 2” description, and the {{ is treated as part of an FSTRING_MIDDLE token. As proof, the f-string f\"{{1}.pop()}\" results in a syntax error unless a space is added between the two opening braces.\n\nCould the authors of the PEP confirm that my assumption is correct? If so, would it make sense to update the PEP so it accurately reflects the intended behavior?\n\nEdit: Another related question… in “step 3”, the PEP implies that when a = or ! token is seen, the tokenizer should switch back to step 2. I presume that’s incorrect and it should stay in step 3 and continue to produce normal tokens (as opposed to FSTRING_MIDDLE tokens) until it sees a : or '}`.\n\nAnother small topic that isn’t mentioned in the PEP has to do with nested format specifiers. It appears that the implementation supports two levels of nesting but not three.\n\nf\"{'':*^{1:{1}}}\" works\n\nf\"{'':*^{1:{1:{1}}}}\" produces a syntax error (f-string: expressions nested too deeply)\n\nThe PEP indicates that there is a “lower bound of 5 levels of nesting”. I presume this statement applies to nesting of f-strings, not of format specifiers within an f-string. Would it make sense for the PEP to mention a separate lower bound for format specifier nesting?\n\n[post 121] pablogsal (2023-05-19):\nThanks @erictraut for the message! I am very excited to know that you are adding PEP 701 support in pyright! Thanks a lot for the great work\n\nLet me answer the points that you raise.\n\nI think we may want to be a bit more explicit here, but the section was intended to be indicative and not prescriptive as different tokenizers would require different ways to approach the problem. You have a good point though because there is ambiguity over how the format specifier should be tokenized in general so we should describe that better. I will try to make a PR after beta freeze as we are currently fully immersed in the Python tokenizer changes.\n\nYou are right here but note this is not new as this is something we just preserved from the previous implementation:\n\nython 3.11.1 (main, Dec 15 2022, 18:32:52) [Clang 14.0.0 (clang-1400.0.29.202)] on darwin\nType \"help\", \"copyright\", \"credits\" or \"license\" for more information.\n>>> f\"{'':{{1}.pop()}}\"\n' '\n\n[quote=\"Eric Traut, post:120, topic:22046, username:erictraut\"]\nAnother small topic that isn’t mentioned in the PEP has to do with nested format specifiers. It appears that the implementation supports two levels of nesting but not three.\n\n`f\"{'':*^{1:{1}}}\"` works\n`f\"{'':*^{1:{1:{1}}}}\"` produces a syntax error (f-string: expressions nested too deeply)\n[/quote]\n\nThis is also something we preserved from the previous implementation:\n\nPython 3.11.1 (main, Dec 15 2022, 18:32:52) [Clang 14.0.0 (clang-1400.0.29.202)] on darwin\nType \"help\", \"copyright\", \"credits\" or \"license\" for more information.\n>>> f\"{'':*^{1:{1:{1}}}}\"\nFile \"<stdin>\", line 1\nf\"{'':*^{1:{1:{1}}}}\"\n^\nSyntaxError: f-string: expressions nested too deeply\n\nFor both of these things we just preserved existing behavior, while for the nesting of f-strings we had to dictate it because now arbitrary nesting is possible while before it was not.\n\nI think this is something that makes sense, just so is more clear what the default prescription/recommendation is.\n\n[post 122] mwerezak (2024-02-13):\nPersonally, I don’t find any of the arguments against supporting quote reuse to be compelling. I find the benefits of resourcing referential transparency inside f-string expressions to far outweigh any concerns I’ve seen so far, for a couple reasons:\n\nOne, the current status quo can cause huge problems when generating code from a template (like with mako), and can still be a pain even in normal every day use. It’s just simpler to think of an f-string expression as a normal Python expression without any special restrictions.\n\nTwo, allowing quote reuse inside f-strings doesn’t, by itself, make code unreadable. What people are worrying about is actually the abuse of quote reuse.\n\nWhile discouraging the abuse of language syntax is a noble goal, I personally feel that it should never come at the expense of legitimate use of the language. In my opinion a language should empower developers to write concise, readable, and expressive code first. Discouraging misuse of syntax should always come second. That’s because being able to provide the expressive power to describe a legitimately complex system in clear and simple terms is always going to be more important for a language.\n\nAnyhow, any sufficiently powerful syntax can be abused, the question is whether misuse is easy enough that it becomes a footgun. IMO that is not the case here.\n\n[post 123] Rosuav (2024-02-13):\nNot sure this is worth debating any more… the PEP was accepted into Python 3.12\n\nReminder: at most 5 ideas; give each reason one quote copied word for word (at most 25 words)\nfrom the post with that post_id; use status \"open\" when no outcome is visible.",
+  "response": {
+    "ideas": [
+      {
+        "title": "Using backslash escapes instead of doubled braces",
+        "kind": "alternative",
+        "status": "rejected",
+        "summary": "Guido suggested using \\{ and \\} to escape curly braces instead of {{ and }} but the team decided against it.",
+        "reasons": [
+          {
+            "text": "The doubling has always irked me, and I think I've forgotten that it existed several times over the years",
+            "evidence": [
+              {
+                "post_id": 112,
+                "quote": "Trying to get the discussion back on track (away from .join()) a bit, have you thought about my parenthetical remark about using \\{ and \\} to escape curlies instead of, or in addition to, {{ and }}?"
+              }
+            ]
+          },
+          {
+            "text": "In any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement but I don't think there is a way around supporting it",
+            "evidence": [
+              {
+                "post_id": 114,
+                "quote": "In any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement but I don't think there is a way around supporting it"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Allowing newlines inside f-string expressions",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The PEP was updated to clarify that newlines are valid inside f-string expressions, matching behavior in other languages.",
+        "reasons": [
+          {
+            "text": "It's unclear from the PEP whether following (new line in f-expression) are valid or not",
+            "evidence": [
+              {
+                "post_id": 117,
+                "quote": "It's unclear from the PEP whether following (new line in f-expression) are valid or not: f'{1\\n+\\n1}'"
+              }
+            ]
+          },
+          {
+            "text": "But I can confirm that this will be incorporated soon into the PEP document",
+            "evidence": [
+              {
+                "post_id": 118,
+                "quote": "But I can confirm that this will be incorporated soon into the PEP document"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Clarifying tokenizer behavior after colon in format specifiers",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The PEP documentation was updated to explicitly state that double braces are not treated as part of the middle token after a colon.",
+        "reasons": [
+          {
+            "text": "Step 3 doesn't say anything special about what happens after a : character is encountered",
+            "evidence": [
+              {
+                "post_id": 120,
+                "quote": "Step 3 doesn't say anything special about what happens after a : character is encountered. It says that the tokenizer should go back to step 2 after emitting a : token and popping the current tokenizer mode from the stack."
+              }
+            ]
+          },
+          {
+            "text": "I think we may want to be a bit more explicit here, but the section was intended to be indicative and not prescriptive as different tokenizers would require different ways to approach the problem",
+            "evidence": [
+              {
+                "post_id": 121,
+                "quote": "I think we may want to be a bit more explicit here, but the section was intended to be indicative and not prescriptive as different tokenizers would require different ways to approach the problem."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Supporting quote reuse inside f-string expressions",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The PEP allows reusing quotes within the expression part of an f-string to improve readability and template generation.",
+        "reasons": [
+          {
+            "text": "Personally, I don't find any of the arguments against supporting quote reuse to be compelling",
+            "evidence": [
+              {
+                "post_id": 122,
+                "quote": "Personally, I don't find any of the arguments against supporting quote reuse to be compelling. I find the benefits of resourcing referential transparency inside f-string expressions to far outweigh any concerns I've seen so far"
+              }
+            ]
+          },
+          {
+            "text": "Not sure this is worth debating any more… the PEP was accepted into Python 3.12",
+            "evidence": [
+              {
+                "post_id": 123,
+                "quote": "Not sure this is worth debating any more… the PEP was accepted into Python 3.12"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Increasing the limit for nested format specifiers",
+        "kind": "alternative",
+        "status": "rejected",
+        "summary": "Users suggested increasing the nesting limit for format specifiers beyond two levels, but the implementation preserved the existing restriction.",
+        "reasons": [
+          {
+            "text": "Another small topic that isn't mentioned in the PEP has to do with nested format specifiers. It appears that the implementation supports two levels of nesting but not three",
+            "evidence": [
+              {
+                "post_id": 120,
+                "quote": "Another small topic that isn't mentioned in the PEP has to do with nested format specifiers. It appears that the implementation supports two levels of nesting but not three."
+              }
+            ]
+          },
+          {
+            "text": "For both of these things we just preserved existing behavior, while for the nesting of f-strings we had to dictate it because now arbitrary nesting is possible while before it was not",
+            "evidence": [
+              {
+                "post_id": 121,
+                "quote": "For both of these things we just preserved existing behavior, while for the nesting of f-strings we had to dictate it because now arbitrary nesting is possible while before it was not."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "durationMs": 179297
+}

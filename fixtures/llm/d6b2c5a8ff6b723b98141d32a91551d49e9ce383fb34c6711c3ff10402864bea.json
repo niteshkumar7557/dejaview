@@ -1,0 +1,31 @@
+{
+  "promptHash": "d6b2c5a8ff6b723b98141d32a91551d49e9ce383fb34c6711c3ff10402864bea",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 98] pitrou:\n“It is already possible to write unreadable code so we should not discourage more of it” is definitely not a compelling argument. You might as well jump straight to “it’s possible to write unsafe Python code so there’s no compelling argument against C++”.\n\n[post 99] sirosen:\nI take your meaning, but that’s not what I’m trying to say.\n\nThere are many examples in this thread which are very confusing but also intentionally constructed, like\n\nf\"{some + f\"{nested + f\"string {concat}\"}\"} example\"\n\nThis doesn’t seem to me to be an attempt to show how the feature, being used merely “cleverly” or by a beginner, makes code difficult to understand. Rather, it intends to show that it is possible to construct something unreadable.\n\nThere is a good amount of discussion about nested f-strings here, but I don’t know that anyone in favor of the PEP cares very much about nested f-strings? More than one comment seems to suggest a view that no one yet knows of a legitimate and useful case for nested f-strings, so we’d probably keep them out during code reviews.\n\nThat line of argument might not be convincing to those against. But nobody seems to be strongly in favor of nested f-strings as a particular consequence of this proposal.\n\n[post 100] ajoino:\nThis will depend on what one considers legitimate, but I found myself writing\n\nprint(f\"{some_dict[\"foo\"]}\")\n\nnot once, but twice in the same day when experimenting in the REPL recently. Even though I hade recently read this thread I was still confuced for a while before I realized what the error was. So quick experiments in the repl is one use-case that I would like this feature for.\n\n[post 101] sirosen:\nThat usage features use of the outer quote character inside of the f-string.\n\nBy nested f-strings, I mean any use of an f-string inside of the {} format specifiers:\n\nf\"f-string {'containing ' + f'another {\"f-string\"}'}\"\n\n[post 102] pablogsal:\n10 posts were split to a new topic: String joining design\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 98,
+        "label": "objection"
+      },
+      {
+        "post_id": 99,
+        "label": "question"
+      },
+      {
+        "post_id": 100,
+        "label": "support"
+      },
+      {
+        "post_id": 101,
+        "label": "alternative"
+      },
+      {
+        "post_id": 102,
+        "label": "noise"
+      }
+    ]
+  },
+  "durationMs": 7285
+}

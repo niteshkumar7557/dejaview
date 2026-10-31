@@ -1,0 +1,31 @@
+{
+  "promptHash": "fe50b23db92c2817c04b408b0afaad721e852d7a665a25a35f2c6f0a662d5f64",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 118] pablogsal:\nThanks for your comment! I answered this partially here:\n\nBut I can confirm that this will be incorporated soon into the PEP document\n\n[post 119] thomas:\nThe SC (sans Pablo, who didn’t get a vote since he’s one of the PEP authors) is happy to accept PEP 701. Thanks for the hard work in getting f-strings in an even better place\n\n[post 120] erictraut:\nA big thanks to the authors of this PEP and its implementation. This is a nice improvement!\n\nI’m implementing support for PEP 701 in pyright, which has its own tokenizer and parser. I tried to implement it based on the documentation in the PEP, but I found that there’s an important detail missing in the “How to produce these tokens” section. Step 3 doesn’t say anything special about what happens after a : character is encountered. It says that the tokenizer should go back to step 2 after emitting a : token and popping the current tokenizer mode from the stack. However, when in “format specifier” mode (i.e. after the : is encountered), I think the rules for step 2 need to change so double braces ({{ or }}) are no longer assumed to be part of an FSTRING_MIDDLE token.\n\nTo test this, I tried f\"{'':{{1}.pop()}}\" with the latest CPython implementation. This f-string parses without error. The {{ after the : is clearly being treated as two separate { tokens rather than part of an FSTRING_MIDDLE token.\n\nIf I use the same subexpression prior to the :, it works consistently with the PEP’s “step 2” description, and the {{ is treated as part of an FSTRING_MIDDLE token. As proof, the f-string f\" …\n\n[post 121] pablogsal:\nThanks @erictraut for the message! I am very excited to know that you are adding PEP 701 support in pyright! Thanks a lot for the great work\n\nLet me answer the points that you raise.\n\nI think we may want to be a bit more explicit here, but the section was intended to be indicative and not prescriptive as different tokenizers would require different ways to approach the problem. You have a good point though because there is ambiguity over how the format specifier should be tokenized in general so we should describe that better. I will try to make a PR after beta freeze as we are currently fully immersed in the Python tokenizer changes.\n\nYou are right here but note this is not new as this is something we just preserved from the previous implementation:\n\nython 3.11.1 (main, Dec 15 2022, 18:32:52) [Clang 14.0.0 (clang-1400.0.29.202)] on darwin\nType \"help\", \"copyright\", \"credits\" or \"license\" for more information.\n>>> f\"{'':{{1}.pop()}}\"\n' '\n\n[quote=\"Eric Traut, post:120, topic:22046, username:erictraut\"]\nAnother small topic that isn’t mentioned in the PEP has to do with nested format specifiers. It appears that the implementation supports two levels of nesting but not three.\n\n`f\"{'':*^ …\n\n[post 122] mwerezak:\nPersonally, I don’t find any of the arguments against supporting quote reuse to be compelling. I find the benefits of resourcing referential transparency inside f-string expressions to far outweigh any concerns I’ve seen so far, for a couple reasons:\n\nOne, the current status quo can cause huge problems when generating code from a template (like with mako), and can still be a pain even in normal every day use. It’s just simpler to think of an f-string expression as a normal Python expression without any special restrictions.\n\nTwo, allowing quote reuse inside f-strings doesn’t, by itself, make code unreadable. What people are worrying about is actually the abuse of quote reuse.\n\nWhile discouraging the abuse of language syntax is a noble goal, I personally feel that it should never come at the expense of legitimate use of the language. In my opinion a language should empower developers to write concise, readable, and expressive code first. Discouraging misuse of syntax should always come second. That’s because being able to provide the expressive power to describe a legitimately complex system in clear and simple terms is always going to be more important for a language.\n\nAnyhow, any …\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 118,
+        "label": "support"
+      },
+      {
+        "post_id": 119,
+        "label": "decision"
+      },
+      {
+        "post_id": 120,
+        "label": "question"
+      },
+      {
+        "post_id": 121,
+        "label": "support"
+      },
+      {
+        "post_id": 122,
+        "label": "support"
+      }
+    ]
+  },
+  "durationMs": 7648
+}

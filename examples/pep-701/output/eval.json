@@ -1,0 +1,46 @@
+{
+  "pepNumber": 701,
+  "groundTruth": [
+    {
+      "title": "Although we think the readability arguments that have been raised against allowing quote reuse in…",
+      "text": "Although we think the readability arguments that have been raised against allowing quote reuse in f-string expressions are valid and very important, we have decided to propose not rejecting quote reuse in f-strings at the parser level. The reason is that one of the cornerstones of this PEP is to reduce the complexity and maintenance of parsing f-strings in CPython and this will not only work against that goal, but it may even make the implementation even more complex than the current one. We believe that forbidding quote reuse should be done in linters and code style tools and not in the parser, the same way other confusing or hard-to-read constructs in the language are handled today."
+    },
+    {
+      "title": "We have decided not to lift the restriction that some expression portions need to wrap ':' and '!…",
+      "text": "We have decided not to lift the restriction that some expression portions need to wrap ':' and '!' in parentheses at the top level, e.g.: >>> f'Useless use of lambdas: { lambda x: x*2 }' SyntaxError: unexpected EOF while parsing The reason is that this will introduce a considerable amount of complexity for no real benefit. This is due to the fact that the : character normally separates the f-string format specification. This format specification is currently tokenized as a string. As the tokenizer MUST tokenize what's on the right of the : as either a string or a stream of tokens, this won't allow the parser to differentiate between the different semantics as that would require the tokenizer to backtrack and produce a different set of tokens (this is, first try as a stream of tokens, and if it fails, try as a string for a format specifier). As there is no fundamental advantage in being able to allow lambdas and similar expressions at the top level, we have decided to keep the restriction that these must be parenthesized if needed: >>> f'Useless use of lambdas: { (lambda x: x*2) }'"
+    },
+    {
+      "title": "We have decided to disallow (for the time being) using escaped braces (\\{ and \\}) in addition to…",
+      "text": "We have decided to disallow (for the time being) using escaped braces (\\{ and \\}) in addition to the {{ and }} syntax. Although the authors of the PEP believe that allowing escaped braces is a good idea, we have decided to not include it in this PEP, as it is not strictly necessary for the formalization of f-strings proposed here, and it can be added independently in a regular CPython issue."
+    }
+  ],
+  "matches": [
+    {
+      "groundTruth": {
+        "title": "Although we think the readability arguments that have been raised against allowing quote reuse in…",
+        "text": "Although we think the readability arguments that have been raised against allowing quote reuse in f-string expressions are valid and very important, we have decided to propose not rejecting quote reuse in f-strings at the parser level. The reason is that one of the cornerstones of this PEP is to reduce the complexity and maintenance of parsing f-strings in CPython and this will not only work against that goal, but it may even make the implementation even more complex than the current one. We believe that forbidding quote reuse should be done in linters and code style tools and not in the parser, the same way other confusing or hard-to-read constructs in the language are handled today."
+      },
+      "decisionKey": "d4",
+      "reasonAgreement": "partial"
+    },
+    {
+      "groundTruth": {
+        "title": "We have decided not to lift the restriction that some expression portions need to wrap ':' and '!…",
+        "text": "We have decided not to lift the restriction that some expression portions need to wrap ':' and '!' in parentheses at the top level, e.g.: >>> f'Useless use of lambdas: { lambda x: x*2 }' SyntaxError: unexpected EOF while parsing The reason is that this will introduce a considerable amount of complexity for no real benefit. This is due to the fact that the : character normally separates the f-string format specification. This format specification is currently tokenized as a string. As the tokenizer MUST tokenize what's on the right of the : as either a string or a stream of tokens, this won't allow the parser to differentiate between the different semantics as that would require the tokenizer to backtrack and produce a different set of tokens (this is, first try as a stream of tokens, and if it fails, try as a string for a format specifier). As there is no fundamental advantage in being able to allow lambdas and similar expressions at the top level, we have decided to keep the restriction that these must be parenthesized if needed: >>> f'Useless use of lambdas: { (lambda x: x*2) }'"
+      },
+      "decisionKey": null,
+      "reasonAgreement": null
+    },
+    {
+      "groundTruth": {
+        "title": "We have decided to disallow (for the time being) using escaped braces (\\{ and \\}) in addition to…",
+        "text": "We have decided to disallow (for the time being) using escaped braces (\\{ and \\}) in addition to the {{ and }} syntax. Although the authors of the PEP believe that allowing escaped braces is a good idea, we have decided to not include it in this PEP, as it is not strictly necessary for the formalization of f-strings proposed here, and it can be added independently in a regular CPython issue."
+      },
+      "decisionKey": "d4",
+      "reasonAgreement": "partial"
+    }
+  ],
+  "recall": 0.6666666666666666,
+  "reasonAgreement": 0.5,
+  "extraIdeas": 5
+}

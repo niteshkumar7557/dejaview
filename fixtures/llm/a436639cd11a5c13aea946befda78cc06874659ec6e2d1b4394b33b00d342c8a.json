@@ -1,0 +1,27 @@
+{
+  "promptHash": "a436639cd11a5c13aea946befda78cc06874659ec6e2d1b4394b33b00d342c8a",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 25] Rosuav:\nBe sure to put in a docs patch then.\n\nThe original PEP refers to them as literals too.\n\nI don’t think it’s worth quibbling over this distinction. We refer to 3+4j as a complex literal, and it’s quite happily parsed by ast.literal_eval - and literal_eval’s docstring says that the expression “may only consist of literal structures”, and then includes list/dict/set in that.\n\nThere is a difference between what the tokenizer calls a literal and what a programmer calls a literal. PEP 701 is no further at fault than large slabs of other formal Python documentation.\n\n[post 26] brettcannon:\nAs one of those “editor people”, my answer for VS Code is, “don’t worry about us”. It’s our job to make this work, not for the language to restrict itself just to conform to some technical limitations an editor may have for some grammar. Python did quite well for a long time only worrying if you could type code out in Notepad, so I don’t think we should start changing that policy now.\n\n[post 28] tjreedy:\nFor recognition of an entire f-string, the issue is reuse of opening quote. IDLE currently properly recognizes the following:\n\nf\"\"\"Things: {\na + f\"{b + ', '.join(things) # Nested f-string.\n}\" suffix} ending\"\"\"\n\nThis current compiles as “SyntaxError: incomplete input”.\n\ngh-73473 requests that IDLE do replacement field syntax highlighting with brace matching and auto-completion. No one has submitted a PR yet. I have no plans to do so. A problem for key-by-key response is the need to both within a string (to recognize the end of the string) and not within a string (to do the other stuff).\n\nWould you like us to reflect this in the PEP?\n\nIf quote reuse stays, please do so. The SC should know that approving this as is will break a few things. Perhaps add at least “Lexing all possible f-strings with relational expressions will no longer be possible. In particular, reuse of opening quotes in replacement fields will be a problem.”\n\nI would initially document that IDLE cannot properly handle f-strings that reuse the opening quote in replacement fields, and that highlighting would not be the only thing affected. (To expand the latter, I will have to examine the uses of hyperparser to see the …\n\n[post 29] Rosuav:\nI personally use SciTE, the reference editor for Scintilla which is also used in Notepad++ and others. It has syntax highlighting support for a number of obscure languages. I would say that, once one open source project has good syntax highlighting support for nested f-strings, others will be able to imitate. One of the huge advantages to a programmer’s editor is that it’s incredibly easy to dogfood, so pain points are that much more likely to be dealt with.\n\n(Case in point: I would never have expected my editor to recognize #define directives in C programs and then intelligently parse #if/#else directives to show which branch is active and which isn’t; but it does. And it’s very handy.)\n\n[post 30] pf_moore:\nI voted yes, as I have definitely hit the “you cannot use the same type of quote in the expression part” issue myself. And I think consistency in allowing whatever can be in an expression is easier to explain and understand.\n\nHaving said that, I’d prefer it if the PEP warned agains over-use of this feature, as it has the possibility of being difficult to read. In particular, I’m concerned about the possibility that formatters like black could try to enforce a particular style here, and I don’t think that would be a good idea (there are too many variables involved in deciding what’s “readable” in this context).\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 25,
+        "label": "support"
+      },
+      {
+        "post_id": 26,
+        "label": "alternative"
+      },
+      {
+        "post_id": 28,
+        "label": "objection"
+      },
+      {
+        "post_id": 29,
+        "label": "support"
+      }
+    ]
+  },
+  "durationMs": 6557
+}

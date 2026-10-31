@@ -1,15 +1,8 @@
 {
   "repo": "python/cpython",
-  "prNumber": 1,
-  "title": "Demo: update typing.override behavior",
-  "body": "Deterministic sample request for the DejaView PR check contract. This is not a live CPython pull request.",
-  "files": [
-    {
-      "path": "Lib/typing.py",
-      "previousPath": null
-    }
-  ],
-  "symbols": [
-    "override"
-  ]
+  "prNumber": 101,
+  "title": "Enforce @typing.override at runtime",
+  "body": "Make typing.override check at runtime that the decorated method really overrides a method in a base class, and raise TypeError otherwise, like the overrides library does.",
+  "files": [{ "path": "Lib/typing.py", "previousPath": null }],
+  "symbols": ["override"]
 }

@@ -1,0 +1,31 @@
+{
+  "promptHash": "9095548f6e663be80c24c1f6e927bb6b3fd995f6f7ac27de1550525a471544f6",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 42] pablogsal:\nThanks, @pf_moore for the suggestion. We will try to incorporate something along these lines if we decided to finally propose quote reuse.\n\n[post 44] pf_moore:\nIs the possibility of code generators worth mentioning here? I imagine it would be more complex to write a code generator that needed to track what types of quote have been used when generating f-strings.\n\nHaving said that, I can’t imagine why a code generator would be making heavy use of f-strings in the first place, as if you’re already generating the code, why not generate the expression that the f-string is equivalent to? But I’ve never written a code generator, so my intuitions on what’s likely to be common are suspect, at best\n\n[post 45] robbo:\nI voted Yes because I think that any (unnecessary) restriction will sooner or later bite someone. But I agree that unnecessary nesting of the same kind of quote is poor style and should be discouraged. [Rob Cliffe]\n\n[post 46] malemburg:\nIMO f-strings should continue to look like regular Python strings to a Python programmer and not allow non-intuitive quoting just because the parser can handle this (since it knows that it’s actually parsing outside the string definition context).\n\nIt would be really strange to have the parser complain about:\n\nwhile accepting:\n\nOtherwise, a programmer can easily lose track of where the f-string starts and ends.\n\nI also don’t think that nesting f-strings should be allowed, but I guess that ship has already sailed.\n\nPersonally, I find the tendency of Python getting more and more complex in many niche areas unfortunate. Often these additions are not done willingly, but get added by accident (e.g. in the case of nested f-strings), but, of course, people find these “features” and start using them. And then we’re stuck with those “features” because of backwards compatibility concerns.\n\n[post 48] monk-time:\nReading this discussion, I find it difficult to understand why prior art (this feature as implemented in other languages) is given so little weight. Shouldn’t we strive for general compatibility so as to make it easier for users to learn and use the language? Instead of introducing another stumbling block where a programmer must go “Oh, this language has this common feature, so I assume it works the same as in all other languages… hey, what’s this error?”\n\nIt also feels to me (and forgive me if I’m wrong) that people reacting to unreadability of f\"test {\"-\".join(words)} test\" do so without taking syntax highlighting into account. In pure black - I agree, it’s unpleasant to parse, but with color it’s really no problem to see where pure string ends and embedded code begins.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 42,
+        "label": "noise"
+      },
+      {
+        "post_id": 44,
+        "label": "question"
+      },
+      {
+        "post_id": 45,
+        "label": "support"
+      },
+      {
+        "post_id": 46,
+        "label": "objection"
+      },
+      {
+        "post_id": 48,
+        "label": "question"
+      }
+    ]
+  },
+  "durationMs": 7225
+}

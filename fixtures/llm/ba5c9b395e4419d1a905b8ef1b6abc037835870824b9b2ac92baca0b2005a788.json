@@ -1,0 +1,31 @@
+{
+  "promptHash": "ba5c9b395e4419d1a905b8ef1b6abc037835870824b9b2ac92baca0b2005a788",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 37] pablogsal:\nThanks a lot, @tjreedy for taking the time to give all this context about IDLE and how this would affect it. Your experience here is very important to us.\n\nWe will reflect this on the PEP so this is taken very seriously when making decisions but I can promise that we will discuss this issue among the authors to see what we can do after we gather some other feedback from other places.\n\nThanks for the correction, we will fix it!\n\nWe will incorporate this to the PEP.\n\nI will try to rephase that. Answering your question (if I understand it correctly) f’{(a !=b)} works currently without parens and that will keep working:\n\n>>> a = b = 1\n>>> f\"{a != b}\"\n'False'\n\nThanks a lot for this feedback! We will get to fix it as soon as possible!\n\n[post 38] pablogsal:\nHmm, this is a good point @steven.daprano! Thanks a lot for raising this with us. At the very least we will reflect this on the PEP so it will be taken as an important aspect of the balance.\n\nI am not sure what we finally propose (quote reuse or not) as we want to gather some feedback first, but we will discuss this aspect among authors again. I think this is an important point but we need to think about it carefully because is less “consistent” and it raises the maintenance cost quite a lot.\n\nIn any case, thanks for pointing it out and for the examples!\n\n[post 39] Rosuav:\nIf I’m understanding correctly, the only way for the initial quote to be contained within an f-string is if it is also inside an (unbalanced) open brace, right? So it shouldn’t be ambiguous.\n\n[post 40] pablogsal:\nIgnoring the consistency arguments, limiting quote reuse raises quite a lot the complexity. This is because when parsing the expression part now the parser needs to be aware that is parsing an expression inside an f-string with a given quite, and that becomes even more tricky when f-strings are nested with different quotes.\n\nThis doesn’t mean that this invalidates the “code smell” argument by any means: I just want to give some context on the maintenance point. I totally understand why you voted “no” (and that’s why I really want feedback from everyone).\n\nI think this is an important point that I guess is not going to have an easy answer. But I promise that we will do our best to reflect all of these considerations in the PEP when a decision is taken and to take all of these into account for our final proposal.\n\n[post 41] pablogsal:\nYeah, is not technically ambiguous in the grammatical sense, but I was interpreting “ambiguous” as “ambiguous for the human eye” as a proxy for “visually confusing” or similar. If I misunderstood that I apologize.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 37,
+        "label": "noise"
+      },
+      {
+        "post_id": 38,
+        "label": "noise"
+      },
+      {
+        "post_id": 39,
+        "label": "question"
+      },
+      {
+        "post_id": 40,
+        "label": "support"
+      },
+      {
+        "post_id": 41,
+        "label": "noise"
+      }
+    ]
+  },
+  "durationMs": 7280
+}

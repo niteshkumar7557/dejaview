@@ -1,0 +1,27 @@
+{
+  "promptHash": "1f2cf4155031c56e23d78b0c058f1e4e8ddab0ad9caa83a0dc32a8323de7e05f",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 31] mauve:\nSure, corporate entities can easily rise to the challenge.\n\nI’m more worried about the long tail of less active libraries and apps that will just have slightly broken Python support forever because the amount of refactor needed to lex Python code accurately is prohibitive. It’s not quite Python’s problem but it’s also not the fault of Python users when they write valid code and encounter buggy highlighting.\n\nLet me add some research though:\n\n- Pygments (Python library) already supports nested f-strings with the same quote type\n\n- highlight.js (which Discourse uses) can already lex nested Python f-strings with the same quote type\n\n- prism.js (another top Google hit for Javascript) states that it can’t lex even current f-strings\n\nI didn’t expect a 2/3 pass rate, so that’s quite promising.\n\nCode I tried in case people want to reproduce\nI tested Pygments in a notebook with\n\nfrom IPython.core.display import HTML\nfrom pygments import highlight\nfrom pygments.lexers import PythonLexer\nfrom pygments.formatters import HtmlFormatter\n\ncode = \"\"\"\nf\"a{str(f\"foo{int}\")}b\" + 1\n\"\"\"\nHTML(highlight(code, PythonLexer(), HtmlFormatter()))\n\nI tested highlight.js with\n\n<link rel=\"stylesheet\" href=\"https: …\n\n[post 32] pf_moore:\nI will note that even with Discourse highlighting it (and lol, it looks like it’s not highlighted in quotes) I still find it hard to interpret. I would hope that even if it’s allowed (and I’m in favour of that, if only for the purposes of making the rules more consistent), it will be discouraged, and remain a rare case in real-world code.\n\n[post 33] steven.daprano:\nYes, thank you.\n\nThis situation would be equivalent to the Python 2 backtick repr syntax, except that was never widely used and I expect that f-strings will be used very frequently\n\nLikewise in mathematics, where we use |x| for absolute value. Its fine when there’s only one pair, but |x|y-2|z| is ambiguous.\n\nIt would be worth checking with people in the Ruby and JS communities to see just how well their editors support arbitrary nesting, and if they don’t, how much of a problem it is in practice.\n\n[post 34] barry:\nI appreciate the goals of the PEP, and support more consistency in the various parsers, both for CPython and across alternative implementations. I do think it will break editors and other syntax highlighting tools, but hopefully they will eventually catch up.\n\nThe biggest problem for me is the reuse of opening quote feature. I get why you want to lift this restriction, and I get that you want to enable arbitrary nesting of quotes, but I think this is helping the machine more than the human. Even the simple example from the PEP is challenging for me to parse.\n\n>>> f\"These are the things: {\", \".join(things)}\"\n\nI read code left to right, so as soon as I hit that second quote, I start scratching my head and asking “what’s going on here?”\n\nOkay, I can eventually work it out, but it won’t remain obvious. It’s worse for some of the more complex examples, and I suspect it’ll be one of those things that trip up every reader of code like this, bringing their comprehension of the intent to a screeching halt. If I had to review such code, I wouldn’t let it in. It’s like everything is now an f-nail, and JWZ’s famous quote about regexps comes to mind.\n\nAre these concerns enough to add artificial …\n\n[post 36] brettcannon:\nI have no idea, hence why I said, “my answer for VS Code”, not “for all editor developers worldwide”.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 31,
+        "label": "support"
+      },
+      {
+        "post_id": 32,
+        "label": "support"
+      },
+      {
+        "post_id": 33,
+        "label": "question"
+      },
+      {
+        "post_id": 34,
+        "label": "objection"
+      }
+    ]
+  },
+  "durationMs": 5100
+}

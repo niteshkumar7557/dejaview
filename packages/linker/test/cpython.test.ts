@@ -90,6 +90,26 @@ describe("CPython repository helpers", () => {
     ]);
   });
 
+  it("finds PEP 695 generic functions and classes, like typing.override in CPython", async () => {
+    const typingPath = path.join(repositoryPath, "Lib", "typing.py");
+    await mkdir(path.dirname(typingPath), { recursive: true });
+    await writeFile(typingPath, [
+      "def override[F: _Func](method: F, /) -> F:",
+      "    return method",
+      "",
+      "class Box[T]:",
+      "    pass",
+    ].join("\n"));
+    await commitFiles();
+
+    await expect(findSymbolDefinitions(repositoryPath, "typing.override")).resolves.toEqual([
+      { symbol: "typing.override", path: "Lib/typing.py", kind: "python_function" },
+    ]);
+    await expect(findSymbolDefinitions(repositoryPath, "Box")).resolves.toEqual([
+      { symbol: "Box", path: "Lib/typing.py", kind: "python_class" },
+    ]);
+  });
+
   it("finds C function definitions but not prototypes or calls", async () => {
     const sourceDirectory = path.join(repositoryPath, "Objects");
     await mkdir(sourceDirectory);

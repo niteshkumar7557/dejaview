@@ -113,8 +113,10 @@ export async function findSymbolDefinitions(
 
 function pythonDefinitionKinds(source: string, name: string): Array<"python_function" | "python_class"> {
   const escaped = escapeRegExp(name);
-  const functionDefinition = new RegExp(`^[\\t ]*(?:async[\\t ]+)?def[\\t ]+${escaped}[\\t ]*\\(`, "m");
-  const classDefinition = new RegExp(`^[\\t ]*class[\\t ]+${escaped}(?=[\\t ]*(?:\\(|:|$))`, "m");
+  // "[" too: PEP 695 generics (`def override[F: _Func](method: F, /)`) are how modern CPython defines
+  // many functions and classes, including typing.override itself.
+  const functionDefinition = new RegExp(`^[\\t ]*(?:async[\\t ]+)?def[\\t ]+${escaped}[\\t ]*[(\\[]`, "m");
+  const classDefinition = new RegExp(`^[\\t ]*class[\\t ]+${escaped}(?=[\\t ]*(?:\\(|\\[|:|$))`, "m");
   const kinds: Array<"python_function" | "python_class"> = [];
   if (functionDefinition.test(source)) kinds.push("python_function");
   if (classDefinition.test(source)) kinds.push("python_class");

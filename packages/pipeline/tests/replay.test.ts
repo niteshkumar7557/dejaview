@@ -1,6 +1,6 @@
-// The full pipeline on a real thread (PEP 698 from discuss.python.org), replaying the model answers
-// recorded in fixtures/llm/ from a real run on the team laptop. No network, no model: this is what CI
-// runs. It must reproduce exactly the output committed in examples/pep-698/output/, which proves the
+// The full pipeline on real threads (PEP 698 and PEP 701 from discuss.python.org), replaying the model
+// answers recorded in fixtures/llm/ from real runs on the team laptop. No network, no model: this is what
+// CI runs. It must reproduce exactly the output committed in examples/<slug>/output/, which proves each
 // example is a real output of this code.
 import { readFileSync } from "node:fs";
 import type { ExtractionResult, Thread } from "@dejaview/shared";
@@ -10,7 +10,7 @@ import { memoryLlmStore } from "../src/store.js";
 
 const read = <T>(path: string): T => JSON.parse(readFileSync(new URL(`../../../${path}`, import.meta.url), "utf8")) as T;
 
-describe("runExtraction on PEP 698, replaying the recorded model answers", () => {
+describe.each(["pep-698", "pep-701"])("runExtraction on %s, replaying the recorded model answers", (slug) => {
   const previous = { mode: process.env.LLM_MODE, triage: process.env.TRIAGE_MODEL, extract: process.env.EXTRACT_MODEL };
   beforeAll(() => {
     process.env.LLM_MODE = "replay";
@@ -24,8 +24,8 @@ describe("runExtraction on PEP 698, replaying the recorded model answers", () =>
     }
   });
 
-  const thread = read<Thread>("fixtures/threads/pep-698.json");
-  const expected = read<ExtractionResult>("examples/pep-698/output/decisions.json");
+  const thread = read<Thread>(`fixtures/threads/${slug}.json`);
+  const expected = read<ExtractionResult>(`examples/${slug}/output/decisions.json`);
 
   it("reproduces the committed example exactly", async () => {
     const result = await runExtraction(thread, { llmStore: memoryLlmStore() });

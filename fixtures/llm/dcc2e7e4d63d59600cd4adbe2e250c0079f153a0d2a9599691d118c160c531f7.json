@@ -1,0 +1,31 @@
+{
+  "promptHash": "dcc2e7e4d63d59600cd4adbe2e250c0079f153a0d2a9599691d118c160c531f7",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 20] barry:\nThis might cause problems for Emacs modes for Python.\n\n[post 21] pablogsal:\nSurely emacs supports JavaScript and Ruby and both languages have interpolation strings with the same constraints as this PEP so I think that a solution to this problem already exists there, although I am not sure how that works as I am not familiar with emacs. Maybe someone more versed in how this is supported can help us understand how that is being handled.\n\n[post 22] steven.daprano:\nYou describe f-strings as “literals” in the PEP. Please don’t do that. F-strings can contain executable code and can have side-effects. They are code not string literals.\n\nWe don’t talk about “def literals” and “lambda literals”. The documentation doesn’t even refer to list or dict literals (rather, “displays”). We shouldn’t abuse the word literal to describe f-strings either.\n\nThe PEP says:\n\n(emphasis added) and then give three examples:\n\nf\"These are the things: {\", \".join(things)}\"\n\nf\"{source.removesuffix(\".py\")}.c: $(srcdir)/{source}\"\n\nf\"{f\"{f\"infinite\"}\"}\" + \" \" + f\"{f\"nesting!!!\"}\"\n\nThe first two might be perfectly understandable to the parser, but as a human reader, they make it more complicated and error-prone to work out which quotes delimit the f-string and which do not.\n\nEspecially when the f-string may be concatenated with other strings, or embedded in larger expressions. Even more especially when used with long line lengths.\n\nTaken in isolation, the human reader can just look at the start of the line and see the f\" token, and then skip to the end of the line to find the matching close quote. But in real code, where f-strings are often embedded in complex expressions and …\n\n[post 23] pablogsal:\nThanks a lot for the feedback @steven.daprano and thanks for taking the time to add some context to the explanations!\n\nWe will correct this in the document soon.\n\nIf I understand correctly your concern is that the nesting of the same kind of quote will make it harder for humans to parse and will lead to code that may be harder to read because the quote character is the same on start and end (as opposed to other delimiters). Would that summarise your concerns correctly?\n\nYes, this is being discussed currently in this thread and we will update the PEP after discussing about it.\n\nAlso notice that as I indicated before any editor that supports other popular languages including ruby and JavaScript will have the same problem as arbitrary nesting with quote reuse is allowed in those languages.\n\n[post 24] pablogsal:\nAs I assume this is going to be a controversial point of the proposal I am making a poll.\n\nQuestion: Do you think that f-strings should allow quote reuse within the expression part? (as in f” something { my_dict[“key”] } something else “)\n\n- Yes\n\n- No\n\n0\nvoters\n\nPlease take the time to read the PEP first and then the discussion so far regarding sone of the arguments in favour and sone of the objections.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 20,
+        "label": "objection"
+      },
+      {
+        "post_id": 21,
+        "label": "question"
+      },
+      {
+        "post_id": 22,
+        "label": "objection"
+      },
+      {
+        "post_id": 23,
+        "label": "noise"
+      },
+      {
+        "post_id": 24,
+        "label": "question"
+      }
+    ]
+  },
+  "durationMs": 7400
+}

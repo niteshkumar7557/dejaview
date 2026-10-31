@@ -1,0 +1,31 @@
+{
+  "promptHash": "71a97aefbef91e45359cee999d46681b0212c6eb167d3bf215ac83c718246681",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 13] pablogsal:\nExactly Noting will change on the string parts of f-strings.\n\n[post 14] tjreedy:\nRationale: while allowing backslash escapes is no problem (point 2), as they must already be recognized to detect strings, allowing un-escaped quotes and infinite nesting (points 1 and 3) is, certainly for regex-based syntax highlighting, which IDLE uses. Regexes are known to not handle any nesting easily and indefinite nesting not at all. Detecting indentifiers, strings, and comments in code does not require dealing with nested parentheses at all. IDLE has a ‘hyperparser’, used for various purposes, that detects the same elements, plus line ends, scanning backwards. I suspect that it would also not work for f strings with the changes proposed.\n\nLess important comments:\n\nMotivation point 4: the linked Wikipedia section says nothing about escape sequences.\n\nIn the next sentence, does ‘regular grammar’ have the technical meaning of the restricted grammar corresponding to ‘regular expressions’ or the colloquial meaning of ‘normal’ (which is different now then when 536 was written)?\n\nOne limitation that this will not and I presume this cannot fix is that set expressions (displays and comprehensions) must still be surrounded by spaces to avoid ‘{{’ and ‘}}’.\n\n[post 15] pablogsal:\nThis is correct, this means that it will not be possible to lex strings anymore using regular expressions. After this PEP (at least in its current form), string quotes in f-strings must be dealt with the same way parentheses-highlighting is dealt with.\n\n@tjreedy Would you like us to reflect this in the PEP?\n\nNotice that forcing the parser to reject reused quotes would complicate the lexer and the parser considerably because it means that it cannot just “parse” the expression part in a regular way because it needs to be aware that is inside an in-flight f-string in order to reject repeated quotes. This was easy to do in a two-pass method because the main parser is unaware of what’s inside the f-string but that won’t be true any more once we move this to the main parser.\n\nIn any case, if this point proves to be too controversial, we are happy to consider dropping it\n\nOh, thanks for pointing that out. Something went wrong there in the writing. We will fix it\n\n[Edit] Corrected it here\n\nHere “regular grammar” means adding f-strings to the main (PEG) parser as part of the formal grammar (the one in Grammar/python.gram).\n\nCorrect, there is no way to disambiguate that.\n\n[post 16] pablogsal:\nAnother option here is to restrict arbitrary nesting to a specific depth. I think that will allow regex-based lexers to work at the price of having some complex regular expression.\n\n@tjreedy do you think that would be a good compromise? If not, what can we do to make it easier to support in IDLE?\n\n[post 18] pablogsal:\nNothing that we can think of. Parsing may be anecdotally faster due to the lack of a second phase for f-string parsing.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 13,
+        "label": "proposal"
+      },
+      {
+        "post_id": 14,
+        "label": "objection"
+      },
+      {
+        "post_id": 15,
+        "label": "question"
+      },
+      {
+        "post_id": 16,
+        "label": "alternative"
+      },
+      {
+        "post_id": 18,
+        "label": "noise"
+      }
+    ]
+  },
+  "durationMs": 7249
+}

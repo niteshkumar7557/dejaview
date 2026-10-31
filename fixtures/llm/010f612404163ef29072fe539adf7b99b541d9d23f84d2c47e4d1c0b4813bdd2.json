@@ -1,0 +1,31 @@
+{
+  "promptHash": "010f612404163ef29072fe539adf7b99b541d9d23f84d2c47e4d1c0b4813bdd2",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 7] ericvsmith:\nAs you know, I’m in favor of this PEP.\n\nI would like the PEP to note that the existing restrictions on nested quotes (and probably other things) was a deliberate design decision in order to make it easy for editors, syntax highlighters and the like to “support” f-strings. All they really had to do is add “f” to “r”, “b”, “u” and they could at least get past the f-string.\n\nAlong the same lines, I think it would also be worth polling some notable editors and see if this change will cause them any headaches, and record that info in the PEP.\n\nThanks for working on this. I look forward to backslashes in expressions!\n\n[post 8] pablogsal:\nMost editors that support other languages need to deal with that anyway. For instance in ruby you can do:\n\n>>> puts \"#{ \"1 + 2\" }\"\n1 + 2\n\nor even\n\n>>> puts \"#{ \"#{\" #{1 + 2} \"}\" }\"\n3\n\nThe change indeed implies that tools and editors need to do some work to parse the new syntax but it shouldn’t be something that either they are not dealing with in other languages or something that is impossible to be implemented.\n\nIn any case, this is a good idea: we will try to reach out to some IDE authors and other tools to gather some feedback as per your proposal\n\n[post 9] smontanaro:\nNot sure where to make comments. Is there something on GitHub? At any rate… Item 3 in the Motivation section states:\n\nComments are forbidden even in multi-line f-strings:\n>>> f'''A complex trick: {\n... bag['bag'] # recursive bags!\n... }'''\nSyntaxError: f-string expression part cannot include '#'\n\nI don’t know if that’s expected to change, but I will point out that while you can insert “comments” in regular strings, they are just part of the string:\n\n>>> '''A complex trick: {\n... bag['bag'] # recursive bags!\n... }'''\n\"A complex trick: {\\n bag['bag'] # recursive bags!\\n}\"\n\nDo you intend to support actual comments in f-strings or just allow # ... to be embedded within the string? I’d be disappointed to find the semantics between f-strings and regular strings had diverged (though, of course they have already).\n\n[post 10] pablogsal:\nThanks for the feedback @smontanaro ! Unfortunately I am afraid I don’t follow your concern.\n\nHere the ‘#’ is not a comment because is a character of the string itself as is on the example that you mentioned:\n\n>>> '''A complex trick: {\n... bag['bag'] # recursive bags!\n... }'''\n\"A complex trick: {\\n bag['bag'] # recursive bags!\\n}\"\n\nNotice in f-strings, the expression part of the string is not part of the string itself and that part is evaluated. Currently, if you try to use a comment there you get this:\n\n>>> f\"\"\"A complex trick: {\n... bag['bag'] # recursive bags!\n... }\"\"\"\nFile \"<stdin>\", line 3\n}\"\"\"\n^\nSyntaxError: f-string expression part cannot include '#'\n\nWhat we are proposing is that this error disappears and anything after the # comment character gets ignored as any comment of any expression (only when the comment is in the expression part).\n\nNotice this does not change semantics between f-strings and strings because you can still put the # character in the string part of the f-string. That is:\n\n>>> f\"\"\"A complex trick: # look a comment here {\n... 1+1\n... } # look, another comment\"\"\"\n'A complex trick: # look a comment here 2 # look, another comment'\n\nThe comments that we want …\n\n[post 11] pf_moore:\nIsn’t the difference here that the # ... is inside a {...} pair? I would certainly expect that outside of {...}, # ... would be treated just as normal text (i.e., as part of the string).\n\nEdit: I see that @pablogsal answered this more fully while I was typing…\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 7,
+        "label": "support"
+      },
+      {
+        "post_id": 8,
+        "label": "support"
+      },
+      {
+        "post_id": 9,
+        "label": "question"
+      },
+      {
+        "post_id": 10,
+        "label": "support"
+      },
+      {
+        "post_id": 11,
+        "label": "question"
+      }
+    ]
+  },
+  "durationMs": 7439
+}

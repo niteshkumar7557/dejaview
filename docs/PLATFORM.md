@@ -408,7 +408,7 @@ Then [`link-decision.ts`](../packages/linker/src/link-decision.ts) turns them in
 |---|---|---|
 | `pr_ref` | A referenced pull request → ask GitHub for its changed files ([`github.ts`](../packages/linker/src/github.ts)) | Strongest |
 | `path_mention` | A file path mentioned in the post, **only if it exists** in the CPython clone | Medium |
-| `symbol_mention` | A code name, **only if `git grep` finds its definition** (`def`, `class`, C function) ([`cpython.ts`](../packages/linker/src/cpython.ts)) | Supporting |
+| `symbol_mention` | A code name, **only if `git grep` finds its definition** (`def`, `class`, C function; also PEP 695 generics like `def override[F: _Func](...)`, which is how CPython defines `typing.override`) ([`cpython.ts`](../packages/linker/src/cpython.ts)) | Supporting |
 
 **An anchor is not a line number.** It is `(repo, symbol, path, commit)`. Line numbers change on every edit;
 these don't.
@@ -464,7 +464,7 @@ On the API side ([`apps/api/src/routes/prChecks.ts`](../apps/api/src/routes/prCh
 
 The Action's setup steps for the fork are in [`apps/action/README.md`](../apps/action/README.md), and the
 workflow file to copy into the fork is [`apps/action/workflows/dejaview.yml`](../apps/action/workflows/dejaview.yml).
-A real (no-match) example request and comment are in [`examples/pr-check/`](../examples/pr-check).
+A real request and the comment it produced (with PEP 698 in the database) are in [`examples/pr-check/`](../examples/pr-check).
 
 ### 5.6 Self-evaluation scorecard ✅
 
@@ -498,8 +498,14 @@ It reports per PEP:
 ### 5.7 "Already rejected?" detector ✅
 
 **What it does.** Warns when a PR re-proposes an idea that was rejected before. It is part of the PR check
-(5.5): Postgres full-text search over the titles and reasons of rejected decisions
-([`DecisionsRepository.similarRejected`](../db/src/decisions.ts)), plus the linker's word-overlap match.
+(5.5), from two sources: the linker's word-overlap match, and
+[`DecisionsRepository.similarRejected`](../db/src/decisions.ts) in Postgres. The database side counts the
+**meaningful words** (Postgres lexemes: stemmed, no stop words) a PR's title and description share with each
+rejected decision's title, summary and reasons, keeps those sharing at least 3, and ranks by how many. (It
+used to require *every* word of the PR to match, which a real PR description never does, so it never fired.)
+
+Real example: a PR titled "Enforce @typing.override at runtime" gets the rejected "runtime enforcement"
+idea from PEP 698, with its reasons and a link ([`examples/pr-check/`](../examples/pr-check)).
 
 ### 5.8 The dashboard ✅
 
@@ -964,7 +970,7 @@ on every PR.
 
 ## 12. What is done and what is missing
 
-*Checked on 1 Nov 2026, around 3:30 AM. Update this list as PRs merge.*
+*Checked on 1 Nov 2026, around 4:15 AM. Update this list as PRs merge.*
 
 | Part | Status |
 |---|---|
@@ -976,11 +982,12 @@ on every PR.
 | Linker library (references, linking, rename tracking, PR matching, comment) | ✅ |
 | GitHub Action code | ✅ |
 | AI client (live / record / replay, cache, retries) | ✅ |
-| Pipeline stages (clean, score, triage, extract, verify, consolidate) and `runExtraction` | ✅ (real run on PEP 698: 4 decisions, 10 of 11 quotes verified) |
-| Evaluation (`evaluatePep`, PEP parser, judge) | ✅ (PEP 698: 1 of 4 rejected ideas recovered, reasons agree; the other 3 are not argued in that thread) |
+| Pipeline stages (clean, score, triage, extract, verify, consolidate) and `runExtraction` | ✅ PEP 698: 3 decisions, 5/5 quotes verified · PEP 701: 16 decisions, 52/52 quotes verified |
+| Evaluation (`evaluatePep`, PEP parser, judge) | ✅ PEP 698: recall 1/4 (the other 3 are barely argued in that thread) · PEP 701: recall 2/3 (both through one merged decision, see 14) |
 | CPython clone + rename tracking in the worker | ✅ |
 | CPython demo fork with the Action installed, and demo PRs | ⬜ |
-| `fixtures/llm/` (recorded AI answers) and `examples/pep-*/` (real outputs) | 🟡 PEP 698 done; PEP 701 running; PEP 695 if time allows |
+| `fixtures/llm/` (recorded AI answers) and `examples/` (real outputs) | ✅ PEP 698, PEP 701, and a real PR check · PEP 695 after the demo |
+| Whole stack end to end on real data (ingest → extract → link → eval → PR check) | ✅ run locally on PEP 698 and 701 |
 | Same person across platforms | ✅ |
 | Deployment (Dockerfile + Fly.io; dashboard built against the real API) | ✅ config; live deploy by Mudit |
 
@@ -1044,6 +1051,10 @@ comment links to `DASHBOARD_URL`.
 | **Ansh** | Code linking and PR bot | `packages/linker/`, `apps/action/`, `examples/pr-check/`, the CPython demo fork |
 | **Nitesh** | Dashboard and pitch | `apps/web/`, `examples/README.md`, slides |
 
+**Since 1 Nov, ~03:40 AM:** Nitesh (with Claude Code) took over every part: Abhijeet's agent ran out of
+time first (the pipeline was built by Nitesh's agent in #15 and #19), then the rest of the team handed over.
+The table shows who built what originally.
+
 Shared files (change only with everyone's OK): `packages/shared/`, root `package.json` and lockfile,
 `tsconfig*.json`, `.github/`, `CLAUDE.md`, `design.md`, `HACKATHON.md`, `docs/team/README.md`. Each
 person's task list is in `docs/team/<name>.md`.
@@ -1075,6 +1086,7 @@ person's task list is in `docs/team/<name>.md`.
 | The CPython repo is huge | Blobless clone; only look up paths and symbols that are actually mentioned |
 | GitHub rate limits | Optional `GITHUB_TOKEN`; fetched sources are stored |
 | CI can't reach the AI | `LLM_MODE=replay` with recorded answers |
+| Consolidation merges two different ideas into one decision (seen on PEP 698 and PEP 701) | Known; next improvement: a stricter consolidation prompt ("group only the same idea") and keeping each group's title to one idea |
 
 ---
 

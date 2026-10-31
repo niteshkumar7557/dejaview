@@ -1,0 +1,141 @@
+{
+  "promptHash": "1c5b108d74a7e72a63d1d2bcffe5be9ce432a27ed3d0c43d53bfbc67ed3bdaba",
+  "model": "qwen3.5:9b",
+  "stage": "extract",
+  "prompt": "You read part of a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nFind the ideas in these posts that were proposed or discussed: the main proposal, alternative designs,\ndifferent spellings or names, extra features people asked for, and ideas that were turned down.\nList at most 5 ideas, most important first (prefer ideas that were rejected or decided).\n\nFor each idea give:\n- title: a short name for the idea itself (at most 12 words), without labels like \"Rejected:\" or \"Proposal:\"\n- kind: \"proposal\" for the main proposal or a new feature, \"alternative\" for a different way of doing it\n- status: \"accepted\" if it was adopted, \"rejected\" if the authors or deciders turned it down,\n  \"withdrawn\" if its own proposer dropped it, \"open\" if no outcome is visible in these posts\n- summary: one short sentence on what happened to the idea\n- reasons: at most 2 reasons why it got that status, each with exactly one evidence item (post_id and quote).\n\nRules for quotes:\n- Copy the quote WORD FOR WORD from the post with that post_id. Do not paraphrase, fix or shorten words.\n- At most 25 words per quote. Never invent a quote.\n- Only use posts shown below.\n\nPosts:\n\n[post 88] guido (2022-12-30):\nHm. I think I may have found an example where I might disagree. But before we argue about this, I think it would help if there was a specification for the tokens – not for what is returned by the tokenizer, but e.g. a regular expression showing what the lexer accepts for each token. This would be helpful for people writing alternate tokenizers.\n\n(In fact, it’s possible that one reason people get hung up on the contents of the tokens is that what they really would like to understand is the input acceptable for each token.)\n\nYes I would like that very much. It would also be nice if we had an executable version of that specification in he form of a Python class into which one can feed examples.\n\n[post 89] pablogsal (2022-12-30):\nAn example where you disagree with treating the tokenizer mode after : then same as the mode for f-string or where you disagree with the proposal in general?\n\nWe can add that, we somehow have something similar now in “consequences of the grammar”. I can adapt it so is more clear.\n\nI don’t think a regular expression is possible (or at least straightforward so it helps for clarifications) because the cut points depend on the level of parenthesis and bracket some of the characters are and some other state the lexer needs to keep track of.\n\nOk, we will incorporate a refined version of that description to the document\n\nIf you don’t mind that the token contents are asymmetric, you can already play with it by getting the tokens from the C tokenizer using the private interface we use for testing (you need to do this from the implementation branch):\n\n>>> import pprint\n>>> import tokenize\n>>> pprint.pprint(list(tokenize._generate_tokens_from_c_tokenizer(\"f' foo { f' {1 + 1:.10f} ' } bar'\")))\n\n[TokenInfo(type=61 (FSTRING_START), string=\"f'\", start=(1, 0), end=(1, 2), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=62 (FSTRING_MIDDLE), string=' foo ', start=(1, 2), end=(1, 7), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=25 (LBRACE), string='{', start=(1, 7), end=(1, 8), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=61 (FSTRING_START), string=\"f'\", start=(1, 9), end=(1, 11), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=62 (FSTRING_MIDDLE), string=' ', start=(1, 11), end=(1, 12), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=25 (LBRACE), string='{', start=(1, 12), end=(1, 13), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=2 (NUMBER), string='1', start=(1, 13), end=(1, 14), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=14 (PLUS), string='+', start=(1, 15), end=(1, 16), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=2 (NUMBER), string='1', start=(1, 17), end=(1, 18), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=11 (COLON), string=':', start=(1, 18), end=(1, 19), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=62 (FSTRING_MIDDLE), string='.10f', start=(1, 19), end=(1, 23), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=26 (RBRACE), string='}', start=(1, 23), end=(1, 24), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=63 (FSTRING_END), string=' ', start=(1, 24), end=(1, 25), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=26 (RBRACE), string='}', start=(1, 27), end=(1, 28), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=63 (FSTRING_END), string=' bar', start=(1, 28), end=(1, 32), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=4 (NEWLINE), string='', start=(1, 33), end=(1, 33), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\")]\n\nI will discuss with @isidentical and @lys.nikolaou about the changes in tokenize.py to see if we can add this to the PEP and the proposed implementation.\n\n[post 90] guido (2022-12-30):\nAn example where you disagree with treating the tokenizer mode after : then same as the mode for f-string or where you disagree with the proposal in general?\n\nThe former – I am still very much in favor of the proposal, I am just trying to tease out details and edge cases.\n\nHere’s my edge case:\n\n- A pair of }} is allowed in the regular “middle” part of an f-string, e.g. f\"a}}z\" produces \"a}z\".\n\n- But inside the format specifier, this is currently not allowed:>>> f\"{X():_}}_}\"\nFile \"<stdin>\", line 1\nf\"{X():_}}_}\"\n^\nSyntaxError: f-string: single '}' is not allowed\n>>>\n\nIf this is truly treated as a middle part it would have interpreted this as a format specifier equal to _}_.\n\nNow, I haven’t built your branch yet so maybe it does that in your version? In that case I give up the quibble (other than that this difference isn’t mentioned in the PEP’s “Consequences …” section).\n\nI did miss that, and I’m glad that it mentions backslashes. I guess there are some other options for comments though, e.g. one could argue that this ought to be valid:\n\nf\"___{\nx\n}___\"\n\nsince the newlines are technically enclosed by brackets, similar to\n\n{\nx\n}\n\nOr if you want to exclude those outer brackets, what about this?\n\nf\"___{(\nx\n)}___\"\n\nI wasn’t thinking of describing the entire f-string as a regex, just each piece. For example a true “middle” piece might be described as follows:\n\nr\"\"\"(?x) # Verbose mode\n(\n\\\\. # Escaped character (ignoring octal/hex)\n|\n{{ # Left brace, must be doubled\n|\n}} # Right brace, must be doubled\n|\n[^'\"{}\\\\] # Everything else\n)*\n(?={) # Must be followed by left brace\n\"\"\"\n\nThis is not the whole story, but it feels like a good start, and (for me at least) it’s more helpful than a hundred words.\n\nI will have to try this for myself. Somehow when I looked at the branch it seemed there weren’t any changes to tokenize.py, seems I was mistaken!\n\n[post 91] pablogsal (2022-12-30):\nI see what you mean but how do you express with regular expressions the fact that the regular expression for the expression part is “normal tokenization but it must stop at } or : only if is not inside parentheses”? Even if somehow you han-wave over the “normal tokenization” I don’t think you can easily express the parentheses part easily with automaton-based regular expressions.\n\nHumm seems that I didn’t clarify this correctly and there is some confusion. Allow me to clarify it better:\n\n- The example I gave uses the C tokenizer interface (notice the funcion name is _generate_tokens_from_c_tokenizer). This is a non-public interface that we exposed in 3.11 to test the C tokenizer. This is the one that you can already use to play with in our branch.\n\n- At the time they are not changes to the tokenize.py file. I meant that I will discuss with @lys.nikolaou and @isidentical about adding them to the proposed implementation.\n\nApologies for the confusion.\n\n[post 93] pablogsal (2022-12-30):\nBoth of these are valid with our current implementation:\n\n>>> x = 1\n>>> f\"___{\n... x\n... }___\"\n'___1___'\n>>> f\"___{(\n... x\n... )}___\"\n'___1___'\n\nIt also handles debug expressions:\n\n>>> f\"___{\n... 1\n... +\n... 1\n... =}___\"\n'___\\n1\\n+\\n1\\n=2___'\n>>> print(_)\n___\n1\n+\n1\n=2___\n\n[post 94] guido (2022-12-31):\nThat could be driven by the parser though, right? The parser can have lookaheads for }, : and :=, and then signal to the lexer to switch back.\n\nGot it. I glanced over that (I seem to be missing a lot of detail today – must be the weather :-).\n\nAh, but who says I don’t want to allow }} in a format specifier? Previously maybe we couldn’t but now we could, right?\n\n(Also, could we allow \\{ and \\} to escape curlies? If we could, would we want to? The doubling feels jarring because that’s not how Python escapes anything else.)\n\nThat’s a relief. I guess it’s another part I skimmed incorrectly. The PEP has “Comments, using the # character, are possible only in multi-line f-string literals” which made me think that these also weren’t possible. But if I added a comment to my examples those should work, right?\n\n[post 95] ncoghlan (2023-01-01):\nDefinite +1 on the PEP as a whole.\n\nLike others in the thread, I voted in favour of grammar consistency in the poll (allowing quote reuse), but I would also like to see the PEP more strongly discourage actually relying on that in manually written code, in the form of a proposed addition to PEP 8.\n\nThe section on string quotes would be the appropriate place for an addition like:\n\n(The part in parentheses probably shouldn’t be added to PEP 8, but could be included in the PEP 701 section on adding the new PEP 8 text)\n\n[post 97] sirosen (2023-01-02):\nIn my view, the various mentions of nested f-strings and unreadable code as a possibility are not particularly compelling arguments. It is always possible to write unreadable code.\n\nO0OO0 = 1\nOO0O0 = 0\nOOO00 = O0OO0 + OO0O0 - ...\n\nAnd I haven’t even started defining functions yet!\n\nThe backslash restriction shows up pretty naturally when working with \\n. The other day, I ran into the following real-world example:\n\nf\"{'\\n'.join(mylist)}\\n\"\n\nIt is not intuitive that this raises an error at runtime, which makes it a (possibly unnecessary) point of friction for developers.\n\n[post 98] pitrou (2023-01-02):\n“It is already possible to write unreadable code so we should not discourage more of it” is definitely not a compelling argument. You might as well jump straight to “it’s possible to write unsafe Python code so there’s no compelling argument against C++”.\n\n[post 99] sirosen (2023-01-02):\nI take your meaning, but that’s not what I’m trying to say.\n\nThere are many examples in this thread which are very confusing but also intentionally constructed, like\n\nf\"{some + f\"{nested + f\"string {concat}\"}\"} example\"\n\nThis doesn’t seem to me to be an attempt to show how the feature, being used merely “cleverly” or by a beginner, makes code difficult to understand. Rather, it intends to show that it is possible to construct something unreadable.\n\nThere is a good amount of discussion about nested f-strings here, but I don’t know that anyone in favor of the PEP cares very much about nested f-strings? More than one comment seems to suggest a view that no one yet knows of a legitimate and useful case for nested f-strings, so we’d probably keep them out during code reviews.\n\nThat line of argument might not be convincing to those against. But nobody seems to be strongly in favor of nested f-strings as a particular consequence of this proposal.\n\n[post 100] ajoino (2023-01-02):\nThis will depend on what one considers legitimate, but I found myself writing\n\nprint(f\"{some_dict[\"foo\"]}\")\n\nnot once, but twice in the same day when experimenting in the REPL recently. Even though I hade recently read this thread I was still confuced for a while before I realized what the error was. So quick experiments in the repl is one use-case that I would like this feature for.\n\n[post 101] sirosen (2023-01-02):\nThat usage features use of the outer quote character inside of the f-string.\n\nBy nested f-strings, I mean any use of an f-string inside of the {} format specifiers:\n\nf\"f-string {'containing ' + f'another {\"f-string\"}'}\"\n\n[post 109] pablogsal (2023-01-03):\nWe actually started with that but it turned out to be a bad idea for the following:\n\n- The tokenizer needs to be able to tokenize the source without the parser driving the modes. This is because for many operations (such as some error reporting, tokenize.py and others) the parser is actually not available.\n\n- When the parser does backtracking we would need the tokenize to “untokenize” the source. This is not only quite chaotic but also is complicated to get “right” with the memorization.\n\n- It breaks the nice separation between the tokenizer and parser. This has proven to help debugging a lot because we can check using our exposed functions that the tokenization works correctly before having to debug the parser. Debugging the parser at the same time as the tokenizer is quite painful.\n\nIn general, we found that just modifying the tokenizer to know when to switch is not only much easier, but also much cleaner and debuggable, and requires many many fewer changes. At the end of the day, one of our cornerstones is making this part of CPython more maintainable so our implementation went this route.\n\n[post 112] guido (2023-01-03):\nThanks, this actually makes sense.\n\nTrying to get the discussion back on track (away from .join()) a bit, have you thought about my parenthetical remark about using \\{ and \\} to escape curlies instead of, or in addition to, {{ and }}? I believe that when PEP 498 was discussed, there was a good reason to use the latter, but somehow I can’t find that reason in the PEP, and I can’t recall what it was. Maybe it was for compatibility with str.format()? The doubling has always irked me, and I think I’ve forgotten that it existed several times over the years (because I so rarely have a real need to put a curly brace in an f-string).\n\n[post 114] pablogsal (2023-01-03):\nNot yet, I want to discuss this in detail with @lys.nikolaou and @isidentical and currently we are focusing on making the tokenize.py changes and acting on the feedback so far. We will discuss it and check if is too hard to support. If it proves to be trivial and we all agree we can add it to the proposal. If it proves to be tricky we can do it as a follow-up (maybe in an issue and not in a PEP).\n\nIn any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement but I don’t think there is a way around supporting it\n\n[post 117] zufuliu (2023-01-05):\nIt’s unclear from the PEP whether following (new line in f-expression) are valid or not:\n\nf'{1\n+\n1}'\n\nf'{1\\\n+\\\n1}'\n\n# triple-quoted f-string\nf'''{1\n+\n1}'''\n\nf'''{1\\\n+\\\n1}'''\n\nsimilar code is valid in string interpolation, e.g. C# (see [Proposal]: Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines. · Issue #4935 · dotnet/csharplang · GitHub), Kotlin (see Kotlin language specification).\n\nReminder: at most 5 ideas; give each reason one quote copied word for word (at most 25 words)\nfrom the post with that post_id; use status \"open\" when no outcome is visible.",
+  "response": {
+    "ideas": [
+      {
+        "title": "Allow backslash escapes for curly braces instead of doubling",
+        "kind": "alternative",
+        "status": "rejected",
+        "summary": "The proposal to use \\{ and \\} to escape braces was discussed but ultimately not included in the final design.",
+        "reasons": [
+          {
+            "text": "I believe that when PEP 498 was discussed, there was a good reason to use the latter, but somehow I can't find that reason in the PEP",
+            "evidence": [
+              {
+                "post_id": 112,
+                "quote": "I believe that when PEP 498 was discussed, there was a good reason to use the latter, but somehow I can't find that reason in the PEP"
+              }
+            ]
+          },
+          {
+            "text": "In any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement",
+            "evidence": [
+              {
+                "post_id": 114,
+                "quote": "In any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Allow newlines inside format specifiers without backslash continuation",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The main proposal allowed newlines within the expression part of f-strings, treating them like regular string content.",
+        "reasons": [
+          {
+            "text": "Both of these are valid with our current implementation: f\"___{ x }___\" and f\"___{( x )}___\"",
+            "evidence": [
+              {
+                "post_id": 93,
+                "quote": "Both of these are valid with our current implementation:\n\n>>> x = 1\n>>> f\"___{\n... x\n... }___\"\n'___1___'"
+              }
+            ]
+          },
+          {
+            "text": "It also handles debug expressions: f\"___{ 1 + 1 =}___\" which prints the formatted result with newlines preserved.",
+            "evidence": [
+              {
+                "post_id": 93,
+                "quote": "It also handles debug expressions:\n\n>>> f\"___{\n... 1\n... +\n... 1\n... =}___\"\n'___\\n1\\n+\\n1\\n=2___'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Use parser-driven mode switching instead of modifying the tokenizer",
+        "kind": "alternative",
+        "status": "accepted",
+        "summary": "The implementation chose to let the parser signal mode changes rather than making the tokenizer context-aware.",
+        "reasons": [
+          {
+            "text": "That could be driven by the parser though, right? The parser can have lookaheads for }, : and :=, and then signal to the lexer to switch back.",
+            "evidence": [
+              {
+                "post_id": 94,
+                "quote": "That could be driven by the parser though, right? The parser can have lookaheads for }, : and :=, and then signal to the lexer to switch back."
+              }
+            ]
+          },
+          {
+            "text": "In general, we found that just modifying the tokenizer to know when to switch is not only much easier, but also much cleaner and debuggable",
+            "evidence": [
+              {
+                "post_id": 109,
+                "quote": "In general, we found that just modifying the tokenizer to know when to switch is not only much easier, but also much cleaner and debuggable"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Add PEP 8 guidance discouraging reliance on quote reuse in f-strings",
+        "kind": "proposal",
+        "status": "open",
+        "summary": "A suggestion was made to add text to PEP 8 advising against relying on the ability to reuse quote characters inside f-strings.",
+        "reasons": [
+          {
+            "text": "I would also like to see the PEP more strongly discourage actually relying on that in manually written code, in the form of a proposed addition to PEP 8.",
+            "evidence": [
+              {
+                "post_id": 95,
+                "quote": "Like others in the thread, I voted in favour of grammar consistency in the poll (allowing quote reuse), but I would also like to see the PEP more strongly discourage actually relying on that in manually written code"
+              }
+            ]
+          },
+          {
+            "text": "The section on string quotes would be the appropriate place for an addition like: (The part in parentheses probably shouldn't be added to PEP 8)",
+            "evidence": [
+              {
+                "post_id": 95,
+                "quote": "The section on string quotes would be the appropriate place for an addition like:\n\n(The part in parentheses probably shouldn't be added to PEP 8, but could be included in the PEP 701 section on adding the new PEP 8 text)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Provide a regular expression specification for f-string token types",
+        "kind": "alternative",
+        "status": "rejected",
+        "summary": "Guido van Rossum requested a regex spec for tokens to help alternate tokenizers, but it was deemed impossible due to lexer state dependencies.",
+        "reasons": [
+          {
+            "text": "I think it would help if there was a specification for the tokens – not for what is returned by the tokenizer, but e.g. a regular expression showing what the lexer accepts for each token.",
+            "evidence": [
+              {
+                "post_id": 88,
+                "quote": "Hm. I think I may have found an example where I might disagree. But before we argue about this, I think it would help if there was a specification for the tokens – not for what is returned by the tokenizer, but e.g. a regular expression showing what the lexer accepts for each token."
+              }
+            ]
+          },
+          {
+            "text": "I don't think a regular expression is possible (or at least straightforward so it helps for clarifications) because the cut points depend on the level of parenthesis",
+            "evidence": [
+              {
+                "post_id": 89,
+                "quote": "I don't think a regular expression is possible (or at least straightforward so it helps for clarifications) because the cut points depend on the level of parenthesis and bracket some of the characters are and some other state the lexer needs to keep track of."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "durationMs": 219909
+}

@@ -216,6 +216,24 @@ describe.skipIf(!databaseUrl)("the data layer (needs DATABASE_URL)", () => {
     expect(accepted).toHaveLength(0);
   });
 
+  it("finds a rejected idea from a long PR description that shares only some of its words", async () => {
+    const saved = await topics.saveThread(sampleThread);
+    await decisions.saveExtraction({
+      topicId: saved.topicId,
+      result: sampleExtraction,
+      postIds: saved.postIds,
+    });
+
+    // Most of these words are not in the decision; "list", "dict", "breaks", "old" and "code" are.
+    const pr = "Switch the config loader to use a list instead of a dict. This breaks old code for some users, " +
+      "but the new loader is faster and easier to read, and we added a migration guide to the docs.";
+    const similar = await decisions.similarRejected(pr);
+    expect(similar.map((d) => d.title)).toEqual(["Use a list instead of a dict"]);
+
+    // Sharing fewer than 3 meaningful words is not enough.
+    expect(await decisions.similarRejected("the loader reads old settings files quickly")).toHaveLength(0);
+  });
+
   it("builds the decision card with its reasons, evidence and people", async () => {
     const saved = await topics.saveThread(sampleThread);
     const [decisionId] = await decisions.saveExtraction({
