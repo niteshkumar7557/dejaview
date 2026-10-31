@@ -49,6 +49,8 @@ export interface LinkerAdapter {
     posts: ThreadPost[],
     ctx: LinkerContext,
   ): Promise<CodeAnchor[]>;
+  /** Fills in current_path and relocated_by when a file has moved since the decision. */
+  relocateAnchor(anchor: CodeAnchor, repoDir: string): Promise<CodeAnchor>;
 }
 
 /** Why a package could not be loaded. */
@@ -118,14 +120,21 @@ export async function loadLinker(): Promise<Loaded<LinkerAdapter>> {
   }
   try {
     const module = (await import(specifier)) as Partial<LinkerAdapter>;
-    if (!module.linkDecision) {
+    if (!module.linkDecision || !module.relocateAnchor) {
       return {
         adapter: null,
         problem: "wrong-exports",
-        reason: `packages/${name} does not export linkDecision yet - ask Ansh`,
+        reason: `packages/${name} does not export linkDecision and relocateAnchor yet - ask Ansh`,
       };
     }
-    return { adapter: { linkDecision: module.linkDecision }, problem: "ok", reason: "loaded" };
+    return {
+      adapter: {
+        linkDecision: module.linkDecision,
+        relocateAnchor: module.relocateAnchor,
+      },
+      problem: "ok",
+      reason: "loaded",
+    };
   } catch {
     return {
       adapter: null,

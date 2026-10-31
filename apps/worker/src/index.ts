@@ -20,6 +20,7 @@ import {
   type JobRow,
 } from "@dejaview/db";
 import { loadLinker, loadPipeline } from "./adapters.js";
+import { prepareCpythonRepository } from "./cpython.js";
 import {
   handleEval,
   handleExtract,
@@ -111,6 +112,19 @@ async function main(): Promise<void> {
   if (linker.adapter) console.log("linker: loaded");
   else console.warn(`linker: ${linker.reason}`);
 
+  // The linker needs the CPython clone. Start it now, in the background, so the quick jobs
+  // are not held up: the link job waits for it when it gets there.
+  const cpython = prepareCpythonRepository();
+  cpython.then((repository) => {
+    if (repository.ok) {
+      console.log(
+        `cpython: ${repository.path}${repository.cloned ? " (cloned just now)" : " (already there)"}`,
+      );
+    } else {
+      console.warn(`cpython: ${repository.error} - link jobs cannot resolve files`);
+    }
+  });
+
   const jobs = new JobsRepository(pool);
   const context: WorkerContext = {
     pool,
@@ -123,6 +137,7 @@ async function main(): Promise<void> {
     pipeline,
     linker,
     cpythonDir: process.env.CPYTHON_DIR ?? "",
+    cpython,
     githubToken: process.env.GITHUB_TOKEN,
     report: async (job, stage, done, total) => {
       const progress = total > 0 ? Math.min(1, done / total) : 0;
