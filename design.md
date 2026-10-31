@@ -611,13 +611,12 @@ as they provide them.
 
 ## 11. Repo & workflow (hackathon rules)
 
-Source: organizers' *Participant Guidelines* (DevClub) and the Hack Day deck.
+Summary of the rules that drive our workflow. Full consolidated rules: Appendix B.
 
 1. New empty **public** GitHub repo, **MIT** license. Fresh project — no earlier code.
 2. **First commit straight to main:** `HACKATHON.md` (in the organizers' format: team name, team members,
    problem statement, models we use and why), plus `LICENSE` and `.gitignore`.
-3. **By 8:30 PM:** first commit pushed, **every member checked in on MLH** (check-in code is in the
-   guidelines), and the **team leader submits** the repo on MLH → Challenges → Add Submission → challenge
+3. **By 8:30 PM:** first commit pushed, **every member checked in on MLH**, and the **team leader submits** the repo on MLH → Challenges → Add Submission → challenge
    *Best Open-Source AI Project* → then Add Member for each teammate.
 4. **By 11:00 PM (strict):** team created on **Cadence**. The MLH team and the Cadence team must match; no team switching.
 5. After the first commit, **main is PR-only** (branch protection). Every change is a branch + PR; CI runs the
@@ -648,6 +647,9 @@ Source: organizers' *Participant Guidelines* (DevClub) and the Hack Day deck.
 ---
 
 ## 12. Team split (4 people) and timeline
+
+**Team Sipmap:** Mudit Agrawal, Nitesh Kumar, Abhijeet Raj Singh, Ansh Gupta. Roles A–D below are to be
+assigned by the team.
 
 | Person | Owns |
 |---|---|
@@ -684,10 +686,199 @@ Source: organizers' *Participant Guidelines* (DevClub) and the Hack Day deck.
 
 ## 14. References
 
-- Problem 06 statement and Hack Day rules deck (Hacktoberfest HackDay Sonipat).
+- Problem 06 statement and Hack Day rules — consolidated in Appendix A and B below (the original PDFs are not
+  kept in the repo).
 - PEP 1 (Rejected Ideas guidance), PEP 9 / PEP 12 (PEP templates) — peps.python.org.
 - Sharma, Savarimuthu, Stanger. *Extracting Rationale for Open Source Software Development Decisions — A Study
   of Python Email Archives.* ICSE 2021. arXiv:2102.05232.
 - Architecture Decision Records (Nygard), MADR, adr-tools.
 - Discourse API (discuss.python.org), GitHub REST API, Ollama API (structured outputs via `format`).
 - Related products: Unblocked, Decispher, Memnox, PRBeliefs.
+
+---
+
+## Appendix A. Official problem statement (Problem 06, verbatim)
+
+**Open Source Decision Intelligence and Knowledge Recovery**
+
+**Category:** Knowledge Management | Developer Intelligence | Information Retrieval
+
+**The Problem**
+
+Open-source projects accumulate years of technical discussions across GitHub issues, pull requests, review
+threads, forums, and design documents.
+
+Important architectural decisions are often made during these discussions but are never formally documented.
+
+When experienced contributors leave a project, the reasoning behind earlier technical decisions becomes
+difficult to recover.
+
+New contributors may unknowingly repeat previously rejected approaches, introduce incompatible changes, or
+question decisions without understanding the original context.
+
+Formal decision records such as Python PEPs and Rust RFCs document major decisions, but everyday engineering
+decisions frequently remain buried in discussions.
+
+**Your Objective**
+
+Build an intelligent knowledge recovery system that extracts technical decisions from public project
+discussions and connects them to the relevant source code.
+
+The system should:
+
+- Analyze public discussions, issues, pull requests, and technical threads.
+- Extract decisions and their underlying reasoning.
+- Identify rejected alternatives and explain why they were rejected.
+- Link decisions to the relevant source code.
+- Maintain references to original discussions.
+- Surface relevant historical decisions when a new pull request modifies associated code.
+- Preserve traceability so maintainers can verify every extracted decision.
+
+**Research Starting Points**
+
+- Architecture Decision Records (ADR).
+- adr-tools.
+- MADR.
+- Python PEPs.
+- Rust RFCs.
+- Kubernetes Enhancement Proposals (KEPs).
+- discuss.python.org.
+
+**Evaluation Scenarios**
+
+The organizers will provide Python PEPs and their associated public discussions.
+
+Participants must give their system the discussion without the corresponding PEP and evaluate whether it can
+recover the ideas that were rejected, along with the reasons behind those decisions.
+
+**Key Technical Considerations**
+
+- How can decisions be extracted from long discussions?
+- How can accepted and rejected approaches be distinguished?
+- How can decisions remain connected to code after files are renamed or moved?
+- How can the same contributor be recognized across different platforms?
+- How can every extracted decision remain verifiable through its original source?
+
+**Expected Deliverable**
+
+A working decision intelligence platform that extracts historical engineering decisions, preserves their
+reasoning, and surfaces relevant knowledge during future development.
+
+**Slide summary from the deck — "Recover the decisions nobody wrote down":** sources such as an issue
+(#1832, 140 replies), a reverted PR (#1901) and a 2022 forum thread feed a **decision record**
+(DECIDED: keep the C parser · REJECTED: rewrite in Rust · WHY: 2× slower on big files · SOURCES: #1832,
+#1901, forum) that is **linked to** `parser/core.c` lines 40–120. When a new PR touches that code, a
+**decisions bot** comments: *"Tried in 2022 and reverted: 2× slower. See #1901."*
+"You build: pull decisions and their reasons out of old discussions, and surface them when someone touches
+that code."
+
+---
+
+## Appendix B. Hackathon rules and logistics (consolidated)
+
+Sources: the Hack Day deck and the DevClub *Participant Guidelines*. Event: Hacktoberfest Hack Day Sonipat ×
+Rishihood University (NST), 31 Oct – 1 Nov 2026, 12 hours.
+
+**Team:** Sipmap — Mudit Agrawal, Nitesh Kumar, Abhijeet Raj Singh, Ansh Gupta. Teams are 1–4 members.
+No team switching; the team registered on MLH is final and must match the team on Cadence.
+
+### B.1 Timeline
+
+| When | What |
+|---|---|
+| 31 Oct, 6:30 PM | Hackathon starts |
+| 31 Oct, 8:30 PM | First commit (`HACKATHON.md`) done, every member checked in on MLH, repo link submitted on MLH |
+| 31 Oct, 11:00 PM | **Strict** last time to create the team on Cadence (cadence.devclubxnst.com) |
+| 31 Oct, until 12:00 AM | Mentors (Krishna, Neetanshu, Kushagar, Sai) help with doubts; after that the build is ours |
+| 1 Nov, 6:30 AM | Hackathon ends. Last push. Repos frozen and fetched for scoring |
+| 1 Nov, 8:30 AM | Presentations (8 panels) |
+| 1 Nov, 1:30 PM | Results and prizes |
+
+Meals: dinner 7:30–9:30 PM, midnight refreshments 2:00 AM, breakfast until 9:30 AM, lunch 12:30–2:30 PM.
+ID card is the food token.
+
+### B.2 Core rules
+
+1. **Fresh project.** No earlier code or prototype; start from an empty repo.
+2. **Public GitHub repo with an open-source license** (MIT or Apache-2.0). Ours: MIT.
+3. **No secrets in the repo, ever.** API keys, passwords and tokens live in `.env`, which is in `.gitignore`.
+4. **Use AI tools, but explain what you built.** If a team can't explain its code, it is out. Judges can ask
+   *any* member.
+
+### B.3 Repository requirements
+
+- **`HACKATHON.md` is the first commit**, pushed straight to `main`, containing: the problem statement picked,
+  the models used and why, the team name, and every member's name. Organizer format:
+  `# HACKATHON.md` → `## Team name` → `## Team members` → `## Problem statement` → `## Models we use and why`.
+- **After the first commit, no direct pushes to `main`.** Every change is a new branch + pull request.
+- **CI (GitHub Actions) runs the tests on every PR. Merge only when CI passes.** CI must install the project and
+  run the tests, and must pass on the **last commit**.
+- **Every commit message and every PR names the AI coding agent that helped and the AI models the project
+  uses.** Organizer example:
+
+  ```
+  Add tests for URL parser
+
+  Coding agent: Claude Code
+  Models used in project: Qwen 2.5 7B
+  ```
+
+- **`.github/pull_request_template.md`** so every PR asks for its models (worth 10 points; organizers say a
+  template is in their Problem Statements doc).
+- **Real tests** for the code.
+- **`examples/` folder:** a sample input and the real output the tool produced from it (proof it works).
+
+### B.4 AI model rules (Problems 1–7)
+
+- Any AI coding agent may be used to write code (Copilot, Cursor, Claude Code, …). Ours: Claude Code, MiniMax M3.
+- If the product uses an AI model, it must be **open-weight** (Llama, Gemma, Qwen, Mistral, DeepSeek, Phi, …),
+  run on our laptop or on the organizers' model server.
+- **Closed model APIs** (OpenAI, Claude, Gemini and other paid APIs) **score 0** for Open-Source AI Use. The
+  organizers' test machines have no API keys, so such calls can't run in their automated tests either.
+- **Name every model, and why, in `HACKATHON.md`.** Naming a model the code doesn't really use → **0 for
+  Open-Source AI Use and −5 overall.** Graders check that the named models are the ones the code uses.
+- (Problem 8 / Gemma track rules — Gemma only, on the laptop, for both product and coding — do **not** apply to us.)
+
+### B.5 Scoring (100 points)
+
+**Automated — they test the repo:**
+- Functional correctness — 30 points
+- Open-source AI use — up to 15 points
+- Testing and evidence
+- Open-source workflow: PRs and CI — 10 points
+
+They check: CI passes, features are really built (not empty stubs), the tests, no secrets in the repo, and that
+the named models are the ones the code uses.
+
+**Panel — the presentation:**
+- Design and trade-offs (Q&A)
+- Live demo and usability
+- Problem understanding
+
+**Must pass:** repo is public with an open-source license, and any team member can explain the code.
+
+### B.6 Final push
+
+- Final push by **6:30 AM, 1 Nov**. The repo is fetched at 6:30 AM and that version is scored.
+- Commits after 6:30 AM don't count and **may lead to negative marks**.
+- CI must pass on the last commit.
+
+### B.7 Presentation (8:30 AM)
+
+- 8 min pitch · 4 min Q&A · 2 min buffer.
+- Show: a live demo, how it works, the models and tools used, and what we learned.
+
+### B.8 Submission (MLH)
+
+- Every member checks in on the MLH event page (hacktoberfest-hack-day-sonipat-x-rishihood-university) with
+  the check-in code from the guidelines.
+- The team leader submits once: MLH event page → Challenges → Add Submission → repo link, project name,
+  description, tech used → challenge **Best Open-Source AI Project** → Submit Project → Your Submission →
+  Add Member for each teammate.
+- The repo can keep changing until 6:30 AM.
+
+### B.9 Prizes
+
+1st Rs 25,000 · 2nd Rs 15,000 · 3rd Rs 10,000 (Problems 1–7). Gemma track Rs 5,000 (Problem 8 only).
+Blog challenge: 2 × Rs 1,000 for the best overnight blog about Hacktoberfest and the project, posted on
+dev.to/mlh-hackathon and submitted via the organizers' blog form.

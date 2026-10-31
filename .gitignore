@@ -14,7 +14,3 @@ coverage/
 *.log
 .DS_Store
 /data/
-
-# Organizer materials kept locally, not part of the project
-/Hacktoberfest HackDay Sonipat*.pdf
-/Screenshot *.png
