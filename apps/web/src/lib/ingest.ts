@@ -35,7 +35,7 @@ export function stageRows(job: JobView | null): { name: string; label: string; s
   return PIPELINE_STAGES.map((s, i) => {
     let state: StageState = "pending";
     if (job && (i < current || (i === current && job.status === "done"))) state = "done";
-    else if (job && i === current) state = job.status === "failed" ? "failed" : "running";
+    else if (job && i === current && job.status !== "queued") state = job.status === "failed" ? "failed" : "running";
     return { name: s.name, label: s.label, state };
   });
 }
@@ -75,6 +75,24 @@ export function jobOutcome(job: JobView): JobOutcome {
 /** The id to poll after this job, if the API names one and this job is done. */
 export function nextJobToFollow(job: JobWithNext): number | null {
   return job.status === "done" && typeof job.nextJobId === "number" ? job.nextJobId : null;
+}
+
+/**
+ * The ingest page keeps the job it follows in its URL (`?job=21&topic=attrs-445`), so a refresh or a
+ * shared link picks the job up again instead of forgetting it. The topic only exists once the worker
+ * has fetched the thread, so without this a queued job would be invisible everywhere.
+ */
+export function followedJobQuery(jobId: number, topicSlug: string | null): string {
+  const params = new URLSearchParams({ job: String(jobId) });
+  if (topicSlug) params.set("topic", topicSlug);
+  return `?${params.toString()}`;
+}
+
+export function followedJobFromQuery(search: string): { jobId: number; topicSlug: string | null } | null {
+  const params = new URLSearchParams(search);
+  const raw = params.get("job") ?? "";
+  if (!/^\d+$/.test(raw) || Number(raw) <= 0) return null;
+  return { jobId: Number(raw), topicSlug: params.get("topic") || null };
 }
 
 /** File types the API's upload reader understands (packages/ingest/src/upload.ts). */

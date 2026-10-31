@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { type FormEvent, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { errorMessage } from "@/lib/errors";
 import { formatPercent } from "@/lib/format";
-import { jobOutcome, overallProgress, stageRows, suggestSlug, UPLOAD_ACCEPT, validateIngestUrl, validateUpload } from "@/lib/ingest";
+import {
+  followedJobFromQuery, followedJobQuery, jobOutcome, overallProgress, stageRows, suggestSlug, UPLOAD_ACCEPT,
+  validateIngestUrl, validateUpload,
+} from "@/lib/ingest";
 import { DUR, EASE, gsap, registerMotion, useGSAP, withMotion } from "@/lib/motion";
 import { getSource } from "@/lib/source";
 import { useJob } from "@/lib/use-job";
@@ -37,6 +40,21 @@ export function IngestPanel() {
 
   const outcome = job ? jobOutcome(job) : "idle";
   const running = outcome === "running";
+  // The worker runs one job at a time, so a new job can wait behind another one for a while.
+  const waiting = job?.status === "queued";
+
+  // Pick up the job named in the URL (after a refresh, or from a shared link).
+  useEffect(() => {
+    const followed = followedJobFromQuery(window.location.search);
+    if (!followed) return;
+    setTopicSlug(followed.topicSlug);
+    follow(followed.jobId).catch((e: unknown) => setError(errorMessage(e)));
+  }, [follow]);
+
+  function startOver() {
+    reset();
+    window.history.replaceState(null, "", window.location.pathname);
+  }
 
   useGSAP(
     () => {
@@ -91,6 +109,7 @@ export function IngestPanel() {
     try {
       const response = await send();
       setTopicSlug(response.topicSlug);
+      window.history.replaceState(null, "", followedJobQuery(response.jobId, response.topicSlug));
       await follow(response.jobId);
     } catch (e) {
       setError(errorMessage(e));
@@ -148,7 +167,7 @@ export function IngestPanel() {
 
       <section className={styles.progress} aria-labelledby="progress-title">
         <div className={styles.progressHead}>
-          <h2 id="progress-title" className={styles.title} aria-live="polite">{HEADINGS[outcome]}</h2>
+          <h2 id="progress-title" className={styles.title} aria-live="polite">{waiting ? "Waiting for the worker" : HEADINGS[outcome]}</h2>
           <span className={`${styles.percent} num`}>{job ? formatPercent(overallProgress(job)) : "—"}</span>
         </div>
         <div className={styles.track} aria-hidden="true"><div className={styles.fill} ref={bar} /></div>
@@ -163,9 +182,15 @@ export function IngestPanel() {
             </li>
           ))}
         </ol>
+        {waiting && (
+          <p className={styles.help}>
+            Job #{job?.id} is in the queue. The worker runs one job at a time and is finishing another one; this
+            starts on its own. You can leave or refresh this page: the link in the address bar brings you back.
+          </p>
+        )}
         {pollError && <p className={styles.error}>{pollError}</p>}
-        {lost && <p className={styles.error}>The API no longer knows this job, so progress stopped. <button type="button" onClick={reset}>Start again</button></p>}
-        {outcome === "failed" && <p className={styles.error}>{job?.error ?? "The job stopped."} <button type="button" onClick={reset}>Retry</button></p>}
+        {lost && <p className={styles.error}>The API no longer knows this job, so progress stopped. <button type="button" onClick={startOver}>Start again</button></p>}
+        {outcome === "failed" && <p className={styles.error}>{job?.error ?? "The job stopped."} <button type="button" onClick={startOver}>Retry</button></p>}
         {outcome === "handed-off" && topicSlug && (
           <p className={styles.help}>
             The worker now extracts the decisions as a separate job. On the laptop GPU that takes several minutes;{" "}
