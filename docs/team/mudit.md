@@ -805,6 +805,29 @@ curl http://localhost:3001/api/jobs/1
 curl http://localhost:3001/api/topics
 ```
 
+## The four pictures in the pull request
+
+They are generated, not drawn by hand, so they cannot drift away from what the code really does:
+
+```bash
+npm run start -w @dejaview/api      # the API has to be running
+npm run render-pr-images -w @dejaview/api
+```
+
+| File | What it shows | Where the content comes from |
+|---|---|---|
+| `mudit-flow.png` | The flow of the data side, top to bottom | Drawn from the real folders and contracts |
+| `mudit-api-run.png` | The API answering, with the rows it returned | `GET /api/topics` and `GET /api/topics/pep-698/timeline` on the running server |
+| `mudit-tests.png` | The test run and the list of test files | `npm test` and `vitest list --filesOnly`, run by the script |
+| `mudit-schema.png` | The tables in the database | `psql \\dt` against the real database |
+
+**One lesson worth keeping:** GitHub shows a picture in a column about 890 pixels wide. The first version of
+these was 2720 pixels wide, so GitHub shrank it to a third and the 12.5 pixel text came out at **4 pixels**
+on screen — unreadable. Every picture is now rendered 820 pixels wide, at one device pixel per CSS pixel,
+with the text sized for that width. The words are about 17 pixels tall when somebody reads the pull request.
+
+The script also hides one thing on purpose: the machine's own path is cut out of the terminal pictures.
+
 ## What is still left in my list
 
 - **Task 7 — deploy.** Postgres + API + worker + web somewhere with a public HTTPS address, so Ansh's
