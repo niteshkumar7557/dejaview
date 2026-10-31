@@ -35,7 +35,7 @@
 ## Global Constraints
 
 - Only files under `apps/web/` (plus `docs/team/nitesh.md`) are created or modified. Dependencies are added with `npm install <pkg> -w @dejaview/web` (this updates the root lockfile, which the team rules allow).
-- Package name `@dejaview/web`; `"private": true`; scripts `dev` (`next dev -p 3000`), `build`, `start`, `typecheck` (`next typegen && tsc --noEmit -p .`).
+- Package name `@dejaview/web`; `"private": true`; scripts `dev` (`next dev -p 3100`), `build`, `start`, `typecheck` (`next typegen && tsc --noEmit -p .`).
 - `tsconfig.json` extends `../../tsconfig.base.json` and overrides: `"module": "ESNext"`, `"moduleResolution": "Bundler"`, `"jsx": "preserve"`, `"lib": ["dom", "dom.iterable", "ES2022"]`, `"types": ["node"]`, `"plugins": [{ "name": "next" }]`, `"paths": { "@/*": ["./src/*"] }`, include `next-env.d.ts`, `src/**/*.ts`, `src/**/*.tsx`, `.next/types/**/*.ts`.
 - `next.config.ts`: `transpilePackages: ["@dejaview/shared"]`; `typescript: { ignoreBuildErrors: true }` with the comment "types are checked by `npm run typecheck` (tsc) in CI; Next's built-in checker may not support TypeScript 7".
 - Next 16: page props `params` and `searchParams` are **Promises** (`const { slug } = await params`).
@@ -111,7 +111,7 @@ apps/web/
 
 - [ ] **Step 1:** Create the files by hand (do not run `create-next-app`; it would write outside conventions). Install: `npm install next@16.4.3 react@19.3.1 react-dom@19.3.1 gsap@3.15.0 @gsap/react@2.1.2 react-markdown -w @dejaview/web` and `npm install -D @types/react @types/react-dom -w @dejaview/web`.
 - [ ] **Step 2:** `globals.css`: reset, `body { background: var(--ground); color: var(--text); font: 400 var(--fs-body)/20px var(--font-sans); }`, `.num { font-variant-numeric: tabular-nums; }`, `.mono { font-family: var(--font-mono); }`, visible focus ring `2px solid var(--accent)` offset 2px.
-- [ ] **Step 3: Verify.** From the repo root: `npm run typecheck` → exits 0 (includes `@dejaview/web`); `npm test` → 13 passed; `npm run build -w @dejaview/web` → "Compiled successfully"; `npm run dev -w @dejaview/web` → `http://localhost:3000` shows "Overview" in IBM Plex Sans on `#f9fbfc`.
+- [ ] **Step 3: Verify.** From the repo root: `npm run typecheck` → exits 0 (includes `@dejaview/web`); `npm test` → 13 passed; `npm run build -w @dejaview/web` → "Compiled successfully"; `npm run dev -w @dejaview/web` → `http://localhost:3100` shows "Overview" in IBM Plex Sans on `#f9fbfc`.
 - [ ] **Step 4: Hand over** commit message "Scaffold Next.js web app with design tokens and fonts".
 
 ### Task 2: Formatting, URL building and the data sources
@@ -339,8 +339,8 @@ apps/web/
 
 **Files:** Modify any file under `apps/web/src/` as the critique requires; Modify `docs/team/nitesh.md` (tick finished tasks)
 
-- [ ] **Step 1:** `npm run build -w @dejaview/web && npm run start -w @dejaview/web` (production build, port 3000).
-- [ ] **Step 2:** From `apps/web`: `node ~/.claude/skills/design-taste-frontend/scripts/lint.mjs --app src` and `node ~/.claude/skills/design-taste-frontend/scripts/inspect.mjs --app http://localhost:3000/` and again for `/topics/pep-701`, `/decisions/{low-confidence id}`, `/eval`, `/ingest`, `/pr-checks`, `/decisions?q=zzz`. Expected: 0 FAIL on every screen at 1440, 768, 390.
+- [ ] **Step 1:** `npm run build -w @dejaview/web && npm run start -w @dejaview/web` (production build, port 3100).
+- [ ] **Step 2:** From `apps/web`: `node ~/.claude/skills/design-taste-frontend/scripts/lint.mjs --app src` and `node ~/.claude/skills/design-taste-frontend/scripts/inspect.mjs --app http://localhost:3100/` and again for `/topics/pep-701`, `/decisions/{low-confidence id}`, `/eval`, `/ingest`, `/pr-checks`, `/decisions?q=zzz`. Expected: 0 FAIL on every screen at 1440, 768, 390.
 - [ ] **Step 3:** Open every screenshot in `.taste-skill/inspect/`; answer the seven questions of app-screens §2.7 in writing (append to this plan under "Critique log"); fix the worst three; re-run. At most three rounds.
 - [ ] **Step 4:** Reduced motion: with `prefers-reduced-motion: reduce` emulated, strip highlight, drawer, menu and evidence jump still work with no travel.
 - [ ] **Step 5:** Root `npm run typecheck` → 0, `npm test` → all pass. Tick tasks 1–10 of `docs/team/nitesh.md` that are done.
