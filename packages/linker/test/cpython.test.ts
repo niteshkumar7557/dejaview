@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { definitionCandidates } from "../src/cpython.js";
 import { ensureCpythonRepository, findSymbolDefinitions, pathExistsAtHead } from "../src/index.js";
 
 const execFileAsync = promisify(execFile);
@@ -131,6 +132,24 @@ describe("CPython repository helpers", () => {
     await expect(findSymbolDefinitions(repositoryPath, "c_call_only")).resolves.toEqual([]);
     await expect(findSymbolDefinitions(repositoryPath, "missing_symbol")).resolves.toEqual([]);
     await expect(findSymbolDefinitions(repositoryPath, "bad-name")).resolves.toEqual([]);
+  });
+
+  it("only reads files with a definition-shaped line, not every file that mentions the name", async () => {
+    // Everyday names ("type", "default") are mentioned in ~1,500 CPython files; reading each one took
+    // the link step tens of minutes. Only lines that look like a definition make a file a candidate.
+    await mkdir(path.join(repositoryPath, "Lib"));
+    await mkdir(path.join(repositoryPath, "Objects"));
+    await writeFile(path.join(repositoryPath, "Lib", "defines.py"), "class target:\n    pass\n");
+    await writeFile(path.join(repositoryPath, "Lib", "mentions.py"), "value = target(1)\nprint('target')\n");
+    await writeFile(path.join(repositoryPath, "Objects", "defines.c"), "static PyObject *\ntarget(PyObject *self)\n{\n    return self;\n}\n");
+    await writeFile(path.join(repositoryPath, "Objects", "mentions.c"), "void f(void) { int x = target(1); }\n");
+    await commitFiles();
+
+    await expect(definitionCandidates(repositoryPath, "target")).resolves.toEqual(["Lib/defines.py", "Objects/defines.c"]);
+    await expect(findSymbolDefinitions(repositoryPath, "target")).resolves.toEqual([
+      { symbol: "target", path: "Lib/defines.py", kind: "python_class" },
+      { symbol: "target", path: "Objects/defines.c", kind: "c_function" },
+    ]);
   });
 
   it("does not return source line numbers in symbol results", async () => {
