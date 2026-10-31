@@ -962,6 +962,40 @@ Every merge keeps the confidence **and the sentence that produced it**, so a rea
 The worker remembers the authors of every thread it stores, and the decision card then names the
 person instead of listing three handles.
 
+## The dress rehearsal — the whole chain, run for real
+
+With the extraction pipeline in place (PR #15), the chain was run end to end on PEP 698:
+
+```
+ingest  → fetch the thread, store it           done
+extract → triage, extract, verify, consolidate done
+link    → attach the code it is about          done
+eval    → compare with the real PEP            done
+```
+
+**What it recovered from the PEP 698 discussion:**
+
+| Decision | Status | Confidence | Quotes | Verified |
+|---|---|---|---|---|
+| Core Proposal: Acceptance of @typing.override Decorator | accepted | high | 2 | 2 |
+| Rejection of Explicit Base Class Specification in Decorator | rejected | high | 5 | 5 |
+| Rejection of Mandatory Usage for Abstract Methods | rejected | high | 2 | 2 |
+| Acceptance of Third-Party Shim Compatibility Strategy | accepted | medium | 2 | 1 |
+
+**And the score against the real PEP:**
+
+| | |
+|---|---|
+| Recall | **0.25** — 1 of the 4 rejected ideas in the PEP was recovered |
+| Reason agreement | **1.0** — the reason for the one it found agrees with the PEP |
+| Extra ideas | 1 — found in the discussion but not listed in the PEP |
+
+The scorecard links each ground-truth item to the decision it matched, through the database id, so
+the dashboard can go straight to the card.
+
+This is one PEP with an eleven-post thread, so the number is small on purpose. The point of the
+rehearsal is that every step works and the numbers are real.
+
 ## What is still left in my list
 
 - **Task 7 — deploy.** Postgres + API + worker + web somewhere with a public HTTPS address, so Ansh's

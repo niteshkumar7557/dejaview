@@ -9,9 +9,17 @@
 
 import { ensureCpythonRepository } from "@dejaview/linker";
 import { isAbsolute, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-/** Where the clone goes when CPYTHON_DIR is not set. It is inside data/, which is git-ignored. */
-export const DEFAULT_CPYTHON_DIR = "./data/cpython";
+/** The root of the repository, found from this file so it does not depend on the working folder. */
+const REPO_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
+
+/**
+ * Where the clone goes when CPYTHON_DIR is not set: data/ in the repository root, which is
+ * git-ignored. It has to be the root and not the working folder, because npm runs a workspace
+ * script inside that folder and the clone would end up somewhere nobody expects.
+ */
+export const DEFAULT_CPYTHON_DIR = resolve(REPO_ROOT, "data/cpython");
 
 export interface CpythonRepository {
   ok: boolean;
@@ -33,7 +41,7 @@ export async function prepareCpythonRepository(
   directory: string | undefined = process.env.CPYTHON_DIR,
 ): Promise<CpythonRepository> {
   const wanted = directory?.trim() || DEFAULT_CPYTHON_DIR;
-  const absolute = isAbsolute(wanted) ? wanted : resolve(process.cwd(), wanted);
+  const absolute = isAbsolute(wanted) ? wanted : resolve(REPO_ROOT, wanted);
 
   const result = await ensureCpythonRepository(absolute);
   if (!result.ok) {
