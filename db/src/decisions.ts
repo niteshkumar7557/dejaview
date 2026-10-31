@@ -85,6 +85,9 @@ function toIso(value: Date | null): string | null {
   return value ? value.toISOString() : null;
 }
 
+/** See similarRejected: the lowest shared-words-per-sqrt(length) score that counts as similar. */
+const MIN_SIMILARITY = 0.5;
+
 export class DecisionsRepository {
   constructor(private readonly pool: Pool) {}
 
@@ -285,6 +288,13 @@ export class DecisionsRepository {
    * decision's title, summary and reasons, keep those sharing at least 3 (or every word of a shorter
    * query), and rank by how many they share.
    */
+  /**
+   * Rejected decisions that share words with a PR's text, best first. Matches are scored by shared
+   * words divided by the square root of the decision's word count: a long decision (PEP 701 has one
+   * with ten reasons) shares a few everyday words with almost any text, and must not outrank or
+   * crowd out a short decision about exactly this idea. Scores at or below MIN_SIMILARITY are left
+   * out (on the real data, unrelated matches scored 0.33-0.48 and related ones 0.56-1.1).
+   */
   async similarRejected(q: string, limit = 10): Promise<DecisionSummary[]> {
     const result = await this.pool.query<DecisionSummaryRow>(
       `WITH query AS (
@@ -292,6 +302,7 @@ export class DecisionsRepository {
        ),
        scored AS (
          SELECT d.id,
+                cardinality(tsvector_to_array(d.search)) AS size,
                 cardinality(array(
                   SELECT unnest(tsvector_to_array(d.search))
                   INTERSECT
@@ -314,9 +325,10 @@ export class DecisionsRepository {
          JOIN topics t ON t.id = d.topic_id
         WHERE s.shared > 0
           AND s.shared >= LEAST(3, (SELECT cardinality(lexemes) FROM query))
-        ORDER BY s.shared DESC, d.id DESC
+          AND s.shared / sqrt(s.size) > $3
+        ORDER BY s.shared / sqrt(s.size) DESC, d.id DESC
         LIMIT $2`,
-      [q, limit],
+      [q, limit, MIN_SIMILARITY],
     );
     const anchorsByDecision = await this.anchorsFor(result.rows.map((row) => row.id));
     return result.rows.map((row) => this.toSummary(row, anchorsByDecision.get(row.id) ?? []));

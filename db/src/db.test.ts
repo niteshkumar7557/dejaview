@@ -234,6 +234,35 @@ describe.skipIf(!databaseUrl)("the data layer (needs DATABASE_URL)", () => {
     expect(await decisions.similarRejected("the loader reads old settings files quickly")).toHaveLength(0);
   });
 
+  it("does not let a long, unrelated rejected decision match through a few common words", async () => {
+    // A real PR about functools.cache matched a PEP 701 f-string decision whose ten reasons share a few
+    // everyday words with almost any text. Matches are ranked by shared words relative to the
+    // decision's length, and a weak match is left out.
+    const saved = await topics.saveThread(sampleThread);
+    const filler = Array.from({ length: 150 }, (_, i) => `topicword${i}`).join(" ");
+    await decisions.saveExtraction({
+      topicId: saved.topicId,
+      postIds: saved.postIds,
+      result: {
+        ...sampleExtraction,
+        decisions: [
+          ...sampleExtraction.decisions,
+          {
+            ...sampleExtraction.decisions[0]!,
+            key: "d2",
+            title: "Rewrite the parser in another language",
+            summary: "Rejected after a long debate.",
+            reasons: [{ text: `The config loader is faster for users, but ${filler}`, evidence: [] }],
+          },
+        ],
+      },
+    });
+
+    const pr = "Switch the config loader to use a list instead of a dict. This breaks old code for some users, " +
+      "but the new loader is faster and easier to read, and we added a migration guide to the docs.";
+    expect((await decisions.similarRejected(pr)).map((d) => d.title)).toEqual(["Use a list instead of a dict"]);
+  });
+
   it("builds the decision card with its reasons, evidence and people", async () => {
     const saved = await topics.saveThread(sampleThread);
     const [decisionId] = await decisions.saveExtraction({
