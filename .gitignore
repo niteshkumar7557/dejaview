@@ -13,4 +13,5 @@ coverage/
 # Local data
 *.log
 .DS_Store
-/data/
+# The CPython clone the worker makes, wherever it is put
+data/
