@@ -1,0 +1,20 @@
+# Secrets: never commit these
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# Local data
+*.log
+.DS_Store
+/data/
+
+# Organizer materials kept locally, not part of the project
+/Hacktoberfest HackDay Sonipat*.pdf
+/Screenshot *.png
