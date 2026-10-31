@@ -1,0 +1,105 @@
+{
+  "promptHash": "0838d6ff852457efcc04280edcc2ceddff9dced972ea9049a87dbd5164d568d3",
+  "model": "qwen3.5:9b",
+  "stage": "extract",
+  "prompt": "You read part of a public discussion about: PEP 698: A typing.override decorator\n\nFind the ideas in these posts that were proposed or discussed: the main proposal, alternative designs,\ndifferent spellings or names, extra features people asked for, and ideas that were turned down.\nList at most 5 ideas, most important first (prefer ideas that were rejected or decided).\n\nFor each idea give:\n- title: a short name for the idea itself (at most 12 words), without labels like \"Rejected:\" or \"Proposal:\"\n- kind: \"proposal\" for the main proposal or a new feature, \"alternative\" for a different way of doing it\n- status: \"accepted\" if it was adopted, \"rejected\" if the authors or deciders turned it down,\n  \"withdrawn\" if its own proposer dropped it, \"open\" if no outcome is visible in these posts\n- summary: one short sentence on what happened to the idea\n- reasons: at most 2 reasons why it got that status, each with exactly one evidence item (post_id and quote).\n\nRules for quotes:\n- Copy the quote WORD FOR WORD from the post with that post_id. Do not paraphrase, fix or shorten words.\n- At most 25 words per quote. Never invent a quote.\n- Only use posts shown below.\n\nPosts:\n\n[post 1] stroxler (2022-11-07):\nHi All,\n\nWe’d like to put PEP 698 forward for discussion.\n\nThe proposal is for a new decorator @typing.override that marks a method as overriding a method in some superclass. Having this decorator - inspired by similar constructs in Java, C++, Typescript, Kotlin, Scala, Swift, and C# - will enable static type checkers to detect potential bugs where a base class method is renamed but child classes were not modified.\n\nPrevious discussion has been on typing-sig, in particular here is the original discussion.\n\n[post 2] NeilGirdhar (2022-11-07):\nReally looking forward to this!\n\nJust curious, but why does it list this as a disadvantage?\n\n“Adding or removing base class methods that impact overrides will require updating subclass code.”\n\nIsn’t being forced to update subclass code one of the benefits of the decorator?\n\nAlso, I proposed something similar in the ipromise library. I allowed for the possibility of indicating from which base class the overridden base method comes from. In some situations, that can help readers of code know where to look for the method, and it’s a bit stricter (if one base class removes, say, the __call__ method, but another one adds it–and you meant to override the one from the first base class). If you’re so inclined, feel free to include this under rejected/considered ideas.\n\n[post 3] stroxler (2022-11-08):\nGood point regarding the odd choice of words!\n\nI think the disadvantages wording should be tweaked to emphasize a verbosity tradeoff - what we had intended to point out was that (as with static types in general) this introduces another tradeoff where code becomes more verbose in order to gain some safety.\n\nAs for specifying the parent class, my initial impression is that while it could be useful (especially making the overridden class explicit to help with code navigation), it probably isn’t worth including in PEP 698 for three reasons:\n\n- if in a single commit you move a method from one base to another, you as the author are likely aware of what you did, so the safety benefits are relatively small\n\n- I’m guessing there wouldn’t be too much use of this feature. Since it’s relatively easy to implement this capability using runtime logic in a library, that makes me thing we don’t need to bake it into typing.py all of the type checkers.\n\nBut I’d like to get opinions from others as well, I just posted a link to this discussion in typing-sig so we can see if there is a range of opinions.\n\nIf the consensus is not to include that functionality, we could add it under the considered ideas.\n\n[post 4] NeilGirdhar (2022-11-08):\nYes, I completely agree with your reasons, and I figured you would probably have thought of this. I was just wondering if you should mention these reasons in the PEP under “rejected alternatives”? In a few years, this extension may be posted on python-ideas, and then it might be useful for that poster to see your rejection reasoning.\n\nThat said, @typing.override could support both usage with and without the base class. But I agree that use of the base class would happen extremely rarely (only in a very complicated inheritance hierarchy). But anyway, the use of a base class could always be added later if someone makes a compelling case for it.\n\nFair enough\n\n[post 5] mkorpela (2022-11-13):\nThe first versions of ”runtime” overriding decorator actually contained the class name inheritance - In Python, how do I indicate I'm overriding a method? - Stack Overflow but that really did not bring any benefits. From my point of view it only made it harder to use. Big jump was to discover a way to leave that out.\n\nNobody has asked for explicitly naming the class in overrides lib in the past 10 years, so I would assume it is not needed.\n\n[post 7] encukou (2023-01-12):\nSorry for asking so late. (I’ve seen PEP 702, typing.deprecated, which isn’t on Discourse yet, and thought about a question that could also apply here.)\n\nIf a third-party library provides a different override decorator, is there a good way to tell type checkers that it should act like @typing.override?\n\n[post 8] AlexWaygood (2023-01-12):\nOne way of handling this kind of thing is to do a typing.TYPE_CHECKING shim, like so:\n\n# module a.py\nfrom typing import TYPE_CHECKING\n\nif TYPE_CHECKING:\nfrom typing import override as override\nelse:\ndef override(func):\n# custom implementation here\n\nAnd then from everywhere else in your codebase, you could just do from a import override. Type checkers will just think that a.override is a reexport of typing.override, but at runtime you can have any custom behaviour you like.\n\n[post 9] dgutson (2023-01-20):\nHi, I’m coming from C++ so I could be a bit biased.\n\nShould be any reference or relationship with @abstractmethod? For example, it would be nice, I think, some mode/flag where the override decorator is explicitly required when overriding an @abstractmethod.\n\n[post 10] a-reich (2023-01-20):\nI’m not sure there is much need for special treatment of abstract methods. The PEP recommends type checkers support a strict mode where all method overrides must be marked with the decorator, whether abstract or not.\n\n[post 11] brettcannon (2023-01-30):\nThe SC has decided to accept this PEP!\n\nReminder: at most 5 ideas; give each reason one quote copied word for word (at most 25 words)\nfrom the post with that post_id; use status \"open\" when no outcome is visible.",
+  "response": {
+    "ideas": [
+      {
+        "title": "Specifying the parent class in the decorator",
+        "kind": "alternative",
+        "status": "rejected",
+        "summary": "The proposal to allow specifying the exact base class was rejected due to low utility and implementation complexity.",
+        "reasons": [
+          {
+            "text": "if in a single commit you move a method from one base to another, you as the author are likely aware of what you did, so the safety benefits are relatively small",
+            "evidence": [
+              {
+                "post_id": 3,
+                "quote": "if in a single commit you move a method from one base to another, you as the author are likely aware of what you did, so the safety benefits are relatively small"
+              }
+            ]
+          },
+          {
+            "text": "I'm guessing there wouldn't be too much use of this feature. Since it's relatively easy to implement this capability using runtime logic in a library, that makes me thing we don't need to bake it into typing.py all of the type checkers.",
+            "evidence": [
+              {
+                "post_id": 3,
+                "quote": "I'm guessing there wouldn't be too much use of this feature. Since it's relatively easy to implement this capability using runtime logic in a library, that makes me thing we don't need to bake it into typing.py all of the type checkers."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Requiring the decorator for abstract method overrides",
+        "kind": "alternative",
+        "status": "rejected",
+        "summary": "The idea of adding a specific mode or flag to require the decorator only for abstract methods was turned down.",
+        "reasons": [
+          {
+            "text": "I'm not sure there is much need for special treatment of abstract methods. The PEP recommends type checkers support a strict mode where all method overrides must be marked with the decorator, whether abstract or not.",
+            "evidence": [
+              {
+                "post_id": 10,
+                "quote": "I'm not sure there is much need for special treatment of abstract methods. The PEP recommends type checkers support a strict mode where all method overrides must be marked with the decorator, whether abstract or not."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Adding runtime enforcement logic to the decorator",
+        "kind": "alternative",
+        "status": "rejected",
+        "summary": "The concept of including custom runtime behavior directly in the standard library decorator was considered unnecessary.",
+        "reasons": [
+          {
+            "text": "I'm guessing there wouldn't be too much use of this feature. Since it's relatively easy to implement this capability using runtime logic in a library, that makes me thing we don't need to bake it into typing.py all of the type checkers.",
+            "evidence": [
+              {
+                "post_id": 3,
+                "quote": "I'm guessing there wouldn't be too much use of this feature. Since it's relatively easy to implement this capability using runtime logic in a library, that makes me thing we don't need to bake it into typing.py all of the type checkers."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Providing a shim for third-party override decorators",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "A pattern was proposed and accepted to allow third-party libraries to define their own override decorators that mimic the standard one.",
+        "reasons": [
+          {
+            "text": "One way of handling this kind of thing is to do a typing.TYPE_CHECKING shim, like so: from typing import TYPE_CHECKING if TYPE_CHECKING: from typing import override as override else: def override(func):",
+            "evidence": [
+              {
+                "post_id": 8,
+                "quote": "One way of handling this kind of thing is to do a typing.TYPE_CHECKING shim, like so: from typing import TYPE_CHECKING if TYPE_CHECKING: from typing import override as override else: def override(func):"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Main proposal for @typing.override decorator",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The core proposal to introduce a new @typing.override decorator was accepted by the Steering Council.",
+        "reasons": [
+          {
+            "text": "The SC has decided to accept this PEP!",
+            "evidence": [
+              {
+                "post_id": 11,
+                "quote": "The SC has decided to accept this PEP!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "durationMs": 101622
+}

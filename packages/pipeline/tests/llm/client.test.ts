@@ -432,3 +432,19 @@ describe("callLlm reusing a recorded answer in live mode", () => {
     }
   });
 });
+
+describe("callLlm when the answer is cut off for length", () => {
+  it("does not retry: the same prompt at temperature 0 would be cut off again", async () => {
+    let calls = 0;
+    const fetchImpl = (async () => {
+      calls += 1;
+      return new Response('{"message":{"content":"{\\"a\\":"}}\n{"done":true,"done_reason":"length"}', { status: 200 });
+    }) as unknown as typeof fetch;
+    await expect(callLlm({
+      model: "m", stage: "extract", prompt: "p-length", jsonSchema: { type: "object" }, responseSchema: z.object({ a: z.number() }),
+      deps: { mode: "live", apiToken: "t", fetchImpl, maxRetries: 2, retryDelayMs: 0, sleep: async () => {},
+        llmStore: { get: async () => null, save: async () => {} } },
+    })).rejects.toThrow(/cut off/);
+    expect(calls).toBe(1);
+  });
+});
