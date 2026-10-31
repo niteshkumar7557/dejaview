@@ -33,7 +33,7 @@ response type you render).
   **timeline** tab showing every post with its triage label and signal score, greyed out when skipped, and
   which decisions cite it.
 - [x] **5. Home / search** (`/`): topics with counts and last recall; full-text decision search with filters.
-- [x] **6. Ingest page** (`/ingest`): paste a URL or upload a file, then poll `/api/jobs/:id` and show
+- [ ] **6. Ingest page** (`/ingest`): paste a URL ✅ done; **file upload still to do** (needs a multipart ingest route in `packages/shared/src/api.ts`, ask Mudit) — then poll `/api/jobs/:id` and show
   stage-by-stage progress (the LLM is slow, so progress must be visible).
 - [x] **7. Eval scorecard** (`/eval`): per PEP, recall and reason agreement, and a side-by-side table
   *PEP says* | *DejaView found* | ✅/❌.
