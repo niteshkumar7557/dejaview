@@ -8,6 +8,7 @@
   "main": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
-    "start": "tsx src/index.ts"
+    "start": "tsx src/index.ts",
+    "seed-llm-calls": "tsx scripts/seed-llm-calls.ts"
   }
 }
