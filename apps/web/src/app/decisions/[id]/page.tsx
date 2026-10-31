@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/Card";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { StatusPill, statusLabel } from "@/components/ui/StatusPill";
 import { formatDate } from "@/lib/format";
+import { getDecisionOnce } from "@/lib/cached";
 import { getSource } from "@/lib/source";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +22,7 @@ type Params = Promise<{ id: string }>;
 async function load(idText: string) {
   const id = Number(idText);
   if (!Number.isInteger(id) || id < 1) return null;
-  return getSource().getDecision(id);
+  return getDecisionOnce(id);
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {

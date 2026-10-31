@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { Tabs } from "@/components/ui/Tabs";
 import { formatCount } from "@/lib/format";
+import { getTopicOnce } from "@/lib/cached";
 import { getSource } from "@/lib/source";
 import { statusCounts } from "@/lib/timeline";
 import styles from "./topic.module.css";
@@ -27,7 +28,7 @@ type Search = Promise<{ tab?: string; status?: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const topic = await getSource().getTopic(slug);
+  const topic = await getTopicOnce(slug);
   return { title: topic ? (topic.pepNumber ? `PEP ${topic.pepNumber}` : topic.title) : "Not found" };
 }
 
@@ -35,7 +36,7 @@ export default async function TopicPage({ params, searchParams }: { params: Para
   const { slug } = await params;
   const { tab = "decisions", status } = await searchParams;
   const source = getSource();
-  const [topic, posts] = await Promise.all([source.getTopic(slug), source.getTimeline(slug)]);
+  const [topic, posts] = await Promise.all([getTopicOnce(slug), source.getTimeline(slug)]);
   if (!topic || !posts) notFound();
 
   const base = `/topics/${slug}`;

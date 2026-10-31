@@ -1,11 +1,14 @@
 import type { PrCheckView } from "@dejaview/shared";
 
-/** One line saying what the PR check found. */
+/**
+ * One line saying what the PR check found. The linker's matches are accepted decisions whose code the
+ * PR touches and rejected ones that resemble its proposal, so "related", not "touches this code".
+ */
 export function prCheckResult(check: PrCheckView): string {
   if (check.decisionIds.length) {
     return check.decisionIds.length === 1
-      ? "1 past decision touches this code"
-      : `${check.decisionIds.length} past decisions touch this code`;
+      ? "1 related past decision"
+      : `${check.decisionIds.length} related past decisions`;
   }
   if (check.similarRejectedIds.length) return "Looks like a rejected idea";
   return "No past decisions";
