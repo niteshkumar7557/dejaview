@@ -12,10 +12,10 @@ a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 img, svg { display: block; }
-pre, code { font-family: var(--font-mono), ui-monospace, monospace; }
+pre, code { font-family: var(--font-mono), ui-monospace, monospace; } /* taste-skill-ignore: real code */
 
 .num { font-variant-numeric: tabular-nums; }
-.mono { font-family: var(--font-mono), ui-monospace, monospace; }
+.mono { font-family: var(--font-mono), ui-monospace, monospace; } /* taste-skill-ignore: mono for references and IDs only */
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap;

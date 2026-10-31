@@ -165,7 +165,7 @@ export const topics: MockTopic[] = [
       "The scoping rules are the part I would like to see spelled out more.",
       "How do runtime introspection tools see the new parameters?",
       "This will make generic code much easier to teach.",
-      "Can a type parameter shadow a module-level name?",
+      "Can a type parameter shadow a module-level name?", // taste-skill-ignore: the word, not a CSS shadow
       "The bracket syntax reads naturally next to subscripted generics.",
       "What happens to existing TypeVar objects created the old way?",
       "Pyright has a prototype of this behind a flag.",
