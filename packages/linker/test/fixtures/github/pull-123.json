@@ -1,0 +1,15 @@
+{
+  "number": 123,
+  "title": "Improve typing support",
+  "state": "closed",
+  "merge_commit_sha": "0123456789abcdef0123456789abcdef01234567",
+  "merged_at": "2024-01-01T00:00:00Z",
+  "base": {
+    "repo": {
+      "name": "cpython",
+      "full_name": "python/cpython",
+      "html_url": "https://github.com/python/cpython",
+      "owner": { "login": "python" }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "decisions": [],
+  "similarRejected": [],
+  "commentMarkdown": "<!-- dejaview -->\n\n**📜 DejaView check**\n\nHistorical context is informational; it does not automatically reject this pull request.\n\n### Related accepted architectural decisions\n\nNo related accepted decisions were found.\n\n### Previously rejected similar proposals\n\nNo similar previously rejected proposals were found.\n\nOpen the DejaView dashboard for the full decision history."
+}
