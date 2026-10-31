@@ -54,3 +54,46 @@ runs smoothly; tests for the API client and MADR renderer; slides ready.
 
 The user flow, how a maintainer verifies a decision in two clicks, why unverified evidence is shown rather
 than hidden, the MADR export, and the overall architecture (`docs/team/README.md` diagram).
+
+## Handoff: where the frontend stands (read this first in a new session)
+
+**Done and merged:** every screen on sample data (PR #3), plan and critique log in `apps/web/docs/plan.md`.
+Pitch deck (13 slides, speaker notes per presenter): https://claude.ai/artifact/MXjrZkCimXQwnbEzCSduRY.
+Fill its `[__]` placeholders (pipeline share, results table) from the real eval runs before 8:30 AM.
+
+**In progress: connect the dashboard to Mudit's API.** Branch `nitesh/connect-api` (from `main` at `986fc63`).
+
+What we know about the API (`apps/api`):
+- Listens on **port 3001** (`PORT` env), CORS open. Run it: `docker compose up -d` → `cp .env.example .env`
+  (set `DATABASE_URL`) → `npm run migrate` → `npm run start -w @dejaview/api` (worker:
+  `npm run start -w @dejaview/worker`). Docker is installed and running on this laptop.
+- There is no seed data: decisions only appear after an ingest job runs through the worker, which needs
+  Abhijeet's pipeline. Until then expect empty lists, so the empty states get exercised.
+- Routes match `packages/shared/src/api.ts`. Extras the web app can now use: `POST /api/eval/:slug`
+  → 202 `{ jobId, topicSlug }`; `POST /api/ingest` accepts multipart with a `file` field plus
+  `topicSlug`, `topicTitle`, `pepNumber`.
+- Non-integer ids return 400 (the web app validates ids first). `GET /api/topics/:slug/timeline` for an
+  unknown slug may return `[]` instead of 404; the topic page checks `getTopic` first, so that is fine.
+
+Next steps, in order:
+1. `apps/web/src/lib/source.ts`: default `NEXT_PUBLIC_API_URL` to `http://localhost:3001` (it says 4000).
+   Add `apps/web/.env.local` (git-ignored) with `NEXT_PUBLIC_USE_MOCKS=0` and the URL. `NEXT_PUBLIC_*` is
+   baked in at build time, so rebuild after changing it.
+2. Smoke-test every route against the running API and compare the real JSON with the contract types
+   (shapes come from `db/src/topics.ts`, `decisions.ts`, `timeline.ts`, `evalRuns.ts`, `prChecks.ts`,
+   `llmCalls.ts`). Fix mismatches on our side, or send Mudit a message if the API breaks the contract.
+3. "Run evaluation": add `startEval(slug)` to `DataSource` (mock + HTTP), a client button that starts
+   it and reuses the ingest job polling, and stop disabling it in HTTP mode.
+4. File upload on `/ingest`: add a `startIngestUpload(form: FormData)` to `DataSource` (multipart POST),
+   a file input on the form, and tests. That closes task 6 above.
+5. Keep sample-data mode as the demo fallback (`NEXT_PUBLIC_USE_MOCKS` unset = mocks).
+
+Deferred minors from the final review (fix if time allows): the strip's `<svg role="img">` hides its
+links from screen readers (use `role="group"`); the drawer can vanish if reopened within 280 ms; ingest
+polling never stops when `getJob` returns null; `aria-live` on the whole progress block is too chatty;
+decisions with 0 quotes count as fully verified; topic and decision pages fetch twice (wrap in
+React `cache()`); several eval runs per PEP would repeat sections; the audit drawer throws on an empty
+`stage`; the mock dataset ships in the client bundle even in HTTP mode.
+
+Team asks still open: Mudit, add `decisionId` to `EvalMatch` and `decidedAt` to `DecisionSummary`;
+Ansh, wrap code names in backticks in PR comments.
