@@ -152,7 +152,7 @@ describe("callLlm", () => {
     expect(body.messages).toEqual([{ role: "user", content: prompt }]);
     expect(body.format).toEqual(jsonSchema);
     expect(body.think).toBe(false);
-    expect(body.options).toEqual({ temperature: 0, num_ctx: 8192 });
+    expect(body.options).toEqual({ temperature: 0, num_ctx: 8192, num_predict: 2500 });
     expect(body.stream).toBe(true);
 
     expect(store.save).toHaveBeenCalledTimes(1);
@@ -405,4 +405,30 @@ describe("callLlm", () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
+});
+
+describe("callLlm reusing a recorded answer in live mode", () => {
+  it("answers from fixtures/llm without calling the model, and saves it to the store", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "dejaview-fixture-"));
+    try {
+      const schema = { type: "object" };
+      const hash = createPromptHash("m", schema, "p");
+      const record = { promptHash: hash, model: "m", stage: "extract", prompt: "p", response: { ok: true }, durationMs: 5 };
+      const { writeFile } = await import("node:fs/promises");
+      await writeFile(join(dir, `${hash}.json`), JSON.stringify(record));
+      const saved: unknown[] = [];
+      const result = await callLlm({
+        model: "m", stage: "extract", prompt: "p", jsonSchema: schema, responseSchema: z.object({ ok: z.boolean() }),
+        deps: {
+          mode: "live", fixtureDir: dir, apiToken: "t",
+          llmStore: { get: async () => null, save: async (r) => { saved.push(r); } },
+          fetchImpl: (async () => { throw new Error("must not call the model"); }) as unknown as typeof fetch,
+        },
+      });
+      expect(result).toEqual({ ok: true });
+      expect(saved).toHaveLength(1);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
 });

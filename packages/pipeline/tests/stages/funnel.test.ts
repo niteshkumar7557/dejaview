@@ -94,3 +94,27 @@ describe("reachesExtraction", () => {
     expect(reachesExtraction("short and unlabelled", null)).toBe(true);
   });
 });
+
+describe("a failing extraction chunk", () => {
+  const base = (calls: AskOptions<unknown>[]) => fakeAsk(calls);
+  it("is skipped while the other chunks still produce decisions", async () => {
+    let extracts = 0;
+    const inner = base([]);
+    const ask = (async (options: AskOptions<unknown>) => {
+      if (options.stage === "extract" && extracts++ === 0) throw new Error("timeout");
+      return inner(options);
+    }) as Ask;
+    const big: Thread = { ...thread, posts: thread.posts.map((p) => ({ ...p, body: `${p.body} ${"filler words here ".repeat(700)}` })) };
+    const result = await extractWith(big, ask);
+    expect(extracts).toBeGreaterThan(1);
+    expect(result.decisions.length).toBeGreaterThan(0);
+  });
+  it("fails the run when every chunk fails", async () => {
+    const inner = base([]);
+    const ask = (async (options: AskOptions<unknown>) => {
+      if (options.stage === "extract") throw new Error("model down");
+      return inner(options);
+    }) as Ask;
+    await expect(extractWith(thread, ask)).rejects.toThrow("Every extraction chunk failed: model down");
+  });
+});

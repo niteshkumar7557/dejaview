@@ -64,10 +64,23 @@ export async function extractWith(thread: Thread, ask: Ask, onProgress?: Progres
   // 3 + 4. Extract per chunk, and check every quote against the posts that chunk showed the model.
   const chunks = chunkPosts(relevant, renderChunkPost);
   const checked: CheckedIdea[] = [];
+  let failedChunks = 0;
+  let lastError: unknown = null;
   for (const [i, chunk] of chunks.entries()) {
     await report("extract", i, chunks.length);
-    const ideas = await extractChunk(ask, title, chunk);
-    for (const idea of ideas) checked.push({ idea, reasons: verifyReasons(idea, chunk) });
+    try {
+      const ideas = await extractChunk(ask, title, chunk);
+      for (const idea of ideas) checked.push({ idea, reasons: verifyReasons(idea, chunk) });
+    } catch (error) {
+      // One bad chunk (the model looped or timed out) must not throw away the rest of a 40-minute run.
+      failedChunks += 1;
+      lastError = error;
+      console.warn(`extract: chunk ${i + 1}/${chunks.length} skipped: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  // But if every chunk failed, the model is down: say so instead of returning an empty result.
+  if (chunks.length > 0 && failedChunks === chunks.length) {
+    throw new Error(`Every extraction chunk failed: ${lastError instanceof Error ? lastError.message : String(lastError)}`);
   }
   await report("extract", chunks.length, chunks.length);
   await report("verify", 1, 1);

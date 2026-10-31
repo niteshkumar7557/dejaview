@@ -74,6 +74,13 @@ export function readOllamaStream(raw: string): OllamaStreamResult {
 export const NUM_CTX = 8192;
 
 /**
+ * The longest answer we let the model write. A small model at temperature 0 can get stuck repeating
+ * itself; without a cap one call ran past 15 minutes on the laptop. A full extraction answer is about
+ * 1,000 tokens, so 2,500 leaves room. A capped answer is cut JSON, so it fails loudly.
+ */
+export const NUM_PREDICT = 2500;
+
+/**
  * Ollama silently drops the START of a prompt longer than num_ctx (where our instructions are), and
  * cuts an answer that runs out of room. Neither raises an error, so we say it out loud.
  */
@@ -197,6 +204,19 @@ async function readFixture(
   return validated as LlmCallRecord;
 }
 
+async function readFixtureIfPresent(
+  hash: string,
+  fixtureDir: string,
+  expected: { model: string; stage: LlmStage; prompt: string },
+): Promise<LlmCallRecord | null> {
+  try {
+    return await readFixture(hash, fixtureDir, expected);
+  } catch {
+    // Missing, unreadable or for a different prompt: ask the model instead.
+    return null;
+  }
+}
+
 async function writeFixture(
   record: LlmCallRecord,
   fixtureDir: string,
@@ -266,6 +286,15 @@ export async function callLlm<T>(
     return result;
   }
 
+  // A recorded answer for this exact prompt (fixtures/llm, committed from a real run) is as good as a
+  // fresh one: same model, same prompt, temperature 0. Reusing it means the worker re-processing a
+  // thread we already ran doesn't make the laptop redo many minutes of work.
+  const recorded = await readFixtureIfPresent(hash, fixtureDir, { model, stage, prompt });
+  if (recorded !== null) {
+    await deps.llmStore.save(recorded);
+    return responseSchema.parse(recorded.response);
+  }
+
   const baseUrl =
     deps.baseUrl ?? process.env.LLM_BASE_URL ?? "http://localhost:11434";
 
@@ -321,6 +350,7 @@ export async function callLlm<T>(
             options: {
               temperature: 0,
               num_ctx: NUM_CTX,
+              num_predict: NUM_PREDICT,
             },
             stream: true,
           }),
