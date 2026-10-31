@@ -35,7 +35,7 @@ LLM_MODE=record npm run extract -w @dejaview/pipeline -- fixtures/threads/pep-69
 
 114 posts on discuss.python.org (about 20,000 tokens after cleaning), so the 9B read it in 8 chunks.
 
-**Result:** 16 decisions (9 accepted, 6 rejected, 1 open), **52 of 52 quotes verified**. 13 posts were
+**Result:** 16 decisions (9 accepted, 6 rejected, 1 open), **58 of 58 quotes verified** (every reason has one). 13 posts were
 filtered before any model saw them. Recall 67%: 2 of the PEP's 3 rejected ideas were matched, reasons
 partly agree. Honest note: both matches point at one merged decision (`d4`), whose reasons cover quote
 reuse and the brace-escaping discussion; consolidation merged two ideas there. 5 more rejected ideas
