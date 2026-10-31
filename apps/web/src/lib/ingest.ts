@@ -13,15 +13,80 @@ export const PIPELINE_STAGES = [
 
 export type StageState = "done" | "running" | "failed" | "pending";
 
+/**
+ * Which row of PIPELINE_STAGES a job is on. The pipeline reports its own stage names (clean … consolidate),
+ * but the worker also writes names of its own ("fetching", "storing", "queued", "linking", "done"), and the
+ * same word can mean different rows: an ingest job's "storing" is the fetch step, an extract job's
+ * "storing" comes after consolidate. So unknown names are placed by the job's type.
+ */
+export function stageIndex(job: Pick<JobView, "type" | "stage">): number {
+  const byName = PIPELINE_STAGES.findIndex((s) => s.name === job.stage);
+  if (byName >= 0) return byName;
+  switch (job.type) {
+    case "ingest": return 0;
+    case "extract": return job.stage === "storing" || job.stage === "done" ? 5 : 1;
+    case "link": return 6;
+    default: return -1;
+  }
+}
+
 export function stageRows(job: JobView | null): { name: string; label: string; state: StageState }[] {
-  const current = job ? PIPELINE_STAGES.findIndex((s) => s.name === job.stage) : -1;
+  const current = job ? stageIndex(job) : -1;
   return PIPELINE_STAGES.map((s, i) => {
     let state: StageState = "pending";
-    if (job?.status === "done") state = "done";
-    else if (job && i < current) state = "done";
+    if (job && (i < current || (i === current && job.status === "done"))) state = "done";
     else if (job && i === current) state = job.status === "failed" ? "failed" : "running";
     return { name: s.name, label: s.label, state };
   });
+}
+
+/**
+ * How far the whole chain is, 0..1. The worker's `progress` is per job (and per stage inside the
+ * extract job), so a finished ingest job says 1 while six of the seven steps are still ahead.
+ * Each row counts as one equal share; the job's own progress fills the current row.
+ */
+export function overallProgress(job: JobView): number {
+  if (job.type === "eval") return job.progress;
+  const current = stageIndex(job);
+  if (current < 0) return 0;
+  if (job.status === "done" && current === PIPELINE_STAGES.length - 1) return 1;
+  const withinRow = job.status === "done" ? 1 : Math.min(Math.max(job.progress, 0), 1);
+  return (current + withinRow) / PIPELINE_STAGES.length;
+}
+
+/** A job as the follower sees it: the worker chains ingest → extract → link, each a separate job. */
+export type JobWithNext = JobView & { nextJobId?: number | null };
+
+/**
+ * Where a job leaves the user:
+ * - "running" / "failed": as it says.
+ * - "finished": the last job of the chain is done (link, or an eval job).
+ * - "handed-off": this job is done but the worker queued the next step as a new job we cannot see,
+ *   because the API does not say which job comes next. The topic page fills in once that finishes.
+ */
+export type JobOutcome = "running" | "failed" | "finished" | "handed-off";
+
+export function jobOutcome(job: JobView): JobOutcome {
+  if (job.status === "failed") return "failed";
+  if (job.status !== "done") return "running";
+  return job.type === "link" || job.type === "eval" ? "finished" : "handed-off";
+}
+
+/** The id to poll after this job, if the API names one and this job is done. */
+export function nextJobToFollow(job: JobWithNext): number | null {
+  return job.status === "done" && typeof job.nextJobId === "number" ? job.nextJobId : null;
+}
+
+/** File types the API's upload reader understands (packages/ingest/src/upload.ts). */
+export const UPLOAD_ACCEPT = ".json,.md,.markdown,.txt";
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
+export function validateUpload(file: { name: string; size: number } | null): string | null {
+  if (!file) return "Choose a file to upload.";
+  if (!/\.(json|md|markdown|txt)$/i.test(file.name)) return "Upload a .json, .md or .txt file.";
+  if (file.size === 0) return "That file is empty.";
+  if (file.size > MAX_UPLOAD_BYTES) return "That file is larger than 5 MB.";
+  return null;
 }
 
 export function validateIngestUrl(input: string): string | null {

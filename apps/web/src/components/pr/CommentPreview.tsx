@@ -9,7 +9,7 @@ export function CommentPreview({ check }: { check: PrCheckView }) {
   return (
     <section className={styles.preview} aria-labelledby="comment-title">
       <div className={styles.previewHead}>
-        <span id="comment-title"><strong>{check.request.repo}#{check.request.prNumber}</strong> · {check.request.title}</span>
+        <span id="comment-title"><strong>{check.request.repo}#{check.request.prNumber}</strong>{check.request.title.trim() ? <> · {check.request.title}</> : null}</span>
         <span>Commented {check.createdAt.slice(0, 16).replace("T", " ")}</span>
       </div>
       <div className={styles.comment}>

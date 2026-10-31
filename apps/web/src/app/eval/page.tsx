@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { GroundTruthTable } from "@/components/eval/GroundTruthTable";
 import { RecallBars } from "@/components/eval/RecallBars";
+import { RunEval } from "@/components/eval/RunEval";
 import styles from "@/components/eval/eval.module.css";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageTitle } from "@/components/ui/PageTitle";
@@ -16,7 +16,8 @@ export const dynamic = "force-dynamic";
 
 export default async function EvalPage() {
   const source = getSource();
-  const [runs, decisions] = await Promise.all([source.listEvalRuns(), source.searchDecisions({})]);
+  const [runs, decisions, topics] = await Promise.all([source.listEvalRuns(), source.searchDecisions({}), source.listTopics()]);
+  const evaluable = topics.flatMap((t) => (t.pepNumber === null ? [] : [{ slug: t.slug, title: t.title, pepNumber: t.pepNumber }]));
   const items = runs.reduce((sum, r) => sum + r.groundTruth.length, 0);
   const matched = runs.reduce((sum, r) => sum + matchedCount(r), 0);
 
@@ -29,12 +30,7 @@ export default async function EvalPage() {
             ? `Across ${runs.length} PEPs we recovered ${ofTotal(matched, items)} rejected ideas (${formatPercent(items ? matched / items : null)}) from the discussions alone. The model never saw the PEPs; we compare afterwards with each PEP's Rejected Ideas section.`
             : "We give the model each PEP's discussion without the PEP, then compare what it found with the PEP's Rejected Ideas section."
         }
-        actions={
-          <>
-            <span className={styles.disabledNote}>{usingMocks ? "Runs against the live API" : "Started from the worker for now"}</span>
-            <Button variant="primary" disabled title="Evaluation runs are started by the worker until the API exposes POST /api/eval/:slug to the web app">Run evaluation</Button>
-          </>
-        }
+        actions={<RunEval topics={evaluable} />}
       />
       <Card title="Recall per PEP" id="recall" meta="Rejected ideas recovered">
         {runs.length ? <RecallBars runs={runs} /> : <EmptyState sentence="No PEP has been evaluated yet." />}
@@ -47,7 +43,7 @@ export default async function EvalPage() {
               {ofTotal(matchedCount(run), run.groundTruth.length)} recovered · evaluated {run.createdAt.slice(0, 16).replace("T", " ")}
             </span>
           </div>
-          <GroundTruthTable run={run} decisions={decisions} />
+          <GroundTruthTable run={run} decisions={decisions} keysAreIds={usingMocks} />
           <p className={styles.extra}>
             {run.extraIdeas === 0
               ? "Every rejected idea DejaView found is also listed in the PEP."

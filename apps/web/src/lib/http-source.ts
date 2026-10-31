@@ -1,8 +1,9 @@
-import type { ApiError } from "@dejaview/shared";
+import type { ApiError, DecisionSummary, IngestResponse } from "@dejaview/shared";
 import {
   decisionPath,
   decisionsPath,
   EVAL_PATH,
+  evalStartPath,
   INGEST_PATH,
   jobPath,
   llmCallsPath,
@@ -12,6 +13,7 @@ import {
   topicPath,
 } from "./api-paths";
 import type { DataSource } from "./data-source";
+import { fullyVerified } from "./verified";
 
 export class ApiRequestError extends Error {
   constructor(
@@ -49,24 +51,35 @@ export function createHttpSource(baseUrl: string, fetchImpl: typeof fetch = fetc
     return (await request<T[]>(path)) ?? [];
   }
 
+  /** A POST that queues a job. A 404 here means the route or the topic is missing, which is an error. */
+  async function startJob(path: string, init: RequestInit, missing: string): Promise<IngestResponse> {
+    const result = await request<IngestResponse>(path, { ...init, method: "POST" });
+    if (!result) throw new ApiRequestError(404, missing);
+    return result;
+  }
+
   return {
     listTopics: () => list(TOPICS_PATH),
     getTopic: (slug) => request(topicPath(slug)),
     getTimeline: (slug) => request(timelinePath(slug)),
-    searchDecisions: (query) => list(decisionsPath(query)),
+    async searchDecisions(query) {
+      const found = await list<DecisionSummary>(decisionsPath(query));
+      // The API's verified=true keeps decisions with at least one verified quote; the dashboard's filter
+      // promises every quote verified, so narrow it here.
+      return query.verified ? found.filter(fullyVerified) : found;
+    },
     getDecision: (id) => request(decisionPath(id)),
     getLlmCalls: (id) => list(llmCallsPath(id)),
     listEvalRuns: () => list(EVAL_PATH),
     listPrChecks: () => list(PR_CHECKS_PATH),
     getJob: (id) => request(jobPath(id)),
-    async startIngest(body) {
-      const result = await request<Awaited<ReturnType<DataSource["startIngest"]>>>(INGEST_PATH, {
-        method: "POST",
+    startIngest: (body) =>
+      startJob(INGEST_PATH, {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(body),
-      });
-      if (!result) throw new ApiRequestError(404, "Ingest endpoint not found");
-      return result;
-    },
+      }, "Ingest endpoint not found"),
+    // No content-type header: fetch sets multipart/form-data with the boundary itself.
+    startIngestUpload: (form) => startJob(INGEST_PATH, { body: form }, "Ingest endpoint not found"),
+    startEval: (slug) => startJob(evalStartPath(slug), {}, `No topic named ${slug}`),
   };
 }

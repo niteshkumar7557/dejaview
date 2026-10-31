@@ -46,6 +46,48 @@ describe("createHttpSource", () => {
   });
 });
 
+describe("createHttpSource jobs and filters", () => {
+  it("posts an upload as multipart without forcing a content type", async () => {
+    const calls: Call[] = [];
+    const source = createHttpSource("http://api.test", fakeFetch(202, { jobId: 5, topicSlug: "pep-701" }, calls));
+    const form = new FormData();
+    form.set("file", new Blob(["[]"]), "thread.json");
+    form.set("topicSlug", "pep-701");
+    await expect(source.startIngestUpload(form)).resolves.toEqual({ jobId: 5, topicSlug: "pep-701" });
+    expect(calls[0]?.url).toBe("http://api.test/api/ingest");
+    expect(calls[0]?.init?.method).toBe("POST");
+    expect(calls[0]?.init?.body).toBe(form);
+    expect(new Headers(calls[0]?.init?.headers).get("content-type")).toBeNull();
+  });
+
+  it("starts an evaluation with POST /api/eval/:slug", async () => {
+    const calls: Call[] = [];
+    const source = createHttpSource("http://api.test", fakeFetch(202, { jobId: 6, topicSlug: "pep 701" }, calls));
+    await expect(source.startEval("pep 701")).resolves.toEqual({ jobId: 6, topicSlug: "pep 701" });
+    expect(calls[0]?.url).toBe("http://api.test/api/eval/pep%20701");
+    expect(calls[0]?.init?.method).toBe("POST");
+  });
+
+  it("turns a 404 from the eval route into an error naming the topic", async () => {
+    const source = createHttpSource("http://api.test", fakeFetch(404, { error: "No topic named x" }, []));
+    await expect(source.startEval("x")).rejects.toThrow("No topic named x");
+  });
+
+  it("keeps only decisions whose every quote is verified when asked for verified ones", async () => {
+    const calls: Call[] = [];
+    const rows = [
+      { id: 1, verifiedEvidence: 2, totalEvidence: 2 },
+      { id: 2, verifiedEvidence: 1, totalEvidence: 2 },
+      { id: 3, verifiedEvidence: 0, totalEvidence: 0 },
+    ];
+    const source = createHttpSource("http://api.test", fakeFetch(200, rows, calls));
+    const verified = await source.searchDecisions({ verified: true });
+    expect(verified.map((d) => d.id)).toEqual([1]);
+    expect(calls[0]?.url).toBe("http://api.test/api/decisions?verified=true");
+    expect(await source.searchDecisions({})).toHaveLength(3);
+  });
+});
+
 describe("createHttpSource when the API is unreachable", () => {
   it("turns a network failure into ApiRequestError with status 0", async () => {
     const failing = (async () => { throw new TypeError("fetch failed"); }) as typeof fetch;

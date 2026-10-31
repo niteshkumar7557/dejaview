@@ -32,6 +32,10 @@ export function llmCallsPath(id: number): string {
   return `${decisionPath(id)}/llm-calls`;
 }
 
+export function evalStartPath(slug: string): string {
+  return `${EVAL_PATH}/${encodeURIComponent(slug)}`;
+}
+
 export function jobPath(id: number): string {
   return `/api/jobs/${id}`;
 }

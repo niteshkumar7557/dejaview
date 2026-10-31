@@ -33,7 +33,7 @@ response type you render).
   **timeline** tab showing every post with its triage label and signal score, greyed out when skipped, and
   which decisions cite it.
 - [x] **5. Home / search** (`/`): topics with counts and last recall; full-text decision search with filters.
-- [ ] **6. Ingest page** (`/ingest`): paste a URL ✅ done; **file upload still to do** (needs a multipart ingest route in `packages/shared/src/api.ts`, ask Mudit) — then poll `/api/jobs/:id` and show
+- [x] **6. Ingest page** (`/ingest`): paste a URL or upload a file (multipart), then poll `/api/jobs/:id` and show
   stage-by-stage progress (the LLM is slow, so progress must be visible).
 - [x] **7. Eval scorecard** (`/eval`): per PEP, recall and reason agreement, and a side-by-side table
   *PEP says* | *DejaView found* | ✅/❌.
@@ -54,3 +54,41 @@ runs smoothly; tests for the API client and MADR renderer; slides ready.
 
 The user flow, how a maintainer verifies a decision in two clicks, why unverified evidence is shown rather
 than hidden, the MADR export, and the overall architecture (`docs/team/README.md` diagram).
+
+## Handoff: where the frontend stands (read this first in a new session)
+
+**Done and merged:** every screen on sample data (PR #3), plan and critique log in `apps/web/docs/plan.md`.
+Pitch deck (13 slides, speaker notes per presenter): https://claude.ai/artifact/MXjrZkCimXQwnbEzCSduRY.
+Fill its `[__]` placeholders (pipeline share, results table) from the real eval runs before 8:30 AM.
+
+**Connected to Mudit's API** (branch `nitesh/connect-api`, PR open). Every route was smoke-tested against
+the running API with a seeded local DB; shapes match the contract.
+
+Run it live: `docker compose up -d` → `cp .env.example .env` → `npm run migrate` →
+`npm run start -w @dejaview/api` (port 3001) and `npm run start -w @dejaview/worker`. `apps/web/.env.local`
+(git-ignored) holds `NEXT_PUBLIC_USE_MOCKS=0` and `NEXT_PUBLIC_API_URL=http://localhost:3001`; it is baked in
+at build time, so rebuild (`npm run build -w @dejaview/web`) after changing it. Unset = sample data (demo fallback).
+
+What changed to fit the real API:
+- Progress rows map the worker's own stage names (`fetching`, `storing`, `queued`, `linking`, `done`) by job
+  type (`stageIndex` in `src/lib/ingest.ts`); the bar shows progress across the whole chain.
+- The worker runs ingest → extract → link as **separate jobs** and the API only returns the ingest job id.
+  When the ingest job ends the panel says "Thread stored" and that extraction continues in the worker. If the
+  API adds `nextJobId` to `JobView`, `useJob` (`src/lib/use-job.ts`) follows it automatically.
+- "Run evaluation" (`RunEval`) posts `/api/eval/:slug`, follows the job, refreshes the scorecard.
+- The API's `verified=true` means "at least one verified quote"; the web filters to "every quote verified"
+  (and a decision with 0 quotes is not verified).
+- Eval matches carry pipeline keys (`d1`), not DB ids, so live mode no longer guesses links from keys.
+- PR checks have no stored title yet; the list falls back to `repo#number`.
+
+Still open: Abhijeet's pipeline isn't merged, so extract/eval jobs fail in the worker (the UI shows the error).
+Pitch deck placeholders still need the real eval numbers.
+
+Deferred minors from the final review (fix if time allows): the strip's `<svg role="img">` hides its
+links from screen readers (use `role="group"`); the drawer can vanish if reopened within 280 ms;
+topic and decision pages fetch twice (wrap in
+React `cache()`); several eval runs per PEP would repeat sections; the audit drawer throws on an empty
+`stage`; the mock dataset ships in the client bundle even in HTTP mode.
+
+Team asks still open: Mudit, add `decisionId` to `EvalMatch`, `decidedAt` to `DecisionSummary`,
+`nextJobId` to `JobView`, store the PR title in `pr_checks`; Ansh, wrap code names in backticks in PR comments.

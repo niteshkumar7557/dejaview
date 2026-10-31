@@ -3,6 +3,7 @@
 import type { DecisionSummary } from "@dejaview/shared";
 import Link from "next/link";
 import { ofTotal } from "@/lib/format";
+import { fullyVerified } from "@/lib/verified";
 import { useHighlight } from "../thread-strip/HighlightContext";
 import { Ref } from "../ui/Ref";
 import { StatusPill } from "../ui/StatusPill";
@@ -31,7 +32,7 @@ export function DecisionsTable({ decisions, showTopic = false, caption }: {
       <tbody>
         {decisions.map((d) => {
           const anchor = d.anchors[0];
-          const allVerified = d.verifiedEvidence === d.totalEvidence;
+          const allVerified = fullyVerified(d);
           return (
             <tr
               key={d.id}

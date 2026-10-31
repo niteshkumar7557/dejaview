@@ -11,6 +11,12 @@ export function prCheckResult(check: PrCheckView): string {
   return "No past decisions";
 }
 
+/** The PR's title, or "repo#number" when the API has none (it does not store titles yet). */
+export function prTitle(check: Pick<PrCheckView, "request">): string {
+  const { repo, prNumber, title } = check.request;
+  return title.trim() || `${repo}#${prNumber}`;
+}
+
 /** The check chosen with ?pr=<id>, or the first one. */
 export function selectCheck(checks: PrCheckView[], param: string | undefined): PrCheckView | null {
   return checks.find((c) => String(c.id) === param) ?? checks[0] ?? null;

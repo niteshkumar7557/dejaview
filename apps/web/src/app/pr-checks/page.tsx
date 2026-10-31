@@ -5,7 +5,7 @@ import styles from "@/components/pr/pr.module.css";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { Ref } from "@/components/ui/Ref";
-import { prCheckResult, selectCheck } from "@/lib/pr-checks";
+import { prCheckResult, prTitle, selectCheck } from "@/lib/pr-checks";
 import { getSource } from "@/lib/source";
 
 export const metadata: Metadata = { title: "PR checks" };
@@ -36,7 +36,7 @@ export default async function PrChecksPage({ searchParams }: { searchParams: Sea
                 <li key={c.id}>
                   <Link href={`/pr-checks?pr=${c.id}`} scroll={false} className={styles.row} aria-current={c.id === selected.id ? "true" : undefined}>
                     <Ref kind="post" value={String(c.request.prNumber)} />
-                    <span className={styles.title}>{c.request.title}</span>
+                    <span className={styles.title}>{prTitle(c)}</span>
                     <span className={`${styles.meta} ${c.decisionIds.length || c.similarRejectedIds.length ? styles.hit : ""}`}>{prCheckResult(c)}</span>
                   </Link>
                 </li>
