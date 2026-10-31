@@ -1,0 +1,53 @@
+name: DejaView PR context
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+
+concurrency:
+  group: dejaview-${{ github.repository }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  dejaview:
+    # External fork PRs do not receive repository secrets or a write token.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the CPython demo fork
+        uses: actions/checkout@v4
+        with:
+          path: cpython
+          persist-credentials: false
+
+      - name: Check out DejaView Action source
+        uses: actions/checkout@v4
+        with:
+          repository: niteshkumar7557/dejaview
+          ref: main
+          path: dejaview-source
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: dejaview-source/package-lock.json
+
+      - name: Install DejaView dependencies
+        working-directory: dejaview-source
+        run: npm ci
+
+      - name: Send PR context to DejaView
+        working-directory: dejaview-source
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEJAVIEW_API_URL: ${{ secrets.DEJAVIEW_API_URL }}
+          DEJAVIEW_API_TOKEN: ${{ secrets.DEJAVIEW_API_TOKEN }}
+        run: npx tsx apps/action/src/main.ts
