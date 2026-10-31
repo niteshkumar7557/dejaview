@@ -59,3 +59,16 @@ export function verifyQuote(
   // Not found anywhere: keep the model's citation, marked unverified.
   return { postId: cited ? citedPostId : best.postId, quote, verified: false, matchScore: citedScore };
 }
+
+/**
+ * Evidence for a reason the model gave without any. The 9B sometimes answers `"evidence": []` but
+ * copies the quote into the reason text instead (a real CPython issue lost every quote this way).
+ * The text counts as evidence only if it is found word for word in one of the posts the model read;
+ * otherwise the reason stays without evidence, never with an invented one.
+ */
+export function evidenceFromReasonText(text: string, posts: { id: number; text: string }[]): Evidence | null {
+  const quote = text.trim();
+  if (!quote) return null;
+  const evidence = verifyQuote(quote, Number.NaN, posts);
+  return evidence.verified ? evidence : null;
+}

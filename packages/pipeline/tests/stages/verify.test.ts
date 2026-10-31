@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchScore, verifyQuote } from "../../src/verify.js";
+import { evidenceFromReasonText, matchScore, verifyQuote } from "../../src/verify.js";
 
 const posts = [
   { id: 1, text: "I think a runtime check would slow every call, so I'm against it." },
@@ -29,5 +29,19 @@ describe("verifyQuote", () => {
     const e = verifyQuote("everyone agreed this is the best design ever", 1, posts);
     expect(e.verified).toBe(false);
     expect(e.postId).toBe(1);
+  });
+});
+
+describe("evidenceFromReasonText", () => {
+  // On a real CPython issue the 9B returned "evidence": [] for every reason but copied the quote into
+  // the reason text, so every decision lost its evidence, its people and its code links.
+  it("turns a reason that is a word-for-word quote into verified evidence from the right post", () => {
+    expect(evidenceFromReasonText("The type checker can enforce this statically without any cost.", posts)).toEqual({
+      postId: 2, quote: "The type checker can enforce this statically without any cost.", verified: true, matchScore: 1,
+    });
+  });
+  it("adds nothing when the reason is the model's own words", () => {
+    expect(evidenceFromReasonText("Static checking is cheaper than runtime checking.", posts)).toBeNull();
+    expect(evidenceFromReasonText("   ", posts)).toBeNull();
   });
 });
