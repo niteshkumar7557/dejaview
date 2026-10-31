@@ -15,6 +15,7 @@ import {
   createPool,
   DecisionsRepository,
   EvalRunsRepository,
+  IdentityRepository,
   JobsRepository,
   PostgresLlmCallStore,
   TopicsRepository,
@@ -103,6 +104,7 @@ describe.skipIf(!databaseUrl)("the worker (needs DATABASE_URL)", () => {
       jobs,
       llmCalls: new PostgresLlmCallStore(pool),
       evalRuns: new EvalRunsRepository(pool),
+      identities: new IdentityRepository(pool),
       pipeline: { adapter: fakePipeline, problem: "ok", reason: "loaded" },
       linker: { adapter: fakeLinker, problem: "ok", reason: "loaded" },
       cpythonDir: "",
@@ -160,6 +162,25 @@ describe.skipIf(!databaseUrl)("the worker (needs DATABASE_URL)", () => {
       "SELECT type FROM jobs WHERE type = 'extract' AND status = 'queued'",
     );
     expect(next.rows).toHaveLength(1);
+  });
+
+  it("remembers who wrote in the thread", async () => {
+    await drainQueue();
+    const filePath = writeDiscussion();
+    const job = await context.jobs.enqueue("ingest", {
+      filePath,
+      topicSlug: SLUG,
+      topicTitle: "Worker test topic",
+      pepNumber: 998,
+    });
+    const claimed = await context.jobs.claimNext();
+    expect(claimed?.id).toBe(job.id);
+
+    await handleIngest(claimed as JobRow, context);
+
+    const found = await context.identities.findByHandle("unknown", "alice");
+    expect(found).not.toBeNull();
+    expect(found?.personId).toBeGreaterThan(0);
   });
 
   it("runs the extraction and stores the decisions", async () => {

@@ -13,3 +13,19 @@ export { EvalRunsRepository } from "./evalRuns.js";
 export { PrChecksRepository } from "./prChecks.js";
 export { TimelineRepository } from "./timeline.js";
 export { createTestDatabase, type TestDatabase } from "./testing.js";
+export {
+  IdentityRepository,
+  platformForSource,
+  type IdentityRecord,
+  type PersonSummary,
+} from "./identity.js";
+export {
+  emailMatchesLogin,
+  judgeMerge,
+  loginFromNoreplyEmail,
+  normalizeDisplayName,
+  normalizeHandle,
+  type IdentityCandidate,
+  type MergeVerdict,
+  type Platform,
+} from "./identityResolver.js";

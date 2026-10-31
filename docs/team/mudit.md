@@ -827,6 +827,100 @@ with the text sized for that width. The words are about 17 pixels tall when some
 
 The script also hides one thing on purpose: the machine's own path is cut out of the terminal pictures.
 
+## Task 7 — the deployment (ready to run)
+
+The image is built and tested. `Dockerfile` at the root builds the API, the worker and the
+dashboard from one source, and it runs `npm run typecheck` while it builds, so an image that exists
+is an image whose code typechecks.
+
+```bash
+docker build -t dejaview:local .
+docker run --rm -p 3001:3001 \
+  -e DATABASE_URL=postgres://dejaview:dejaview@host.docker.internal:5432/dejaview_dev \
+  dejaview:local
+```
+
+That was run against the real database: the API inside the container answered `/api/health` and
+served the three ingested topics.
+
+### The three things that have to be running
+
+| Piece | What it is | How it runs |
+|---|---|---|
+| Postgres | The database | A managed one (Fly, Neon, Supabase) or the local `docker-compose.yml` |
+| The API | Express, the thing the dashboard and the bot talk to | `npm run start -w @dejaview/api` |
+| The worker | Takes the jobs and runs the slow model work | `npm run start -w @dejaview/worker` |
+
+**The API and the worker must be separate processes.** The worker takes a Postgres advisory lock when
+it starts, so a second copy would only wait. That is on purpose.
+
+### Fly.io (flyctl is already installed on the laptop)
+
+```bash
+flyctl auth login            # interactive: the human does this
+flyctl launch --no-deploy --copy-config --name dejaview
+flyctl postgres create --name dejaview-db --region iad
+flyctl postgres attach dejaview-db --app dejaview      # sets DATABASE_URL by itself
+flyctl secrets set \
+  LLM_BASE_URL=https://llm.kumarnitesh.in \
+  LLM_API_TOKEN=... \
+  DEJAVIEW_API_TOKEN=... \
+  GITHUB_TOKEN=...
+flyctl deploy
+```
+
+`fly.toml` already describes the three processes and the health check on `/api/health`.
+
+**One catch:** Next.js inlines the `NEXT_PUBLIC_` variables when the dashboard is built, so the API
+URL has to be known at build time. The image takes it as a build argument:
+
+```bash
+flyctl deploy --build-arg BUILD_WEB=1 --build-arg NEXT_PUBLIC_API_URL=https://dejaview.fly.dev
+```
+
+### The secrets, and where they go
+
+| Variable | Who needs it | Where it comes from |
+|---|---|---|
+| `DATABASE_URL` | API, worker | The managed Postgres. Set by `flyctl postgres attach`. |
+| `LLM_BASE_URL` | worker | `https://llm.kumarnitesh.in` |
+| `LLM_API_TOKEN` | worker | The tunnel's token. Never in the repo. |
+| `DEJAVIEW_API_TOKEN` | API | A new random string. The GitHub Action sends it as a bearer token. |
+| `GITHUB_TOKEN` | worker | Optional. Raises the GitHub rate limit from 60 to 5000 an hour. |
+| `DASHBOARD_URL` | API | Where the dashboard lives, so the PR comment can link to a decision. |
+
+### Checking that it works
+
+```bash
+curl https://dejaview.fly.dev/api/health      # {"ok":true,"db":true,"llm":false}
+curl https://dejaview.fly.dev/api/topics       # the topics we ingested
+```
+
+`llm: false` only means the laptop's tunnel is not reachable from the server. Everything else works
+without it, because the results are precomputed.
+
+### What the GitHub Action needs
+
+Ansh's action calls `POST /api/pr-check` with `DEJAVIEW_API_TOKEN`. It needs two things from us:
+
+1. the public HTTPS address of the API,
+2. the same token, set as a secret in the demo fork.
+
+## Task 8 — recognising the same person (done)
+
+`db/src/identity.ts` and `db/src/identityResolver.ts`. A person, and the handles they use.
+
+| Rule | Confidence |
+|---|---|
+| the same handle on two platforms | medium (0.6) |
+| the same display name after normalizing | medium (0.5) |
+| the same email address | high (0.9) |
+| a GitHub noreply email that names the login | high (0.9) |
+
+Every merge keeps the confidence **and the sentence that produced it**, so a reader can check it.
+The worker remembers the authors of every thread it stores, and the decision card then names the
+person instead of listing three handles.
+
 ## What is still left in my list
 
 - **Task 7 — deploy.** Postgres + API + worker + web somewhere with a public HTTPS address, so Ansh's

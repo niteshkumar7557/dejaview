@@ -6,9 +6,11 @@
 import {
   DecisionsRepository,
   EvalRunsRepository,
+  IdentityRepository,
   JobRow,
   JobsRepository,
   PostgresLlmCallStore,
+  platformForSource,
   TopicsRepository,
 } from "@dejaview/db";
 import {
@@ -41,6 +43,7 @@ export interface WorkerContext {
   jobs: JobsRepository;
   llmCalls: PostgresLlmCallStore;
   evalRuns: EvalRunsRepository;
+  identities: IdentityRepository;
   pipeline: Loaded<PipelineAdapter>;
   linker: Loaded<LinkerAdapter>;
   /** Where the CPython clone lives, for the linker. */
@@ -92,6 +95,14 @@ export async function handleIngest(job: JobRow, context: WorkerContext): Promise
 
   const saved = await context.topics.saveThread(thread);
   await context.report(job, "queued", 1, 1);
+
+  // Remember who wrote in this thread. The same handle on another platform is later recognised
+  // as the same person, so a decision card can name a human instead of three handles.
+  const platform = platformForSource(thread.source.kind);
+  const handles = [...new Set(thread.posts.map((post) => post.author))];
+  for (const handle of handles) {
+    await context.identities.remember({ platform, handle, displayName: handle });
+  }
 
   await context.jobs.enqueue("extract", {
     topicId: saved.topicId,

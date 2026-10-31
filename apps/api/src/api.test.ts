@@ -7,7 +7,14 @@ import { rmSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
 import type { ExtractionResult, Thread } from "@dejaview/shared";
-import { createPool, createTestDatabase, TopicsRepository, DecisionsRepository, type TestDatabase } from "@dejaview/db";
+import {
+  createPool,
+  createTestDatabase,
+  TopicsRepository,
+  DecisionsRepository,
+  IdentityRepository,
+  type TestDatabase,
+} from "@dejaview/db";
 import { createApp } from "./app.js";
 import { createContext } from "./context.js";
 import { simplePrMatcher } from "./simpleMatcher.js";
@@ -76,12 +83,14 @@ describe.skipIf(!databaseUrl)("the API (needs DATABASE_URL)", () => {
   let database: TestDatabase;
   let topics: TopicsRepository;
   let decisions: DecisionsRepository;
+  let identities: IdentityRepository;
 
   beforeAll(async () => {
     database = await createTestDatabase(databaseUrl ?? "", "dejaview_test_api");
     pool = database.pool;
     topics = new TopicsRepository(pool);
     decisions = new DecisionsRepository(pool);
+    identities = new IdentityRepository(pool);
     app = createApp(
       createContext(pool, simplePrMatcher, { apiToken: API_TOKEN, dashboardUrl: "http://localhost:3000" }),
     );
@@ -220,6 +229,25 @@ describe.skipIf(!databaseUrl)("the API (needs DATABASE_URL)", () => {
     expect(accepted.body).toHaveLength(0);
     const rejected = await request(app).get("/api/decisions").query({ status: "rejected" });
     expect(rejected.body).toHaveLength(1);
+  });
+
+  it("names the person on the decision card, not just the handle", async () => {
+    await seed();
+    // The same human, known by a display name as well as the handle.
+    await identities.remember({
+      platform: "discourse",
+      handle: "alice",
+      displayName: "Alice Example",
+    });
+
+    const list = await request(app).get("/api/decisions").query({ q: "breaks old code" });
+    const response = await request(app).get(`/api/decisions/${list.body[0].id}`);
+    expect(response.status).toBe(200);
+    expect(response.body.people).toContain("Alice Example");
+
+    // Put the identity back the way it was, so the next test is not affected.
+    await pool.query("DELETE FROM identities");
+    await pool.query("DELETE FROM people");
   });
 
   it("shows one decision card", async () => {
