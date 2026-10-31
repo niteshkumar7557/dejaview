@@ -18,14 +18,15 @@ export const DUR = 0.28;
 export const EASE = "power2.out";
 
 export const REDUCED = "(prefers-reduced-motion: reduce)";
-export const FULL = "(prefers-reduced-motion: no-preference)";
 
-/** Runs `full` normally and `reduced` when the user prefers reduced motion. Returns a revert function. */
-export function withMotion(full: () => void, reduced: () => void): () => void {
-  const mm = gsap.matchMedia();
-  mm.add(FULL, full);
-  mm.add(REDUCED, reduced);
-  return () => mm.revert();
+/**
+ * Runs `full`, or `reduced` when the user prefers reduced motion, once, at call time.
+ * These are one-shot feedback animations, so a preference change mid-session applies to the next one;
+ * (gsap.matchMedia would keep listeners alive and replay stale animations when the preference flips).
+ */
+export function withMotion(full: () => void, reduced: () => void): void {
+  if (prefersReducedMotion()) reduced();
+  else full();
 }
 
 /** True when the user prefers reduced motion (checked at call time). */

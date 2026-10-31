@@ -22,13 +22,13 @@ export function PhoneMenu({ title }: { title: string }) {
       if (open) {
         el.hidden = false;
         closeButton.current?.focus();
-        return withMotion(
+        withMotion(
           () => { gsap.fromTo(el, { xPercent: -100 }, { xPercent: 0, duration: DUR, ease: EASE }); },
           () => { gsap.set(el, { xPercent: 0 }); },
         );
       }
       if (!el.hidden) {
-        return withMotion(
+        withMotion(
           () => { gsap.to(el, { xPercent: -100, duration: DUR, ease: EASE, onComplete: () => { el.hidden = true; } }); },
           () => { el.hidden = true; },
         );

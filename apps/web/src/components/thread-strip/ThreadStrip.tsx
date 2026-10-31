@@ -39,16 +39,18 @@ export function ThreadStrip({ posts, linkBase, height = 56, label = "Discussion"
         : all.filter((el) => (el.dataset.decisions ?? "").split(" ").includes(String(decisionId)));
       const dim = decisionId === null ? [] : all.filter((el) => !lit.includes(el));
       const rest = all.filter((el) => !lit.includes(el) && !dim.includes(el));
-      return withMotion(
+      const tween = (targets: Element[], vars: gsap.TweenVars) => { if (targets.length) gsap.to(targets, vars); };
+      const set = (targets: Element[], vars: gsap.TweenVars) => { if (targets.length) gsap.set(targets, vars); };
+      withMotion(
         () => {
-          gsap.to(lit, { scaleY: 1.35, scaleX: 2.5, opacity: 1, transformOrigin: "50% 100%", duration: DUR_FAST, ease: EASE, overwrite: true });
-          gsap.to(dim, { scaleY: 1, scaleX: 1, opacity: 0.3, duration: DUR_FAST, ease: EASE, overwrite: true });
-          gsap.to(rest, { scaleY: 1, scaleX: 1, opacity: 1, duration: DUR_FAST, ease: EASE, overwrite: true });
+          tween(lit, { scaleY: 1.35, scaleX: 2.5, opacity: 1, transformOrigin: "50% 100%", duration: DUR_FAST, ease: EASE, overwrite: true });
+          tween(dim, { scaleY: 1, scaleX: 1, opacity: 0.3, duration: DUR_FAST, ease: EASE, overwrite: true });
+          tween(rest, { scaleY: 1, scaleX: 1, opacity: 1, duration: DUR_FAST, ease: EASE, overwrite: true });
         },
         () => {
-          gsap.set(lit, { scaleY: 1.35, scaleX: 2.5, opacity: 1, transformOrigin: "50% 100%" });
-          gsap.set(dim, { scaleY: 1, scaleX: 1, opacity: 0.3 });
-          gsap.set(rest, { scaleY: 1, scaleX: 1, opacity: 1 });
+          set(lit, { scaleY: 1.35, scaleX: 2.5, opacity: 1, transformOrigin: "50% 100%" });
+          set(dim, { scaleY: 1, scaleX: 1, opacity: 0.3 });
+          set(rest, { scaleY: 1, scaleX: 1, opacity: 1 });
         },
       );
     },

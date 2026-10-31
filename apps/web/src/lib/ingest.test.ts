@@ -29,7 +29,7 @@ describe("validateIngestUrl", () => {
     expect(validateIngestUrl("https://github.com/python/cpython/issues/102856")).toBeNull();
   });
   it("rejects other hosts", () => {
-    expect(validateIngestUrl("https://example.com/t/1")).toBe("Use a discuss.python.org thread or a github.com issue or pull request.");
+    expect(validateIngestUrl("https://gitlab.com/python/cpython/-/issues/1")).toBe("Use a discuss.python.org thread or a github.com issue or pull request.");
   });
   it("rejects text that is not a URL", () => {
     expect(validateIngestUrl("pep 701")).toBe("Paste a full link starting with https://");

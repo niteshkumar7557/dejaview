@@ -44,7 +44,8 @@ export function IngestPanel() {
   useGSAP(
     () => {
       const progress = job?.progress ?? 0;
-      return withMotion(
+      if (!bar.current) return;
+      withMotion(
         () => { gsap.to(bar.current, { scaleX: progress, duration: DUR * 2, ease: EASE, transformOrigin: "0 50%" }); },
         () => { gsap.set(bar.current, { scaleX: progress, transformOrigin: "0 50%" }); },
       );

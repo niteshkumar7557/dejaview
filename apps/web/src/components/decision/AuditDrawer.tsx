@@ -22,21 +22,24 @@ export function AuditDrawer({ calls }: { calls: LlmCallView[] }) {
   useGSAP(
     () => {
       if (!mounted || !panel.current) return;
+      const drawer = panel.current;
       const backdrop = root.current?.querySelector(`.${styles.backdrop}`);
+      if (!backdrop) return;
       if (open) {
         closeButton.current?.focus();
-        return withMotion(
+        withMotion(
           () => {
-            gsap.fromTo(panel.current, { xPercent: 100 }, { xPercent: 0, duration: DUR, ease: EASE });
-            gsap.fromTo(backdrop ?? [], { opacity: 0 }, { opacity: 0.32, duration: DUR, ease: EASE });
+            gsap.fromTo(drawer, { xPercent: 100 }, { xPercent: 0, duration: DUR, ease: EASE });
+            gsap.fromTo(backdrop, { opacity: 0 }, { opacity: 0.32, duration: DUR, ease: EASE });
           },
-          () => { gsap.set(backdrop ?? [], { opacity: 0.32 }); },
+          () => { gsap.set(backdrop, { opacity: 0.32 }); },
         );
+        return;
       }
-      return withMotion(
+      withMotion(
         () => {
-          gsap.to(panel.current, { xPercent: 100, duration: DUR, ease: "power2.in", onComplete: () => setMounted(false) });
-          gsap.to(backdrop ?? [], { opacity: 0, duration: DUR });
+          gsap.to(drawer, { xPercent: 100, duration: DUR, ease: "power2.in", onComplete: () => setMounted(false) });
+          gsap.to(backdrop, { opacity: 0, duration: DUR });
         },
         () => setMounted(false),
       );
@@ -66,10 +69,10 @@ export function AuditDrawer({ calls }: { calls: LlmCallView[] }) {
       {mounted && (
         <>
           <div className={styles.backdrop} onClick={hide} aria-hidden="true" />
-          <div ref={panel} className={styles.drawer} role="dialog" aria-modal="true" aria-labelledby="audit-title"
+          <div ref={panel} className={styles.drawer} role="dialog" aria-modal="true" aria-labelledby="audit-drawer-title"
             onKeyDown={(e) => e.key === "Escape" && hide()}>
             <div className={styles.drawerHead}>
-              <h2 id="audit-title" className={styles.drawerTitle}>Model calls behind this decision</h2>
+              <h2 id="audit-drawer-title" className={styles.drawerTitle}>Model calls behind this decision</h2>
               <button ref={closeButton} type="button" onClick={hide} aria-label="Close" style={{ border: 0, background: "transparent", width: 32, height: 32, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                 <Icon name="close" />
               </button>

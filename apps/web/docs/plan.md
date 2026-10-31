@@ -348,4 +348,31 @@ apps/web/
 
 ## Critique log
 
-(Filled in during Task 13.)
+Final gate (production build, 1440 / 768 / 390): lint 0 FAIL; inspector 0 FAIL on all 11 screens checked
+(`/`, topic, timeline, decision ×2, search, empty search, ingest, eval, PR checks, not-found).
+
+Answers to app-screens §2.7:
+
+1. **Biggest block answers the question.** Overview: the finding line + discussions table; topic: strip then
+   decisions; decision: reasons with quotes; eval: recall bars then side-by-side tables. Yes on every screen.
+2. **Shared edges, no dead strips.** Rows of cards end level; the timeline got a right rail and ingest/not-found
+   got real content after the inspector flagged voids.
+3. **Colour only on data.** Teal only on evidence ticks, recall bars, progress and the active underline; status
+   pills use the pale pairs; one near-black primary per screen.
+4. **Numbers add up.** Every count is derived from rows (tests in `mocks/views.test.ts`, `lib/overview.test.ts`,
+   `lib/eval.test.ts`); verified quotes are checked to appear verbatim in their post.
+5. **Zeros and dashes.** Missing recall/duration/code print a grey dash; real zeros print as 0.
+6. **Legends match marks.** The strip legend swatches are the tick marks; no caption explains colours.
+7. **Phone.** Sidebar folds into a menu sheet; tables become label/value rows with right-aligned figures; rails
+   move under the main column; PR checks show one region at a time.
+
+Warnings kept, with reasons:
+- `unused-canvas` on the timeline: post bodies keep a 75-character reading measure beside the rail.
+- `no-data-hue` on decision pages: the strip lights only that decision's 1–3 evidence ticks (2.5× wide), a tiny
+  pixel share by design; the screen's main data is the quotes.
+- `hero-void` on PR checks: the gap under a short bot comment in the detail pane.
+- `em-dash` (lint, global count): every dash is a missing-value mark in data, never prose.
+
+Fixed during the gate: phone numbers left-aligned, phone text under 13px, odd KPI cell, duplicate heading id
+(`audit-title`) between the audit card and the drawer, GSAP warnings on empty targets, and `withMotion`
+replaying stale animations when the motion preference changed (now one-shot, tested in `lib/motion.test.ts`).

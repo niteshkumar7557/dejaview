@@ -19,28 +19,28 @@ response type you render).
 
 ## Tasks (in order)
 
-- [ ] **1. Scaffold** `apps/web` (`@dejaview/web`): Next.js App Router + TypeScript, `tsconfig.json` extending
+- [x] **1. Scaffold** `apps/web` (`@dejaview/web`): Next.js App Router + TypeScript, `tsconfig.json` extending
   `../../tsconfig.base.json` (plus Next's settings), `transpilePackages: ["@dejaview/shared"]` in
   `next.config`, scripts `dev`, `build`, `typecheck`. Make sure root `npm run typecheck` and `npm test` still pass.
-- [ ] **2. API client + mocks.** `src/lib/api.ts`: one typed function per route in `api.ts`, base URL from
+- [x] **2. API client + mocks.** `src/lib/api.ts`: one typed function per route in `api.ts`, base URL from
   `NEXT_PUBLIC_API_URL`; `NEXT_PUBLIC_USE_MOCKS=1` serves typed mocks from `src/mocks/` instead. Unit-test the
   URL/query building.
-- [ ] **3. Decision card** (`/decisions/[id]`), the most important screen: status badge (accepted / rejected /
+- [x] **3. Decision card** (`/decisions/[id]`), the most important screen: status badge (accepted / rejected /
   withdrawn / open), summary, reasons, each with evidence quotes showing ✅ verified / ⚠️ unverified, author, date
   and a link to the exact post; linked code (path, symbol, "renamed from …"); people; model used; a drawer
   with the LLM audit trail (`/llm-calls`).
-- [ ] **4. Topic page** (`/topics/[slug]`): decision list with filters (status, verified only), and a
+- [x] **4. Topic page** (`/topics/[slug]`): decision list with filters (status, verified only), and a
   **timeline** tab showing every post with its triage label and signal score, greyed out when skipped, and
   which decisions cite it.
-- [ ] **5. Home / search** (`/`): topics with counts and last recall; full-text decision search with filters.
-- [ ] **6. Ingest page** (`/ingest`): paste a URL or upload a file, then poll `/api/jobs/:id` and show
+- [x] **5. Home / search** (`/`): topics with counts and last recall; full-text decision search with filters.
+- [x] **6. Ingest page** (`/ingest`): paste a URL or upload a file, then poll `/api/jobs/:id` and show
   stage-by-stage progress (the LLM is slow, so progress must be visible).
-- [ ] **7. Eval scorecard** (`/eval`): per PEP, recall and reason agreement, and a side-by-side table
+- [x] **7. Eval scorecard** (`/eval`): per PEP, recall and reason agreement, and a side-by-side table
   *PEP says* | *DejaView found* | ✅/❌.
-- [ ] **8. PR checks** (`/pr-checks`): the bot's comments rendered as Markdown.
-- [ ] **9. MADR export** (`src/lib/madr.ts`): render a `DecisionCard` as a MADR Markdown file (context,
+- [x] **8. PR checks** (`/pr-checks`): the bot's comments rendered as Markdown.
+- [x] **9. MADR export** (`src/lib/madr.ts`): render a `DecisionCard` as a MADR Markdown file (context,
   considered options, decision outcome, reasons, links to sources) with a download button; snapshot test.
-- [ ] **10. Polish**: responsive, readable, fast; empty and loading states; works when the LLM laptop is off
+- [x] **10. Polish**: responsive, readable, fast; empty and loading states; works when the LLM laptop is off
   (everything comes from the API/DB).
 - [ ] **11. Pitch.** Slides following `design.md` §10 (8 min), Q&A prep, `examples/README.md` (what each
   example is and the command that produced it). Rehearse with the team before 8:30 AM.
