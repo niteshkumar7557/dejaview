@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { formatPercent, ofTotal } from "@/lib/format";
-import { matchedCount } from "@/lib/eval";
+import { latestRunPerTopic, matchedCount } from "@/lib/eval";
 import { getSource, usingMocks } from "@/lib/source";
 
 export const metadata: Metadata = { title: "Evaluation" };
@@ -16,7 +16,8 @@ export const dynamic = "force-dynamic";
 
 export default async function EvalPage() {
   const source = getSource();
-  const [runs, decisions, topics] = await Promise.all([source.listEvalRuns(), source.searchDecisions({}), source.listTopics()]);
+  const [allRuns, decisions, topics] = await Promise.all([source.listEvalRuns(), source.searchDecisions({}), source.listTopics()]);
+  const runs = latestRunPerTopic(allRuns);
   const evaluable = topics.flatMap((t) => (t.pepNumber === null ? [] : [{ slug: t.slug, title: t.title, pepNumber: t.pepNumber }]));
   const items = runs.reduce((sum, r) => sum + r.groundTruth.length, 0);
   const matched = runs.reduce((sum, r) => sum + matchedCount(r), 0);

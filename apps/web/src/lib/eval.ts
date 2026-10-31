@@ -43,3 +43,18 @@ export function resolveMatch(
   const decision = id === null ? undefined : decisions.find((d) => d.id === id && d.topic.slug === topicSlug);
   return decision ? { id: decision.id, title: decision.title } : null;
 }
+
+/**
+ * The newest run of each topic, newest first. Running the evaluation again adds a row rather than
+ * replacing one, and the scorecard should show each PEP once, with its latest result.
+ */
+export function latestRunPerTopic<T extends { id: number; createdAt: string; topic: { slug: string } }>(runs: T[]): T[] {
+  const newest = new Map<string, T>();
+  for (const run of runs) {
+    const seen = newest.get(run.topic.slug);
+    if (!seen || run.createdAt > seen.createdAt || (run.createdAt === seen.createdAt && run.id > seen.id)) {
+      newest.set(run.topic.slug, run);
+    }
+  }
+  return [...newest.values()].sort((a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : b.id - a.id));
+}

@@ -29,3 +29,9 @@ export function ofTotal(part: number, total: number): string {
 export function shortSha(sha: string | null): string {
   return sha ? sha.slice(0, 7) : DASH;
 }
+
+/** A pipeline stage as a heading: "extract" → "Extract". Empty or blank → "Unknown stage". */
+export function stageLabel(stage: string): string {
+  const s = stage.trim();
+  return s ? s[0]!.toUpperCase() + s.slice(1) : "Unknown stage";
+}

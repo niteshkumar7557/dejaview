@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCount, formatDate, formatPercent, formatScore, ofTotal, shortSha } from "./format";
+import { formatCount, formatDate, formatPercent, formatScore, ofTotal, shortSha, stageLabel } from "./format";
 
 describe("formatPercent", () => {
   it("rounds a ratio to whole percent by default", () => expect(formatPercent(0.8182)).toBe("82%"));
@@ -32,4 +32,12 @@ describe("ofTotal", () => {
 describe("shortSha", () => {
   it("keeps seven characters", () => expect(shortSha("a3f09c1e2b7d")).toBe("a3f09c1"));
   it("prints a dash for null", () => expect(shortSha(null)).toBe("—"));
+});
+
+describe("stageLabel", () => {
+  it("capitalises the stage", () => expect(stageLabel("extract")).toBe("Extract"));
+  it("does not throw on an empty stage", () => {
+    expect(stageLabel("")).toBe("Unknown stage");
+    expect(stageLabel("  ")).toBe("Unknown stage");
+  });
 });

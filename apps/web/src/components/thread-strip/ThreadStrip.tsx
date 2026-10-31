@@ -70,8 +70,9 @@ export function ThreadStrip({ posts, linkBase, height = 56, label = "Discussion"
         </span>
       </figcaption>
       <svg viewBox={`0 0 ${WIDTH} ${Math.round(height * 1.4)}`} preserveAspectRatio="none" className={styles.svg}
-        style={{ height: Math.round(height * 1.4) }} role="img" aria-label={`${counts.total} posts, ${counts.evidence} cited as evidence`}>
-        <line x1="0" x2={WIDTH} y1={height * 1.4 - 0.5} y2={height * 1.4 - 0.5} className={styles.baseline} />
+        style={{ height: Math.round(height * 1.4) }} role="group" aria-label={`${counts.total} posts, ${counts.evidence} cited as evidence`}>
+        {/* role="group", not "img": an img hides its children, and the evidence ticks are links. */}
+        <line aria-hidden="true" x1="0" x2={WIDTH} y1={height * 1.4 - 0.5} y2={height * 1.4 - 0.5} className={styles.baseline} />
         {ticks.map((t) => {
           const y = height * 1.4 - 1 - t.h;
           const rect = (
