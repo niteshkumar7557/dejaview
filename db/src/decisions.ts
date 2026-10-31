@@ -15,6 +15,7 @@ import type {
   TopicRef,
 } from "@dejaview/shared";
 import type { Pool } from "pg";
+import { withTransaction } from "./client.js";
 
 export interface DecisionRow {
   id: number;
@@ -171,33 +172,39 @@ export class DecisionsRepository {
     return decisionId;
   }
 
-  /** Attaches the code a decision is about. */
+  /**
+   * Sets the code a decision is about, replacing any links saved before. The link step can run again
+   * for the same decision (a retried job, or a re-link after a linker fix), and must not pile up copies.
+   */
   async saveAnchors(
     decisionId: number,
     anchors: CodeAnchor[],
     postIds: Map<string, number>,
   ): Promise<void> {
-    for (const anchor of anchors) {
-      await this.pool.query(
-        `INSERT INTO code_anchors
-           (decision_id, repo, symbol, original_path, original_commit, current_path,
-            relocated_by, link_method, evidence_post_id, last_checked_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())`,
-        [
-          decisionId,
-          anchor.repo,
-          anchor.symbol,
-          anchor.originalPath,
-          anchor.originalCommit,
-          anchor.currentPath,
-          anchor.relocatedBy,
-          anchor.linkMethod,
-          anchor.evidencePostId === null
-            ? null
-            : (postIds.get(String(anchor.evidencePostId)) ?? null),
-        ],
-      );
-    }
+    await withTransaction(this.pool, async (client) => {
+      await client.query("DELETE FROM code_anchors WHERE decision_id = $1", [decisionId]);
+      for (const anchor of anchors) {
+        await client.query(
+          `INSERT INTO code_anchors
+             (decision_id, repo, symbol, original_path, original_commit, current_path,
+              relocated_by, link_method, evidence_post_id, last_checked_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())`,
+          [
+            decisionId,
+            anchor.repo,
+            anchor.symbol,
+            anchor.originalPath,
+            anchor.originalCommit,
+            anchor.currentPath,
+            anchor.relocatedBy,
+            anchor.linkMethod,
+            anchor.evidencePostId === null
+              ? null
+              : (postIds.get(String(anchor.evidencePostId)) ?? null),
+          ],
+        );
+      }
+    });
   }
 
   private async anchorsFor(decisionIds: number[]): Promise<Map<number, CodeAnchor[]>> {
