@@ -20,7 +20,7 @@ The project is split between four teammates (`docs/team/README.md`). Before doin
    draft a short message the user can send to that teammate. Change `packages/shared` or root files only if the
    user explicitly says the team agreed to it.
 5. **Branch:** if on `main`, create a branch `<name>/<topic>` before editing (e.g. `abhijeet/quote-verifier`).
-   Then follow the no-commit rule below.
+   Then follow the commit and PR rule below.
 
 ## Project
 
@@ -35,71 +35,34 @@ its "Rejected Ideas" and the reasons.
 
 **Hard deadline: final push by 6:30 AM, 1 Nov 2026 (IST).** Commits after that don't count and may cost marks.
 
-## AI agents may commit and push, after a human has reviewed the work (team rule)
+## Commits and PRs: the agent does them, humans merge (team rule)
 
-Claude Code, MiniMax M3 or any other AI agent working in this repo **may run `git commit` and `git push`** —
-but only **after a human has reviewed the change and explicitly approved it.** Human review is the gate,
-not a formality.
+The AI agent **commits, pushes its branch and opens the PR** itself; the teammate reviews and merges. The
+agent **never merges** a PR and **never pushes to `main`**.
 
-### The rule, step by step
+1. Work on a branch `<name>/<topic>` (create it from an up-to-date `main`).
+2. Before committing, run `npm run typecheck` and `npm test` and report the real result.
+3. Commit with this message shape. **Do not add a `Co-Authored-By` trailer or any other AI attribution
+   line**; the `Coding agent:` line is the disclosure:
+   ```
+   <imperative summary, at most 72 chars>
 
-1. **Work on a branch** (`<name>/<topic>`). Never commit straight to `main`.
-2. **Run the checks yourself**: `npm run typecheck` and `npm test` must be green. Report the real result.
-3. **Show the human the diff and stop.** Say what changed, what you tested, and ask for review.
-4. **Wait for an explicit yes.** "Looks good", "go ahead", "commit it", "push it" — anything clear. If the
-   human asks for changes, make them and show the diff again.
-5. **Only then commit and push**, using the commit message and PR description from the template below.
-6. **Open the PR** if the human asked for one.
+   <what changed and why, wrapped at ~72 chars>
 
-### What still belongs to the humans
+   Coding agent: <the agent that did the work>
+   Models used in project: Qwen3.5 9B, Qwen3.5 4B
+   ```
+4. Push (`git push -u origin <branch>`) and open the PR with the GitHub CLI
+   (`gh pr create --base main --title "..." --body-file <file>`), filling `.github/pull_request_template.md`
+   including the `Coding agent:` and `Models used in project:` lines. No AI attribution footer in the PR body.
+5. Give the teammate the PR link, then stop until they merge. They merge with **Rebase and merge**.
 
-- **Merging to `main`.** The agent opens the PR and pushes; a human merges once CI is green.
-- **Force-pushing, amending a human's commit, rewriting published history, `git reset --hard`, or skipping
-  hooks.** Never.
-- **Pushing anything that contains a secret.** If you are not sure whether a file is safe, leave it out and
-  say so.
-- **Any push after 6:30 AM, 1 Nov 2026 (IST).** The deadline is absolute.
-
-### If there is no review
-
-If the human has not reviewed the change, the agent **stops** and hands over the commit message and the PR
-description, and does not commit. An unreviewed commit is worse than no commit: it puts unreviewed code in
-the history that nobody asked for.
-
-### The template for every commit message and PR description
-
-Use exactly this shape:
-
-````
-**Commit message**
-```
-<imperative summary, ≤ 72 chars>
-
-<what changed and why, wrapped at ~72 chars>
-
-Coding agent: <the agent that did the work>
-Models used in project: Qwen3.5 9B, Qwen3.5 4B
-```
-
-**PR description** (fills .github/pull_request_template.md)
-```
-## What this PR does
-...
-## Changes
-- ...
-## How it was tested
-- ...
-## AI disclosure (required by hackathon rules)
-Coding agent: <the agent that did the work>
-Models used in project: Qwen3.5 9B, Qwen3.5 4B
-```
-````
-
-Before handing over, the agent runs `npm run typecheck` and `npm test` and reports the real result.
+GitHub CLI setup (once per machine): `brew install gh`, then `gh auth login` (interactive; the user runs it,
+for example by typing `! gh auth login` in Claude Code).
 
 ## Non-negotiable rules (they affect scoring)
 
-1. **Nothing goes to `main` directly.** Every change: new branch → PR → CI green → merge (done by humans).
+1. **Nothing goes to `main` directly.** Every change: new branch → PR (opened by the agent) → CI green → merge (done by the teammate, Rebase and merge).
 2. **Every commit message ends with these lines** (CI fails the PR otherwise):
    ```
    Coding agent: Claude Code

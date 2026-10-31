@@ -80,10 +80,9 @@ It covers the work that is **done and tested** so far: the ingest package and th
    I did not touch `packages/pipeline/` (Abhijeet), `packages/linker/` (Ansh), `apps/web/` (Nitesh) or
    `packages/shared/` (shared contract). If I needed something from them, I would have asked, not edited.
 2. **I worked on a branch, never on `main`.** The branch is `mudit/ingest`.
-3. **I did not commit, push or open a PR — because nobody had reviewed the diff yet.** Under the rule in
-   `CLAUDE.md`, an AI agent may commit and push **after a human has reviewed the change and said go
-   ahead**. Until then it shows the diff and hands over the commit message and the PR description, which
-   is what I did here.
+3. **I commit, push and open the PR myself; a human reviews and merges.** That is the team rule in
+   `CLAUDE.md`: the agent does the commit, the push and the PR, and **never** merges and **never** pushes
+   to `main`. Before committing I run the typecheck and the tests and report the real result.
 4. **Everything gets a real test.** No stubs. Tests must run with no network, so I saved real API answers
    and replay them.
 5. **I never read the PEP text while ingesting.** Only the eval module is allowed to fetch the PEP, and
@@ -93,8 +92,8 @@ It covers the work that is **done and tested** so far: the ingest package and th
 
 Before writing code I read, in this order:
 
-- `CLAUDE.md` — the house rules (branch naming, the human-review gate before an agent commits, the two
-  required lines in every commit message, "read `design.md` first").
+- `CLAUDE.md` — the house rules (branch naming, who commits and who merges, the two required lines in
+  every commit message, "read `design.md` first").
 - `docs/team/README.md` — who owns which folder.
 - `docs/team/mudit.md` — my own task list.
 - `design.md` — the product design. The parts that matter to me are §4 (architecture), §5.1 (ingest),
