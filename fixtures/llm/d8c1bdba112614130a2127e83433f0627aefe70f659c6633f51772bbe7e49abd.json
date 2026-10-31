@@ -1,0 +1,31 @@
+{
+  "promptHash": "d8c1bdba112614130a2127e83433f0627aefe70f659c6633f51772bbe7e49abd",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 698: A typing.override decorator\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 1] stroxler:\nHi All,\n\nWe’d like to put PEP 698 forward for discussion.\n\nThe proposal is for a new decorator @typing.override that marks a method as overriding a method in some superclass. Having this decorator - inspired by similar constructs in Java, C++, Typescript, Kotlin, Scala, Swift, and C# - will enable static type checkers to detect potential bugs where a base class method is renamed but child classes were not modified.\n\nPrevious discussion has been on typing-sig, in particular here is the original discussion.\n\n[post 2] NeilGirdhar:\nReally looking forward to this!\n\nJust curious, but why does it list this as a disadvantage?\n\n“Adding or removing base class methods that impact overrides will require updating subclass code.”\n\nIsn’t being forced to update subclass code one of the benefits of the decorator?\n\nAlso, I proposed something similar in the ipromise library. I allowed for the possibility of indicating from which base class the overridden base method comes from. In some situations, that can help readers of code know where to look for the method, and it’s a bit stricter (if one base class removes, say, the __call__ method, but another one adds it–and you meant to override the one from the first base class). If you’re so inclined, feel free to include this under rejected/considered ideas.\n\n[post 3] stroxler:\nGood point regarding the odd choice of words!\n\nI think the disadvantages wording should be tweaked to emphasize a verbosity tradeoff - what we had intended to point out was that (as with static types in general) this introduces another tradeoff where code becomes more verbose in order to gain some safety.\n\nAs for specifying the parent class, my initial impression is that while it could be useful (especially making the overridden class explicit to help with code navigation), it probably isn’t worth including in PEP 698 for three reasons:\n\n- if in a single commit you move a method from one base to another, you as the author are likely aware of what you did, so the safety benefits are relatively small\n\n- I’m guessing there wouldn’t be too much use of this feature. Since it’s relatively easy to implement this capability using runtime logic in a library, that makes me thing we don’t need to bake it into typing.py all of the type checkers.\n\nBut I’d like to get opinions from others as well, I just posted a link to this discussion in typing-sig so we can see if there is a range of opinions.\n\nIf the consensus is not to include that functionality, we could add it under the considered ideas.\n\n[post 4] NeilGirdhar:\nYes, I completely agree with your reasons, and I figured you would probably have thought of this. I was just wondering if you should mention these reasons in the PEP under “rejected alternatives”? In a few years, this extension may be posted on python-ideas, and then it might be useful for that poster to see your rejection reasoning.\n\nThat said, @typing.override could support both usage with and without the base class. But I agree that use of the base class would happen extremely rarely (only in a very complicated inheritance hierarchy). But anyway, the use of a base class could always be added later if someone makes a compelling case for it.\n\nFair enough\n\n[post 5] mkorpela:\nThe first versions of ”runtime” overriding decorator actually contained the class name inheritance - In Python, how do I indicate I'm overriding a method? - Stack Overflow but that really did not bring any benefits. From my point of view it only made it harder to use. Big jump was to discover a way to leave that out.\n\nNobody has asked for explicitly naming the class in overrides lib in the past 10 years, so I would assume it is not needed.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 1,
+        "label": "proposal"
+      },
+      {
+        "post_id": 2,
+        "label": "question"
+      },
+      {
+        "post_id": 3,
+        "label": "support"
+      },
+      {
+        "post_id": 4,
+        "label": "support"
+      },
+      {
+        "post_id": 5,
+        "label": "noise"
+      }
+    ]
+  },
+  "durationMs": 14536
+}

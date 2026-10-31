@@ -7,6 +7,9 @@ import type { LlmCallRecord, LlmCallStore } from "@dejaview/shared";
 import {
   callLlm,
   createPromptHash,
+  contextWarning,
+  joinOllamaStream,
+  readOllamaStream,
   type LlmClientDependencies,
 } from "../../src/llm/client.js";
 
@@ -70,6 +73,31 @@ function options(deps: LlmClientDependencies) {
   };
 }
 
+describe("joinOllamaStream", () => {
+  it("joins a streamed answer, one JSON object per line", () => {
+    const raw = ['{"message":{"content":"{\\"a\\":"}}', '{"message":{"content":"1}"}}', '{"done":true}', ""].join("\n");
+    expect(joinOllamaStream(raw)).toBe('{"a":1}');
+  });
+  it("accepts a single non-streamed object", () => {
+    expect(joinOllamaStream('{"message":{"content":"ok"}}')).toBe("ok");
+  });
+  it("surfaces an error line from Ollama", () => {
+    expect(() => joinOllamaStream('{"error":"model not found"}')).toThrow("Ollama error: model not found");
+  });
+});
+
+describe("contextWarning", () => {
+  it("reads the prompt token count and stop reason from the last streamed line", () => {
+    const raw = '{"message":{"content":"x"}}\n{"done":true,"done_reason":"stop","prompt_eval_count":812}';
+    expect(readOllamaStream(raw)).toEqual({ content: "x", promptTokens: 812, doneReason: "stop" });
+  });
+  it("warns when the answer was cut off or the prompt filled the window, and stays quiet otherwise", () => {
+    expect(contextWarning({ content: "", promptTokens: 100, doneReason: "length" }, "extract")).toMatch(/cut off/);
+    expect(contextWarning({ content: "", promptTokens: 8000, doneReason: "stop" }, "extract")).toMatch(/8000 of 8192/);
+    expect(contextWarning({ content: "", promptTokens: 3000, doneReason: "stop" }, "extract")).toBeNull();
+  });
+});
+
 describe("createPromptHash", () => {
   it("is deterministic and changes when model, schema, or prompt changes", () => {
     const hash = createPromptHash(model, jsonSchema, prompt);
@@ -125,7 +153,7 @@ describe("callLlm", () => {
     expect(body.format).toEqual(jsonSchema);
     expect(body.think).toBe(false);
     expect(body.options).toEqual({ temperature: 0, num_ctx: 8192 });
-    expect(body.stream).toBe(false);
+    expect(body.stream).toBe(true);
 
     expect(store.save).toHaveBeenCalledTimes(1);
     expect(getSaved()).toMatchObject({

@@ -31,11 +31,59 @@ export interface CallLlmOptions<T> {
   deps: LlmClientDependencies;
 }
 
-const ollamaResponseSchema = z.object({
-  message: z.object({
-    content: z.string(),
-  }),
+const ollamaChunkSchema = z.object({
+  message: z.object({ content: z.string() }).optional(),
+  error: z.string().optional(),
+  prompt_eval_count: z.number().optional(),
+  done_reason: z.string().optional(),
 });
+
+/**
+ * Joins Ollama's answer. We ask for a streamed answer (one JSON object per line, each with a piece of
+ * the message) because the team laptop sits behind a Cloudflare tunnel that drops any request that sends
+ * nothing back for 100 seconds (HTTP 524), and the 9B takes longer than that to write a full answer.
+ * Streaming keeps bytes flowing. A single non-streamed JSON object is accepted too.
+ */
+export function joinOllamaStream(raw: string): string {
+  return readOllamaStream(raw).content;
+}
+
+export interface OllamaStreamResult {
+  content: string;
+  /** Tokens Ollama actually read from the prompt (from the last line), when it says. */
+  promptTokens: number | null;
+  /** "stop" normally; "length" means the answer was cut off at the token limit. */
+  doneReason: string | null;
+}
+
+export function readOllamaStream(raw: string): OllamaStreamResult {
+  let content = "";
+  let promptTokens: number | null = null;
+  let doneReason: string | null = null;
+  for (const line of raw.split("\n")) {
+    if (!line.trim()) continue;
+    const chunk = ollamaChunkSchema.parse(JSON.parse(line));
+    if (chunk.error) throw new Error(`Ollama error: ${chunk.error}`);
+    content += chunk.message?.content ?? "";
+    if (typeof chunk.prompt_eval_count === "number") promptTokens = chunk.prompt_eval_count;
+    if (typeof chunk.done_reason === "string") doneReason = chunk.done_reason;
+  }
+  return { content, promptTokens, doneReason };
+}
+
+export const NUM_CTX = 8192;
+
+/**
+ * Ollama silently drops the START of a prompt longer than num_ctx (where our instructions are), and
+ * cuts an answer that runs out of room. Neither raises an error, so we say it out loud.
+ */
+export function contextWarning(result: OllamaStreamResult, stage: string): string | null {
+  if (result.doneReason === "length") return `LLM ${stage}: the answer was cut off at the context limit`;
+  if (result.promptTokens !== null && result.promptTokens >= NUM_CTX * 0.95) {
+    return `LLM ${stage}: prompt used ${result.promptTokens} of ${NUM_CTX} tokens; its start may have been dropped`;
+  }
+  return null;
+}
 
 const defaultFixtureDir = fileURLToPath(
   new URL("../../../../fixtures/llm/", import.meta.url),
@@ -272,9 +320,9 @@ export async function callLlm<T>(
             think: false,
             options: {
               temperature: 0,
-              num_ctx: 8192,
+              num_ctx: NUM_CTX,
             },
-            stream: false,
+            stream: true,
           }),
           signal: AbortSignal.timeout(timeoutMs),
         },
@@ -286,12 +334,10 @@ export async function callLlm<T>(
         );
       }
 
-      const rawResponse: unknown = await response.json();
-      const envelope = ollamaResponseSchema.parse(rawResponse);
-      const result = parseModelOutput(
-        envelope.message.content,
-        responseSchema,
-      );
+      const stream = readOllamaStream(await response.text());
+      const warning = contextWarning(stream, stage);
+      if (warning) console.warn(warning);
+      const result = parseModelOutput(stream.content, responseSchema);
 
       successfulRecord = {
         promptHash: hash,

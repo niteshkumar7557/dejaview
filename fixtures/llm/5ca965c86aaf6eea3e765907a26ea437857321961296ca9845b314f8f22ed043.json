@@ -1,0 +1,31 @@
+{
+  "promptHash": "5ca965c86aaf6eea3e765907a26ea437857321961296ca9845b314f8f22ed043",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 698: A typing.override decorator\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 6] stroxler:\nThanks to both Niel for the suggestion and Mikko for sharing past experience with this approach.\n\nI’ve put up a PR to include this idea in the “Rejected Alternatives” selection:\n\n[post 7] encukou:\nSorry for asking so late. (I’ve seen PEP 702, typing.deprecated, which isn’t on Discourse yet, and thought about a question that could also apply here.)\n\nIf a third-party library provides a different override decorator, is there a good way to tell type checkers that it should act like @typing.override?\n\n[post 8] AlexWaygood:\nOne way of handling this kind of thing is to do a typing.TYPE_CHECKING shim, like so:\n\n# module a.py\nfrom typing import TYPE_CHECKING\n\nif TYPE_CHECKING:\nfrom typing import override as override\nelse:\ndef override(func):\n# custom implementation here\n\nAnd then from everywhere else in your codebase, you could just do from a import override. Type checkers will just think that a.override is a reexport of typing.override, but at runtime you can have any custom behaviour you like.\n\n[post 9] dgutson:\nHi, I’m coming from C++ so I could be a bit biased.\n\nShould be any reference or relationship with @abstractmethod? For example, it would be nice, I think, some mode/flag where the override decorator is explicitly required when overriding an @abstractmethod.\n\n[post 10] a-reich:\nI’m not sure there is much need for special treatment of abstract methods. The PEP recommends type checkers support a strict mode where all method overrides must be marked with the decorator, whether abstract or not.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 6,
+        "label": "noise"
+      },
+      {
+        "post_id": 7,
+        "label": "question"
+      },
+      {
+        "post_id": 8,
+        "label": "alternative"
+      },
+      {
+        "post_id": 9,
+        "label": "question"
+      },
+      {
+        "post_id": 10,
+        "label": "support"
+      }
+    ]
+  },
+  "durationMs": 5127
+}

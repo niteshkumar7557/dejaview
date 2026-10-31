@@ -1,0 +1,58 @@
+{
+  "pepNumber": 698,
+  "groundTruth": [
+    {
+      "title": "Rely on Integrated Development Environments for safety",
+      "text": "Modern Integrated Development Environments (IDEs) often provide the ability to automatically update subclasses when renaming a method. But we view this as insufficient for several reasons: - If a codebase is split into multiple projects, an IDE will not help and the bug appears when upgrading dependencies. Type checkers are a fast way to catch breaking changes in dependencies. - Not all developers use such IDEs. And library maintainers, even if they do use an IDE, should not need to assume pull request authors use the same IDE. We prefer being able to detect problems in continuous integration without assuming anything about developers’ choice of editor."
+    },
+    {
+      "title": "Runtime enforcement",
+      "text": "We considered having @typing.override enforce override safety at runtime, similarly to how @overrides.overrides does today. We rejected this for four reasons: - For users of static type checking, it is not clear this brings any benefits. - There would be at least some performance overhead, leading to projects importing slower with runtime enforcement. We estimate the @overrides.overrides implementation takes around 100 microseconds, which is fast but could still add up to a second or more of extra initialization time in million-plus line codebases, which is exactly where we think @typing.override will be most useful. - An implementation may have edge cases where it doesn’t work well (we heard from a maintainer of one such closed-source library that this has been a problem). We expect static enforcement to be simple and reliable. - The implementation approaches we know of are not simple. The decorator executes before the class is finished evaluating, so the options we know of are either to inspect the bytecode of the caller (as @overrides.overrides does) or to use a metaclass-based approach. Neither approach seems ideal."
+    },
+    {
+      "title": "Mark a base class to force explicit overrides on subclasses",
+      "text": "We considered including a class decorator @require_explicit_overrides, which would have provided a way for base classes to declare that all subclasses must use the @override decorator on method overrides. The Overrides library has a mixin class, EnforceExplicitOverrides, which provides similar behavior in runtime checks. We decided against this because we expect owners of large codebases will benefit most from @override, and for these use cases having a strict mode where explicit @override is required (see the Backward Compatibility section) provides more benefits than a way to mark base classes. Moreover we believe that authors of projects who do not consider the extra type safety to be worth the additional boilerplate of using @override should not be forced to do so. Having an optional strict mode puts the decision in the hands of project owners, whereas the use of @require_explicit_overrides in libraries would force project owners to use @override even if they prefer not to."
+    },
+    {
+      "title": "Include the name of the ancestor class being overridden",
+      "text": "We considered allowing the caller of @override to specify a specific ancestor class where the overridden method should be defined: .. code-block:: python class Parent0: def foo(self) -> int: return 1 class Parent1: def bar(self) -> int: return 1 class Child(Parent0, Parent1): @override(Parent0) # okay, Parent0 defines foo def foo(self) -> int: return 2 @override(Parent0) # type error, Parent0 does not define bar def bar(self) -> int: return 2 This could be useful for code readability because it makes the override structure more explicit for deep inheritance trees. It also might catch bugs by prompting developers to check that the implementation of an override still makes sense whenever a method being overridden moves from one base class to another. We decided against it because: - Supporting this would add complexity to the implementation of both @override and type checker support for it, so there would need to be considerable benefits. - We believe that it would be rarely used and catch relatively few bugs. - The author of the Overrides package has noted that early versions of his library included this capability but it was rarely useful and seemed to have little benefit. After it was removed, the ability was never requested by users."
+    }
+  ],
+  "matches": [
+    {
+      "groundTruth": {
+        "title": "Rely on Integrated Development Environments for safety",
+        "text": "Modern Integrated Development Environments (IDEs) often provide the ability to automatically update subclasses when renaming a method. But we view this as insufficient for several reasons: - If a codebase is split into multiple projects, an IDE will not help and the bug appears when upgrading dependencies. Type checkers are a fast way to catch breaking changes in dependencies. - Not all developers use such IDEs. And library maintainers, even if they do use an IDE, should not need to assume pull request authors use the same IDE. We prefer being able to detect problems in continuous integration without assuming anything about developers’ choice of editor."
+      },
+      "decisionKey": null,
+      "reasonAgreement": null
+    },
+    {
+      "groundTruth": {
+        "title": "Runtime enforcement",
+        "text": "We considered having @typing.override enforce override safety at runtime, similarly to how @overrides.overrides does today. We rejected this for four reasons: - For users of static type checking, it is not clear this brings any benefits. - There would be at least some performance overhead, leading to projects importing slower with runtime enforcement. We estimate the @overrides.overrides implementation takes around 100 microseconds, which is fast but could still add up to a second or more of extra initialization time in million-plus line codebases, which is exactly where we think @typing.override will be most useful. - An implementation may have edge cases where it doesn’t work well (we heard from a maintainer of one such closed-source library that this has been a problem). We expect static enforcement to be simple and reliable. - The implementation approaches we know of are not simple. The decorator executes before the class is finished evaluating, so the options we know of are either to inspect the bytecode of the caller (as @overrides.overrides does) or to use a metaclass-based approach. Neither approach seems ideal."
+      },
+      "decisionKey": null,
+      "reasonAgreement": null
+    },
+    {
+      "groundTruth": {
+        "title": "Mark a base class to force explicit overrides on subclasses",
+        "text": "We considered including a class decorator @require_explicit_overrides, which would have provided a way for base classes to declare that all subclasses must use the @override decorator on method overrides. The Overrides library has a mixin class, EnforceExplicitOverrides, which provides similar behavior in runtime checks. We decided against this because we expect owners of large codebases will benefit most from @override, and for these use cases having a strict mode where explicit @override is required (see the Backward Compatibility section) provides more benefits than a way to mark base classes. Moreover we believe that authors of projects who do not consider the extra type safety to be worth the additional boilerplate of using @override should not be forced to do so. Having an optional strict mode puts the decision in the hands of project owners, whereas the use of @require_explicit_overrides in libraries would force project owners to use @override even if they prefer not to."
+      },
+      "decisionKey": null,
+      "reasonAgreement": null
+    },
+    {
+      "groundTruth": {
+        "title": "Include the name of the ancestor class being overridden",
+        "text": "We considered allowing the caller of @override to specify a specific ancestor class where the overridden method should be defined: .. code-block:: python class Parent0: def foo(self) -> int: return 1 class Parent1: def bar(self) -> int: return 1 class Child(Parent0, Parent1): @override(Parent0) # okay, Parent0 defines foo def foo(self) -> int: return 2 @override(Parent0) # type error, Parent0 does not define bar def bar(self) -> int: return 2 This could be useful for code readability because it makes the override structure more explicit for deep inheritance trees. It also might catch bugs by prompting developers to check that the implementation of an override still makes sense whenever a method being overridden moves from one base class to another. We decided against it because: - Supporting this would add complexity to the implementation of both @override and type checker support for it, so there would need to be considerable benefits. - We believe that it would be rarely used and catch relatively few bugs. - The author of the Overrides package has noted that early versions of his library included this capability but it was rarely useful and seemed to have little benefit. After it was removed, the ability was never requested by users."
+      },
+      "decisionKey": "d2",
+      "reasonAgreement": "yes"
+    }
+  ],
+  "recall": 0.25,
+  "reasonAgreement": 1,
+  "extraIdeas": 1
+}

@@ -59,9 +59,9 @@ checklist), 4 (big picture and why), 5 (features), 6 (the life of one discussion
 | 9 | [`apps/api/src/routes/prChecks.ts`](../apps/api/src/routes/prChecks.ts) + [`packages/linker/src/pr.ts`](../packages/linker/src/pr.ts) | What happens when the PR bot calls us, and how the comment is built |
 | 10 | [`apps/web/src/app/decisions/[id]/page.tsx`](../apps/web/src/app/decisions/[id]/page.tsx) | The decision card: where evidence, code links and the audit trail come together |
 
-When the pipeline lands, add its entry file (`packages/pipeline/src/index.ts`, `runExtraction` and
-`evaluatePep`) and the quote verifier to this list: "how do you stop hallucinations?" is the most likely
-question.
+| 11 | [`packages/pipeline/src/run-extraction.ts`](../packages/pipeline/src/run-extraction.ts) | The whole AI funnel in one function: clean → triage → extract → verify → consolidate |
+| 12 | [`packages/pipeline/src/verify.ts`](../packages/pipeline/src/verify.ts) | How every quote is checked: the answer to "how do you stop hallucinations?", the most likely question |
+| 13 | [`packages/pipeline/src/eval/evaluate.ts`](../packages/pipeline/src/eval/evaluate.ts) | How the scorecard numbers are computed |
 
 **3. Your own part, in depth.** Know every file in the folders you own (section 13, "Who does what"),
 including the tests: be able to say what each one checks.
@@ -280,7 +280,7 @@ One **topic** can hold several sources, for example "PEP 701" = three forum thre
 **The leak rule.** Ingest and extraction **never read the PEP itself**. Only the evaluation step (5.6)
 downloads the PEP, after extraction is finished. This keeps the test honest.
 
-### 5.2 Decision extraction: the funnel 🟡
+### 5.2 Decision extraction: the funnel ✅
 
 **What it does.** Turns a long thread into a short list of ideas, each with a status and reasons.
 
@@ -339,9 +339,41 @@ phrases in the post; **who** said it (Steering Council, PEP author or PEP delega
 **Why this shape:** you can explain the funnel in one breath: "cheap filters, the small model sorts, the big
 model reasons, code checks."
 
-**Where.** [`packages/pipeline`](../packages/pipeline) (Abhijeet). Today only the **AI client** is built
-([`client.ts`](../packages/pipeline/src/llm/client.ts), see section 9). The five stages and the
-`runExtraction()` function the worker calls are still to come.
+**Where** ([`packages/pipeline/src/`](../packages/pipeline/src), one small file per stage):
+
+| Stage | File | Model | What the code does |
+|---|---|---|---|
+| 1a. Clean | [`clean.ts`](../packages/pipeline/src/clean.ts) + [`text.ts`](../packages/pipeline/src/text.ts) | none | HTML → text, removes quoted replies (`<aside class="quote">`, `<blockquote>`, `> ` lines), skips empty / "+1" / "thanks" / under-5-word / duplicate posts |
+| 1b. Score | [`score.ts`](../packages/pipeline/src/score.ts) | none | Signal score from decision phrases, proposer, Steering Council / core devs, likes, position, length. A post scoring below 1 is skipped |
+| 2. Triage | [`triage.ts`](../packages/pipeline/src/triage.ts) | 4B | 5 posts per call, one label each; the prompt has 4 examples (including "I am -1 on this, it breaks old code" → objection, which the 4B got wrong without them). A `noise` label only removes posts under 40 words (`reachesExtraction`): on the real PEP 698 run the 4B called the PEP author's 500-word reply about the Rejected Alternatives "noise". A post the model forgets is kept |
+| 3. Extract | [`chunk.ts`](../packages/pipeline/src/chunk.ts) + [`extract.ts`](../packages/pipeline/src/extract.ts) | 9B | Windows of about 3,500 tokens of posts, overlapping by 3 posts; each post shown as `[post id] author (date)`, cut at 6,000 characters; the rules are repeated after the posts; JSON schema forces ideas → reasons → `{post_id, quote}` |
+| 4. Verify | [`verify.ts`](../packages/pipeline/src/verify.ts) | none | Exact match = 1.0, else best window of words; ≥ 0.85 verified; wrong post → re-attached; otherwise kept as unverified |
+| 5. Consolidate | [`consolidate.ts`](../packages/pipeline/src/consolidate.ts) | 9B | Only titles + reasons go in; the model groups duplicates; code makes sure every idea lands in exactly one group, then merges reasons and quotes. Skipped when there is only one idea |
+| All | [`run-extraction.ts`](../packages/pipeline/src/run-extraction.ts) | | `runExtraction(thread, { llmStore, onProgress })` runs 1→5, reports each stage for the progress bar, gives keys `d1, d2…`, sets confidence (high = all quotes verified and ≥ 2; low = none verified), `decidedAt` = date of the latest quoted post |
+
+Every model call goes through [`llm/ask.ts`](../packages/pipeline/src/llm/ask.ts), a thin wrapper over the
+AI client ([`client.ts`](../packages/pipeline/src/llm/client.ts), section 9), so the stages can be tested
+with a fake model. Models come from [`config.ts`](../packages/pipeline/src/config.ts) (`TRIAGE_MODEL`,
+`EXTRACT_MODEL`).
+
+**The context window (8,192 tokens) and why we chunk.** Measured on our threads: PEP 698's whole
+discussion is about 1,300 tokens after cleaning, so it goes to the 9B in one call. PEP 701 (~20,000
+tokens) and PEP 695 (~28,000) don't fit, so they are split into chunks. We keep `num_ctx` at 8,192 instead
+of raising it: the 9B barely fits the 4 GB GPU, a bigger window is slower and uses more memory, and small
+models lose track of the middle of long inputs. To make chunking safe:
+- each chunk is ~3,500 tokens of posts + ~400 of instructions, leaving ~2,000 for the answer;
+- the rules are repeated after the posts, because Ollama silently drops the *start* of a prompt that is too long;
+- the client reads Ollama's real token count from the stream and warns when a prompt nears the window or an
+  answer was cut off (`contextWarning` in [`llm/client.ts`](../packages/pipeline/src/llm/client.ts));
+- chunks overlap by 3 posts, and consolidation merges an idea seen in several chunks (a later "decision" post wins the status).
+
+**Run it yourself** on a saved thread (writes the real outputs to `examples/<slug>/`, caches model answers
+in `data/llm-cache/` so a crashed run resumes):
+
+```sh
+npm run extract -w @dejaview/pipeline -- fixtures/threads/pep-698.json --eval
+# LLM_MODE=record also saves every answer to fixtures/llm/ so tests can replay it
+```
 
 ### 5.3 Verified evidence and the audit trail ✅ (storage and display)
 
@@ -425,7 +457,7 @@ The Action's setup steps for the fork are in [`apps/action/README.md`](../apps/a
 workflow file to copy into the fork is [`apps/action/workflows/dejaview.yml`](../apps/action/workflows/dejaview.yml).
 A real (no-match) example request and comment are in [`examples/pr-check/`](../examples/pr-check).
 
-### 5.6 Self-evaluation scorecard 🟡
+### 5.6 Self-evaluation scorecard ✅
 
 **What it does.** Runs the organizers' test on ourselves, so we can show a number instead of a promise:
 
@@ -441,9 +473,18 @@ It reports per PEP:
 - **reason agreement**: for those we found, do our reasons match the PEP's;
 - **extra ideas**: rejected ideas we found that the PEP doesn't list (shown, not counted as wrong).
 
-**Where.** The dashboard page ([`apps/web/src/app/eval/page.tsx`](../apps/web/src/app/eval/page.tsx)) with a
-"Run evaluation" button, the API (`POST /api/eval/:slug`, `GET /api/eval`), the worker's `eval` job and the
-`eval_runs` table are built. The scoring itself (`evaluatePep()` in the pipeline) is still to come.
+**Where.**
+- [`packages/pipeline/src/eval/pep.ts`](../packages/pipeline/src/eval/pep.ts): downloads the PEP and reads
+  its rejected-ideas sections. It understands both PEP styles: one sub-heading per idea (PEP 698, PEP 695)
+  and numbered `#.` lists (PEP 701). Tested on the real PEP files saved in
+  [`packages/pipeline/tests/fixtures/peps/`](../packages/pipeline/tests/fixtures/peps).
+- [`packages/pipeline/src/eval/evaluate.ts`](../packages/pipeline/src/eval/evaluate.ts): `evaluatePep()`.
+  The shortlist is pure code (shared meaningful words, no database). One 9B call per ground-truth idea
+  answers `{best, reasons_agree}`; an answer out of range counts as "no match". Reason agreement scores
+  yes = 1, partly = 0.5, no = 0.
+- The dashboard page ([`apps/web/src/app/eval/page.tsx`](../apps/web/src/app/eval/page.tsx)) with its
+  "Run evaluation" button, the API (`POST /api/eval/:slug`, `GET /api/eval`), the worker's `eval` job and
+  the `eval_runs` table (which turns each match's `d1` key into the real decision id).
 
 ### 5.7 "Already rejected?" detector ✅
 
@@ -607,9 +648,19 @@ API responses in [`packages/ingest/testdata/`](../packages/ingest/testdata), nev
 
 ### `packages/pipeline`
 
-Covered in 5.2 and 9. Today: [`src/llm/client.ts`](../packages/pipeline/src/llm/client.ts) and its tests.
-It must export `runExtraction(thread, { llmStore, onProgress })` and `evaluatePep(pepNumber, extraction,
-{ llmStore })` for the worker to use it.
+Covered in 5.2, 5.6 and 9. [`src/index.ts`](../packages/pipeline/src/index.ts) exports
+`runExtraction(thread, { llmStore, onProgress })` and `evaluatePep(pepNumber, extraction, { llmStore })`,
+which the worker loads automatically, plus `extractWith` / `evaluateWith` (the same with an injectable
+model, for tests), `parseRejectedIdeas`, `callLlm`, and two simple stores: `memoryLlmStore` (tests) and
+`fileLlmStore` (the CLI). Other files: [`src/cli.ts`](../packages/pipeline/src/cli.ts) (the `extract`
+command) and [`src/store.ts`](../packages/pipeline/src/store.ts).
+
+Tests ([`tests/`](../packages/pipeline/tests)): `stages/` (clean, score, chunk, verify, consolidate, and
+the whole funnel with a fake model that checks the 4B triages and the 9B extracts/consolidates), `eval/`
+(PEP parser on the real PEP files, the evaluation maths with a fake judge), `llm/` (the AI client), and
+[`replay.test.ts`](../packages/pipeline/tests/replay.test.ts): the full pipeline on the real PEP 698
+thread, replaying the answers recorded from the laptop, which must reproduce
+`examples/pep-698/output/decisions.json` exactly.
 
 ### `packages/linker`
 
@@ -763,8 +814,12 @@ Every AI call in the project goes through `callLlm()`. What it does, in order:
    - `live`: calls Ollama.
    - `record`: calls Ollama **and** writes the fixture file, to replay later.
 4. Calls Ollama's `/api/chat` with `format: <JSON schema>` (the model must answer in that shape),
-   `think: false` (faster), `temperature: 0` (same answer each time), `num_ctx: 8192`. Timeout 60 s,
-   2 retries with growing waits.
+   `think: false` (faster), `temperature: 0` (same answer each time), `num_ctx: 8192`, and
+   **`stream: true`**: the laptop sits behind a Cloudflare tunnel that drops a request with no reply for
+   100 seconds (HTTP 524), and the 9B takes longer than that to write a full answer, so the answer comes
+   in pieces and `joinOllamaStream` joins them. 2 retries with growing waits. The client's own default
+   timeout is 60 s; the pipeline raises it to 15 minutes per call (`LLM_TIMEOUT_MS` in
+   [`llm/ask.ts`](../packages/pipeline/src/llm/ask.ts)).
 5. **Validates** the answer with a zod schema, saves it (model, stage, prompt, answer, duration), and returns it.
 
 ### The funnel and the honesty rules
@@ -888,7 +943,7 @@ on every PR.
 
 ## 12. What is done and what is missing
 
-*Checked on 31 Oct 2026, around midnight. Update this list as PRs merge.*
+*Checked on 1 Nov 2026, around 2 AM. Update this list as PRs merge.*
 
 | Part | Status |
 |---|---|
@@ -900,11 +955,11 @@ on every PR.
 | Linker library (references, linking, rename tracking, PR matching, comment) | ✅ |
 | GitHub Action code | ✅ |
 | AI client (live / record / replay, cache, retries) | ✅ |
-| **Pipeline stages** (clean, score, triage, extract, verify, consolidate) and `runExtraction` | ⬜ **missing, blocks real decisions** |
-| **Evaluation** (`evaluatePep`, PEP parser, judge) | ⬜ missing, blocks the scorecard numbers |
+| Pipeline stages (clean, score, triage, extract, verify, consolidate) and `runExtraction` | ✅ (real run on PEP 698: 4 decisions, 10 of 11 quotes verified) |
+| Evaluation (`evaluatePep`, PEP parser, judge) | ✅ (PEP 698: 1 of 4 rejected ideas recovered, reasons agree; the other 3 are not argued in that thread) |
 | Rename tracking called by the worker (`relocateAnchor`) | ⬜ |
 | CPython demo fork with the Action installed, and demo PRs | ⬜ |
-| `fixtures/llm/` (recorded AI answers) and `examples/pep-*/` (real outputs) | ⬜ (come from real pipeline runs) |
+| `fixtures/llm/` (recorded AI answers) and `examples/pep-*/` (real outputs) | 🟡 PEP 698 done; PEP 701 and 695 runs in progress |
 | Same person across platforms | ⬜ (lowest priority) |
 
 Known issues, already reported to their owners:
