@@ -1,0 +1,31 @@
+{
+  "promptHash": "79260e97943796d7d10f18c21c1780237f83211c02aaa677888b34bdf7b122b2",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 93] pablogsal:\nBoth of these are valid with our current implementation:\n\n>>> x = 1\n>>> f\"___{\n... x\n... }___\"\n'___1___'\n>>> f\"___{(\n... x\n... )}___\"\n'___1___'\n\nIt also handles debug expressions:\n\n>>> f\"___{\n... 1\n... +\n... 1\n... =}___\"\n'___\\n1\\n+\\n1\\n=2___'\n>>> print(_)\n___\n1\n+\n1\n=2___\n\n[post 94] guido:\nThat could be driven by the parser though, right? The parser can have lookaheads for }, : and :=, and then signal to the lexer to switch back.\n\nGot it. I glanced over that (I seem to be missing a lot of detail today – must be the weather :-).\n\nAh, but who says I don’t want to allow }} in a format specifier? Previously maybe we couldn’t but now we could, right?\n\n(Also, could we allow \\{ and \\} to escape curlies? If we could, would we want to? The doubling feels jarring because that’s not how Python escapes anything else.)\n\nThat’s a relief. I guess it’s another part I skimmed incorrectly. The PEP has “Comments, using the # character, are possible only in multi-line f-string literals” which made me think that these also weren’t possible. But if I added a comment to my examples those should work, right?\n\n[post 95] ncoghlan:\nDefinite +1 on the PEP as a whole.\n\nLike others in the thread, I voted in favour of grammar consistency in the poll (allowing quote reuse), but I would also like to see the PEP more strongly discourage actually relying on that in manually written code, in the form of a proposed addition to PEP 8.\n\nThe section on string quotes would be the appropriate place for an addition like:\n\n(The part in parentheses probably shouldn’t be added to PEP 8, but could be included in the PEP 701 section on adding the new PEP 8 text)\n\n[post 96] ncoghlan:\nMaybe tweak the phrasing to be “f-strings that span multiple lines”? (As you say, it’s possible to span multiple lines without using triple quotes to make an explicitly multi-line string)\n\n[post 97] sirosen:\nIn my view, the various mentions of nested f-strings and unreadable code as a possibility are not particularly compelling arguments. It is always possible to write unreadable code.\n\nO0OO0 = 1\nOO0O0 = 0\nOOO00 = O0OO0 + OO0O0 - ...\n\nAnd I haven’t even started defining functions yet!\n\nThe backslash restriction shows up pretty naturally when working with \\n. The other day, I ran into the following real-world example:\n\nf\"{'\\n'.join(mylist)}\\n\"\n\nIt is not intuitive that this raises an error at runtime, which makes it a (possibly unnecessary) point of friction for developers.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 93,
+        "label": "support"
+      },
+      {
+        "post_id": 94,
+        "label": "question"
+      },
+      {
+        "post_id": 95,
+        "label": "support"
+      },
+      {
+        "post_id": 96,
+        "label": "noise"
+      },
+      {
+        "post_id": 97,
+        "label": "objection"
+      }
+    ]
+  },
+  "durationMs": 7276
+}

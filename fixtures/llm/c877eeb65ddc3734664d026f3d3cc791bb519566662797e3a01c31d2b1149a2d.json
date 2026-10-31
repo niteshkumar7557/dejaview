@@ -1,0 +1,31 @@
+{
+  "promptHash": "c877eeb65ddc3734664d026f3d3cc791bb519566662797e3a01c31d2b1149a2d",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 66] stoneleaf:\nThen don’t engage with me. I certainly have no desire to argue my case with someone who thinks so little of me.\n\nI disagree. Mutable defaults serve a valuable purpose.\n\nHow? Misusing mutable defaults can be hard to track down, but trying to misuse f-strings by resusing the quotes is hardly difficult to find and fix.\n\n[post 67] markshannon:\nPersonally, I found the prohibition on reusing the same quote mildly annoying.\n\nf\"You have the following in your basket: {\", \".join(items)}.\" seems perfectly fine to me.\n\nBut I think I would find the restriction much more annoying if I knew that it was unnecessary, and that extra work had been put in just to stop me.\n\n[post 68] malemburg:\nCouldn’t resist…\n\ndef bart(foo):\nf\"\"\"{(\n\nfoo := foo + 1,\nprint('Finally, curly brackets in Python ;-)'),\n[\nprint('Teacher: You should not use full Python in f-strings.')\nfor i in range(foo)\n],\nprint(f'But you can... {foo}-)')\n\n)}\"\"\"\n\nbart(7)\n\n…\n\nFinally, curly brackets in Python ;-)\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nBut you can... 8-)\n\nThis is already possible in 3.10, but I strongly doubt that it was ever intended. Should we really head on in the same direction even more ?\n\nJust to be clear: I like the PEP and support it, since it simplifies the implementation and removes some annoying bits (e.g. the backslash limitation), but I don’t like the removal of the string literal quoting rules and support for arbitrary nesting of f-strings. By keeping the quote restriction, arbitrary nesting can b …\n\n[post 69] arhadthedev:\nI guess the problem arises on scanning code swiftly, diagonally jumping from one quote/bracket/colon to another in a hot potato style, reading everything else with a side vision.\n\nMeanwhile, reading the code sequentially, line by line left to right causes absolutely no problem.\n\nSo I guess that the quote reuse punishes some reading styles that perfectly worked before.\n\n[post 70] dumbpotato:\nHaving read through everything here, I still believe that the mere possibility of having deeply nested f-strings(and the re-use of quotes) is not a good enough reason to disallow it on the parser level.\n\nUltimately(in my opinion), such restrictions belong in linters and code formatters rather than in the language grammar itself.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 66,
+        "label": "objection"
+      },
+      {
+        "post_id": 67,
+        "label": "support"
+      },
+      {
+        "post_id": 68,
+        "label": "question"
+      },
+      {
+        "post_id": 69,
+        "label": "objection"
+      },
+      {
+        "post_id": 70,
+        "label": "alternative"
+      }
+    ]
+  },
+  "durationMs": 7359
+}

@@ -1,0 +1,1597 @@
+{
+  "topicSlug": "pep-701",
+  "models": {
+    "triage": "qwen3.5:4b",
+    "extract": "qwen3.5:9b"
+  },
+  "posts": [
+    {
+      "postId": 1,
+      "bodyClean": "Hi\n\nI am very excited to share with you a PEP that @isidentical, @lys.nikolaou and myself have been working on recently: PEP 701 - PEP 701 – Syntactic formalization of f-strings. We believe this will be a great improvement in both the maintainability of CPython and the usability of f-strings.\n\nWe look forward to hear what you think about this and to getting your feedback!\n\nThanks a lot, everyone for your time!\n\nTLDR\n\n- The PEP proposes a formalized grammar for f-strings in Python by adding f-strings directly into the Grammar instead of using a two-pass hand-written parser.\n\n- This would lift some existing restrictions for f-strings that (we believe) will improve the user experience with f-strings.\n\n- Other benefits include:\n\n- Reduced maintenance costs for f-string parsing code as well us improved usability for users and library developers.\n\n- Better error messages involving f-strings by leveraging the PEG parser machinery.\n\n- The proposed changes would improve overall consistency of the language and provide a way for alternative implementations to accurately implement f-strings.\n\nLink to the PEP\n\n(I am not pasting the PEP contents here to avoid having a diverging version if the PEP is updated)",
+      "signalScore": 11,
+      "triageLabel": "proposal",
+      "skipped": false
+    },
+    {
+      "postId": 2,
+      "bodyClean": "For further context you can read the coverage of my talk about this project on the 2022 Python Language Summit:",
+      "signalScore": 3.6,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 3,
+      "bodyClean": "Thank you for this – I’m a big fan of the formalization proposed herein!\n\nOne clarification (and apologies for any ignorance – I’ve read through the PEP and skimmed the reference implementation, but I’m more familiar with the RustPython parser than the CPython parser right now): how, if at all, will this impact the AST representation? And will there be any formalization of the rules by which f-strings are “resolved” to AST nodes?\n\nI’m referring, e.g., to the logic that I think lives in _PyPegen_concatenate_strings, to combine adjacent constant strings in the JoinedStr, along with the rules for resolving implicit string concatenations containing f-strings and “normal” strings. This is another area in which we’ve implemented custom logic for RustPython based on observing CPython’s behavior. I’m assuming that it’s an entirely separate topic and one that will not be impacted by this PEP as written, which is fine, but I wanted to confirm my understanding and flag it as a pain point with similar characteristics to the f-string parsing itself.",
+      "signalScore": 2.8,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 4,
+      "bodyClean": "Thanks for the feedback @charliermarsh!\n\nNop, the AST will be the same. In fact, that’s how we are checking the implementation: by comparing ASTs of most PyPi packages\n\nNoted. I promise to discuss it with the co-authors but for this PEP we don’t envision changing any of those semantics, as our main target is maintainability for CPython and user experience for end users (not tool authors ATM).\n\nIn any case, we can chat offline about this if you want to elaborate. You can write to pablogsal (at) python (dot) org if you want",
+      "signalScore": 4.6,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 5,
+      "bodyClean": "Can the new syntax be correctly syntax-highlighted in IDEs, code review tools, etc.?",
+      "signalScore": 0.6,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 6,
+      "bodyClean": "There isn’t any reason why this would not be possible. This change is not different from any other syntax change in Python: tools need to update to handle the new syntax and old syntax will work the same way.\n\nIDEs and other review tools need to parse the code and any parser will be able to handle this new syntax because is equivalent to how parsers need to handle nested parenthesis. There is no hard requirement for a PEG parser.",
+      "signalScore": 4.2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 7,
+      "bodyClean": "As you know, I’m in favor of this PEP.\n\nI would like the PEP to note that the existing restrictions on nested quotes (and probably other things) was a deliberate design decision in order to make it easy for editors, syntax highlighters and the like to “support” f-strings. All they really had to do is add “f” to “r”, “b”, “u” and they could at least get past the f-string.\n\nAlong the same lines, I think it would also be worth polling some notable editors and see if this change will cause them any headaches, and record that info in the PEP.\n\nThanks for working on this. I look forward to backslashes in expressions!",
+      "signalScore": 2.6,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 8,
+      "bodyClean": "Most editors that support other languages need to deal with that anyway. For instance in ruby you can do:\n\n>>> puts \"#{ \"1 + 2\" }\"\n1 + 2\n\nor even\n\n>>> puts \"#{ \"#{\" #{1 + 2} \"}\" }\"\n3\n\nThe change indeed implies that tools and editors need to do some work to parse the new syntax but it shouldn’t be something that either they are not dealing with in other languages or something that is impossible to be implemented.\n\nIn any case, this is a good idea: we will try to reach out to some IDE authors and other tools to gather some feedback as per your proposal",
+      "signalScore": 5.2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 9,
+      "bodyClean": "Not sure where to make comments. Is there something on GitHub? At any rate… Item 3 in the Motivation section states:\n\nComments are forbidden even in multi-line f-strings:\n>>> f'''A complex trick: {\n... bag['bag'] # recursive bags!\n... }'''\nSyntaxError: f-string expression part cannot include '#'\n\nI don’t know if that’s expected to change, but I will point out that while you can insert “comments” in regular strings, they are just part of the string:\n\n>>> '''A complex trick: {\n... bag['bag'] # recursive bags!\n... }'''\n\"A complex trick: {\\n bag['bag'] # recursive bags!\\n}\"\n\nDo you intend to support actual comments in f-strings or just allow # ... to be embedded within the string? I’d be disappointed to find the semantics between f-strings and regular strings had diverged (though, of course they have already).",
+      "signalScore": 1.2,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 10,
+      "bodyClean": "Thanks for the feedback @smontanaro ! Unfortunately I am afraid I don’t follow your concern.\n\nHere the ‘#’ is not a comment because is a character of the string itself as is on the example that you mentioned:\n\n>>> '''A complex trick: {\n... bag['bag'] # recursive bags!\n... }'''\n\"A complex trick: {\\n bag['bag'] # recursive bags!\\n}\"\n\nNotice in f-strings, the expression part of the string is not part of the string itself and that part is evaluated. Currently, if you try to use a comment there you get this:\n\n>>> f\"\"\"A complex trick: {\n... bag['bag'] # recursive bags!\n... }\"\"\"\nFile \"<stdin>\", line 3\n}\"\"\"\n^\nSyntaxError: f-string expression part cannot include '#'\n\nWhat we are proposing is that this error disappears and anything after the # comment character gets ignored as any comment of any expression (only when the comment is in the expression part).\n\nNotice this does not change semantics between f-strings and strings because you can still put the # character in the string part of the f-string. That is:\n\n>>> f\"\"\"A complex trick: # look a comment here {\n... 1+1\n... } # look, another comment\"\"\"\n'A complex trick: # look a comment here 2 # look, another comment'\n\nThe comments that we want to allow are only on the expression part.",
+      "signalScore": 5.2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 11,
+      "bodyClean": "Isn’t the difference here that the # ... is inside a {...} pair? I would certainly expect that outside of {...}, # ... would be treated just as normal text (i.e., as part of the string).\n\nEdit: I see that @pablogsal answered this more fully while I was typing…",
+      "signalScore": 1.2,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 13,
+      "bodyClean": "Exactly Noting will change on the string parts of f-strings.",
+      "signalScore": 3.2,
+      "triageLabel": "proposal",
+      "skipped": false
+    },
+    {
+      "postId": 14,
+      "bodyClean": "Rationale: while allowing backslash escapes is no problem (point 2), as they must already be recognized to detect strings, allowing un-escaped quotes and infinite nesting (points 1 and 3) is, certainly for regex-based syntax highlighting, which IDLE uses. Regexes are known to not handle any nesting easily and indefinite nesting not at all. Detecting indentifiers, strings, and comments in code does not require dealing with nested parentheses at all. IDLE has a ‘hyperparser’, used for various purposes, that detects the same elements, plus line ends, scanning backwards. I suspect that it would also not work for f strings with the changes proposed.\n\nLess important comments:\n\nMotivation point 4: the linked Wikipedia section says nothing about escape sequences.\n\nIn the next sentence, does ‘regular grammar’ have the technical meaning of the restricted grammar corresponding to ‘regular expressions’ or the colloquial meaning of ‘normal’ (which is different now then when 536 was written)?\n\nOne limitation that this will not and I presume this cannot fix is that set expressions (displays and comprehensions) must still be surrounded by spaces to avoid ‘{{’ and ‘}}’.",
+      "signalScore": 2.2,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 15,
+      "bodyClean": "This is correct, this means that it will not be possible to lex strings anymore using regular expressions. After this PEP (at least in its current form), string quotes in f-strings must be dealt with the same way parentheses-highlighting is dealt with.\n\n@tjreedy Would you like us to reflect this in the PEP?\n\nNotice that forcing the parser to reject reused quotes would complicate the lexer and the parser considerably because it means that it cannot just “parse” the expression part in a regular way because it needs to be aware that is inside an in-flight f-string in order to reject repeated quotes. This was easy to do in a two-pass method because the main parser is unaware of what’s inside the f-string but that won’t be true any more once we move this to the main parser.\n\nIn any case, if this point proves to be too controversial, we are happy to consider dropping it\n\nOh, thanks for pointing that out. Something went wrong there in the writing. We will fix it\n\n[Edit] Corrected it here\n\nHere “regular grammar” means adding f-strings to the main (PEG) parser as part of the formal grammar (the one in Grammar/python.gram).\n\nCorrect, there is no way to disambiguate that.",
+      "signalScore": 5.2,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 16,
+      "bodyClean": "Another option here is to restrict arbitrary nesting to a specific depth. I think that will allow regex-based lexers to work at the price of having some complex regular expression.\n\n@tjreedy do you think that would be a good compromise? If not, what can we do to make it easier to support in IDLE?",
+      "signalScore": 4.4,
+      "triageLabel": "alternative",
+      "skipped": false
+    },
+    {
+      "postId": 17,
+      "bodyClean": "Are there any performance implications?",
+      "signalScore": 0.2,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 18,
+      "bodyClean": "Nothing that we can think of. Parsing may be anecdotally faster due to the lack of a second phase for f-string parsing.",
+      "signalScore": 4,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 19,
+      "bodyClean": "Got it. Thanks.",
+      "signalScore": 0.2,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 20,
+      "bodyClean": "This might cause problems for Emacs modes for Python.",
+      "signalScore": 1.9,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 21,
+      "bodyClean": "Surely emacs supports JavaScript and Ruby and both languages have interpolation strings with the same constraints as this PEP so I think that a solution to this problem already exists there, although I am not sure how that works as I am not familiar with emacs. Maybe someone more versed in how this is supported can help us understand how that is being handled.",
+      "signalScore": 4.4,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 22,
+      "bodyClean": "You describe f-strings as “literals” in the PEP. Please don’t do that. F-strings can contain executable code and can have side-effects. They are code not string literals.\n\nWe don’t talk about “def literals” and “lambda literals”. The documentation doesn’t even refer to list or dict literals (rather, “displays”). We shouldn’t abuse the word literal to describe f-strings either.\n\nThe PEP says:\n\n(emphasis added) and then give three examples:\n\nf\"These are the things: {\", \".join(things)}\"\n\nf\"{source.removesuffix(\".py\")}.c: $(srcdir)/{source}\"\n\nf\"{f\"{f\"infinite\"}\"}\" + \" \" + f\"{f\"nesting!!!\"}\"\n\nThe first two might be perfectly understandable to the parser, but as a human reader, they make it more complicated and error-prone to work out which quotes delimit the f-string and which do not.\n\nEspecially when the f-string may be concatenated with other strings, or embedded in larger expressions. Even more especially when used with long line lengths.\n\nTaken in isolation, the human reader can just look at the start of the line and see the f\" token, and then skip to the end of the line to find the matching close quote. But in real code, where f-strings are often embedded in complex expressions and long lines, it is not that easy. You have to manually parse the f-string, counting quotes and braces, and work out which ones are paired with which other ones.\n\nYou know. The sort of thing computers are excellent at but people suck at.\n\nI consider the first two examples terrible code which should be discouraged and the fact that your PEP allows it is a point against it, not in favour.\n\nEspecially since we can get the same effect by just changing one of the pairs of quotes to '. So in this regard, the PEP doesn’t even add functionality. It just encourages people to write code which is harder to read and more error prone.\n\nIn Python 1.x and 2.x, we had the backtick for evaluating the repr of objects. It could be nested exactly as you have here:\n\n# Python 2.7\n\n>>> `(`123`, 456)`\n\n\"('123', 456)\"\n\nOne of the reasons we got rid of it was because it was too hard for the human reader to read nested backtick expressions.\n\nAlso keep in mind that many editors will have very simple-minded colourizers. Code inside f-strings may not be colourized, or if it is, the colourizer surely won’t include a full blown Python parser. So it will likely colour the first example as a comma-separated pair of strings:\n\nf\"These are the things: {\" COMMA \".join(things)}\"\n\nand the second looks like you are calling a .py method on a string literal, followed by a quote instead of the opening paren. Many editors will colour this as a syntax error, or at least least, incorrectly.\n\nf\"{source.removesuffix(\" .py \")}.c: $(srcdir)/{source}\"",
+      "signalScore": 2.4,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 23,
+      "bodyClean": "Thanks a lot for the feedback @steven.daprano and thanks for taking the time to add some context to the explanations!\n\nWe will correct this in the document soon.\n\nIf I understand correctly your concern is that the nesting of the same kind of quote will make it harder for humans to parse and will lead to code that may be harder to read because the quote character is the same on start and end (as opposed to other delimiters). Would that summarise your concerns correctly?\n\nYes, this is being discussed currently in this thread and we will update the PEP after discussing about it.\n\nAlso notice that as I indicated before any editor that supports other popular languages including ruby and JavaScript will have the same problem as arbitrary nesting with quote reuse is allowed in those languages.",
+      "signalScore": 5.2,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 24,
+      "bodyClean": "As I assume this is going to be a controversial point of the proposal I am making a poll.\n\nQuestion: Do you think that f-strings should allow quote reuse within the expression part? (as in f” something { my_dict[“key”] } something else “)\n\n- Yes\n\n- No\n\n0\nvoters\n\nPlease take the time to read the PEP first and then the discussion so far regarding sone of the arguments in favour and sone of the objections.",
+      "signalScore": 5,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 25,
+      "bodyClean": "Be sure to put in a docs patch then.\n\nThe original PEP refers to them as literals too.\n\nI don’t think it’s worth quibbling over this distinction. We refer to 3+4j as a complex literal, and it’s quite happily parsed by ast.literal_eval - and literal_eval’s docstring says that the expression “may only consist of literal structures”, and then includes list/dict/set in that.\n\nThere is a difference between what the tokenizer calls a literal and what a programmer calls a literal. PEP 701 is no further at fault than large slabs of other formal Python documentation.",
+      "signalScore": 2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 26,
+      "bodyClean": "As one of those “editor people”, my answer for VS Code is, “don’t worry about us”. It’s our job to make this work, not for the language to restrict itself just to conform to some technical limitations an editor may have for some grammar. Python did quite well for a long time only worrying if you could type code out in Notepad, so I don’t think we should start changing that policy now.",
+      "signalScore": 4.5,
+      "triageLabel": "alternative",
+      "skipped": false
+    },
+    {
+      "postId": 27,
+      "bodyClean": "And for those editor people who don’t have the resources of the world’s largest IT company behind them, paying them to make it work?",
+      "signalScore": 0.6,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 28,
+      "bodyClean": "For recognition of an entire f-string, the issue is reuse of opening quote. IDLE currently properly recognizes the following:\n\nf\"\"\"Things: {\na + f\"{b + ', '.join(things) # Nested f-string.\n}\" suffix} ending\"\"\"\n\nThis current compiles as “SyntaxError: incomplete input”.\n\ngh-73473 requests that IDLE do replacement field syntax highlighting with brace matching and auto-completion. No one has submitted a PR yet. I have no plans to do so. A problem for key-by-key response is the need to both within a string (to recognize the end of the string) and not within a string (to do the other stuff).\n\nWould you like us to reflect this in the PEP?\n\nIf quote reuse stays, please do so. The SC should know that approving this as is will break a few things. Perhaps add at least “Lexing all possible f-strings with relational expressions will no longer be possible. In particular, reuse of opening quotes in replacement fields will be a problem.”\n\nI would initially document that IDLE cannot properly handle f-strings that reuse the opening quote in replacement fields, and that highlighting would not be the only thing affected. (To expand the latter, I will have to examine the uses of hyperparser to see the consequence of stopping scanning prematurely. Or clone, build python, and run IDLE in your alternate repository.) I would add that IDLE users should not use code reformatters that change the quotes used for f-strings or any quotes within f-strings.\n\nif this point proves to be too controversial, we are happy to consider dropping it\n\nI’d like that possibility kept alive.\n\nContinuing other comments:\n\nSpecification - please note that FSTRING-X tokens are defined below. I went looking for them in the PEP the text directed me to.\n\nConsequences: expression comments require additional lines even to close the replacement field.\n\nRejected ideas, 1: I think you mean wrap in parentheses, as in the example? Would f’{(a !=b)} be an example for ‘!’?",
+      "signalScore": 3,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 29,
+      "bodyClean": "I personally use SciTE, the reference editor for Scintilla which is also used in Notepad++ and others. It has syntax highlighting support for a number of obscure languages. I would say that, once one open source project has good syntax highlighting support for nested f-strings, others will be able to imitate. One of the huge advantages to a programmer’s editor is that it’s incredibly easy to dogfood, so pain points are that much more likely to be dealt with.\n\n(Case in point: I would never have expected my editor to recognize #define directives in C programs and then intelligently parse #if/#else directives to show which branch is active and which isn’t; but it does. And it’s very handy.)",
+      "signalScore": 1,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 30,
+      "bodyClean": "I voted yes, as I have definitely hit the “you cannot use the same type of quote in the expression part” issue myself. And I think consistency in allowing whatever can be in an expression is easier to explain and understand.\n\nHaving said that, I’d prefer it if the PEP warned agains over-use of this feature, as it has the possibility of being difficult to read. In particular, I’m concerned about the possibility that formatters like black could try to enforce a particular style here, and I don’t think that would be a good idea (there are too many variables involved in deciding what’s “readable” in this context).",
+      "signalScore": 3.2,
+      "triageLabel": null,
+      "skipped": false
+    },
+    {
+      "postId": 31,
+      "bodyClean": "Sure, corporate entities can easily rise to the challenge.\n\nI’m more worried about the long tail of less active libraries and apps that will just have slightly broken Python support forever because the amount of refactor needed to lex Python code accurately is prohibitive. It’s not quite Python’s problem but it’s also not the fault of Python users when they write valid code and encounter buggy highlighting.\n\nLet me add some research though:\n\n- Pygments (Python library) already supports nested f-strings with the same quote type\n\n- highlight.js (which Discourse uses) can already lex nested Python f-strings with the same quote type\n\n- prism.js (another top Google hit for Javascript) states that it can’t lex even current f-strings\n\nI didn’t expect a 2/3 pass rate, so that’s quite promising.\n\nCode I tried in case people want to reproduce\nI tested Pygments in a notebook with\n\nfrom IPython.core.display import HTML\nfrom pygments import highlight\nfrom pygments.lexers import PythonLexer\nfrom pygments.formatters import HtmlFormatter\n\ncode = \"\"\"\nf\"a{str(f\"foo{int}\")}b\" + 1\n\"\"\"\nHTML(highlight(code, PythonLexer(), HtmlFormatter()))\n\nI tested highlight.js with\n\n<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/default.min.css\">\n<script src=\"https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js\"></script>\n<script src=\"https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/languages/python.min.js\"></script>\n<script>hljs.highlightAll();</script>\n<pre><code class=\"language-python\">f\"a{str(f\"foo{int}\")}b\" + 1</code></pre>\n\nAnd to demonstate Discourse rendering it:\n\nf\"a{str(f\"foo{int}\")}b\" + 1",
+      "signalScore": 1.8,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 32,
+      "bodyClean": "I will note that even with Discourse highlighting it (and lol, it looks like it’s not highlighted in quotes) I still find it hard to interpret. I would hope that even if it’s allowed (and I’m in favour of that, if only for the purposes of making the rules more consistent), it will be discouraged, and remain a rare case in real-world code.",
+      "signalScore": 1.8,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 33,
+      "bodyClean": "Yes, thank you.\n\nThis situation would be equivalent to the Python 2 backtick repr syntax, except that was never widely used and I expect that f-strings will be used very frequently\n\nLikewise in mathematics, where we use |x| for absolute value. Its fine when there’s only one pair, but |x|y-2|z| is ambiguous.\n\nIt would be worth checking with people in the Ruby and JS communities to see just how well their editors support arbitrary nesting, and if they don’t, how much of a problem it is in practice.",
+      "signalScore": 1,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 34,
+      "bodyClean": "I appreciate the goals of the PEP, and support more consistency in the various parsers, both for CPython and across alternative implementations. I do think it will break editors and other syntax highlighting tools, but hopefully they will eventually catch up.\n\nThe biggest problem for me is the reuse of opening quote feature. I get why you want to lift this restriction, and I get that you want to enable arbitrary nesting of quotes, but I think this is helping the machine more than the human. Even the simple example from the PEP is challenging for me to parse.\n\n>>> f\"These are the things: {\", \".join(things)}\"\n\nI read code left to right, so as soon as I hit that second quote, I start scratching my head and asking “what’s going on here?”\n\nOkay, I can eventually work it out, but it won’t remain obvious. It’s worse for some of the more complex examples, and I suspect it’ll be one of those things that trip up every reader of code like this, bringing their comprehension of the intent to a screeching halt. If I had to review such code, I wouldn’t let it in. It’s like everything is now an f-nail, and JWZ’s famous quote about regexps comes to mind.\n\nAre these concerns enough to add artificial constraints on the implementation? Maybe, since the PEP already carves out at least one restriction. But maybe for consistency, the answer should be to let people write terrible, unreadable code!\n\nI voted “no” since for me, the concerns outweigh the benefits in this case. Heavily nested or reused quote characters is a code smell to me.",
+      "signalScore": 5.9,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 35,
+      "bodyClean": "I agree; it’s a code smell. As such, style guides and code review should frown upon it. But it will make things easier if the language permits it.",
+      "signalScore": 0.8,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 36,
+      "bodyClean": "I have no idea, hence why I said, “my answer for VS Code”, not “for all editor developers worldwide”.",
+      "signalScore": 2.1,
+      "triageLabel": null,
+      "skipped": false
+    },
+    {
+      "postId": 37,
+      "bodyClean": "Thanks a lot, @tjreedy for taking the time to give all this context about IDLE and how this would affect it. Your experience here is very important to us.\n\nWe will reflect this on the PEP so this is taken very seriously when making decisions but I can promise that we will discuss this issue among the authors to see what we can do after we gather some other feedback from other places.\n\nThanks for the correction, we will fix it!\n\nWe will incorporate this to the PEP.\n\nI will try to rephase that. Answering your question (if I understand it correctly) f’{(a !=b)} works currently without parens and that will keep working:\n\n>>> a = b = 1\n>>> f\"{a != b}\"\n'False'\n\nThanks a lot for this feedback! We will get to fix it as soon as possible!",
+      "signalScore": 4,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 38,
+      "bodyClean": "Hmm, this is a good point @steven.daprano! Thanks a lot for raising this with us. At the very least we will reflect this on the PEP so it will be taken as an important aspect of the balance.\n\nI am not sure what we finally propose (quote reuse or not) as we want to gather some feedback first, but we will discuss this aspect among authors again. I think this is an important point but we need to think about it carefully because is less “consistent” and it raises the maintenance cost quite a lot.\n\nIn any case, thanks for pointing it out and for the examples!",
+      "signalScore": 5,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 39,
+      "bodyClean": "If I’m understanding correctly, the only way for the initial quote to be contained within an f-string is if it is also inside an (unbalanced) open brace, right? So it shouldn’t be ambiguous.",
+      "signalScore": 1,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 40,
+      "bodyClean": "Ignoring the consistency arguments, limiting quote reuse raises quite a lot the complexity. This is because when parsing the expression part now the parser needs to be aware that is parsing an expression inside an f-string with a given quite, and that becomes even more tricky when f-strings are nested with different quotes.\n\nThis doesn’t mean that this invalidates the “code smell” argument by any means: I just want to give some context on the maintenance point. I totally understand why you voted “no” (and that’s why I really want feedback from everyone).\n\nI think this is an important point that I guess is not going to have an easy answer. But I promise that we will do our best to reflect all of these considerations in the PEP when a decision is taken and to take all of these into account for our final proposal.",
+      "signalScore": 5.8,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 41,
+      "bodyClean": "Yeah, is not technically ambiguous in the grammatical sense, but I was interpreting “ambiguous” as “ambiguous for the human eye” as a proxy for “visually confusing” or similar. If I misunderstood that I apologize.",
+      "signalScore": 4,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 42,
+      "bodyClean": "Thanks, @pf_moore for the suggestion. We will try to incorporate something along these lines if we decided to finally propose quote reuse.",
+      "signalScore": 6,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 43,
+      "bodyClean": "Yep, agreed on “confusing” (and that’s why I would try to avoid it where possible), but wanted to clarify whether it was truly ambiguous.",
+      "signalScore": 0.2,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 44,
+      "bodyClean": "Is the possibility of code generators worth mentioning here? I imagine it would be more complex to write a code generator that needed to track what types of quote have been used when generating f-strings.\n\nHaving said that, I can’t imagine why a code generator would be making heavy use of f-strings in the first place, as if you’re already generating the code, why not generate the expression that the f-string is equivalent to? But I’ve never written a code generator, so my intuitions on what’s likely to be common are suspect, at best",
+      "signalScore": 2.2,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 45,
+      "bodyClean": "I voted Yes because I think that any (unnecessary) restriction will sooner or later bite someone. But I agree that unnecessary nesting of the same kind of quote is poor style and should be discouraged. [Rob Cliffe]",
+      "signalScore": 1,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 46,
+      "bodyClean": "IMO f-strings should continue to look like regular Python strings to a Python programmer and not allow non-intuitive quoting just because the parser can handle this (since it knows that it’s actually parsing outside the string definition context).\n\nIt would be really strange to have the parser complain about:\n\nwhile accepting:\n\nOtherwise, a programmer can easily lose track of where the f-string starts and ends.\n\nI also don’t think that nesting f-strings should be allowed, but I guess that ship has already sailed.\n\nPersonally, I find the tendency of Python getting more and more complex in many niche areas unfortunate. Often these additions are not done willingly, but get added by accident (e.g. in the case of nested f-strings), but, of course, people find these “features” and start using them. And then we’re stuck with those “features” because of backwards compatibility concerns.",
+      "signalScore": 4.8,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 47,
+      "bodyClean": "It feels to me like it is okay if the parser allows quote reuse, as long as we have the documentation, formatters, and linters to warn us against it.",
+      "signalScore": 0.4,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 48,
+      "bodyClean": "Reading this discussion, I find it difficult to understand why prior art (this feature as implemented in other languages) is given so little weight. Shouldn’t we strive for general compatibility so as to make it easier for users to learn and use the language? Instead of introducing another stumbling block where a programmer must go “Oh, this language has this common feature, so I assume it works the same as in all other languages… hey, what’s this error?”\n\nIt also feels to me (and forgive me if I’m wrong) that people reacting to unreadability of f\"test {\"-\".join(words)} test\" do so without taking syntax highlighting into account. In pure black - I agree, it’s unpleasant to parse, but with color it’s really no problem to see where pure string ends and embedded code begins.",
+      "signalScore": 3.4,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 49,
+      "bodyClean": "Why? There’s a clear marker in the second one that says “stuff between {} is treated differently” (discourse even does the highlighting for that). f-strings have been around for almost 6 years now, and that {} does un-string-like things is the whole point, which people seem to have gotten with relative ease.\n\nSeveral of the examples against quote reuse have minimal code being executed to interpolate the string. Once that part becomes longer, like\n\nf\"Please, have some {assorted_snacks[\"for_guests\"].serve()}, they're delicious!\"\n\nit becomes much less ambiguous (YMMV) which parts are string and what parts are string interpolation.\n\nFor example, not being able to simply use a some_dict[\"key\"] within the interpolation part, in a way that’s consistent way with the (usually black-enforced) style of double-quotes in the rest of the code base is really annoying, and a constant source of stylistic and mental friction.\n\nMy POV is that it’s completely fine if someone doesn’t like nested quotes of the same kind. But like simplicity, another oft-repeated koan is “we’re all consenting adults here”, and – as the poll shows – there’s a sizeable portion of people who want the quote reuse to be possible. It would be easier to argue the case against enabling that if the costs were borne by the implementation, but even that’s not the case - the implementation would get simpler[1], the language more regular (for those who care about it), and people could choose whether to embrace or forbid its use in their codebase.\n\nAt least, I think that personal style choices are not a sufficiently strong argument for forbidding quote reuse.\n\n- speaking about CPython here, not other software like editors ↩︎",
+      "signalScore": 2.6,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 50,
+      "bodyClean": "I’m pretty sure that black can be fixed to allow single quotes in {} parts of f-strings to continue to allow use of string literals - perhaps even enforce this\n\nThis code doesn’t look much different, but it clearly matches expectations when writing Python string literals:\n\nf\"Please, have some {assorted_snacks['for_guests'].serve()}, they're delicious!\"\n\nI frankly don’t understand, why people would want to disrupt Python’s quote handling on purpose. If a programming language requires code highlighting to be fully understood by humans, then something is wrong, and Python has a long history of having a nice human friendly syntax.\n\nFor more complex templating logic, it’s much better to go with e.g. Jinja2. f-string are simply a nice compact way of getting access to variables. The fact that you can use arbitrary expressions is one of the “features” I talked about in my previous post. This is mostly due to keeping the implementation simple and avoid limiting ways of accessing variables, but not really intended for arbitrary code execution. Of course, people still use the feature that way and that’s unfortunate, IMO.",
+      "signalScore": 1.4,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 51,
+      "bodyClean": "I don’t think it disrupts the quote handling really. The first time I tried to subscript a key in an f-string I was surprised that I had to change from double to single quote. So in that case the current qoute handling was disruptive. It felt like an arbritrary restriction.\n\nFurthermore, I don’t really see the readability issues that are brought up here, maybe because I started using Python after f-strings were introduced and because I’ve always used syntax highlighting tools.\n\nI agree with the people saying that the reuse of quotes in f-strings should not be syntactically incorrect but instead be discouraged in the docs.",
+      "signalScore": 2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 52,
+      "bodyClean": "If all the languages are “compatible”, what makes them different?\n\nThe reason I fell in love with Python was its readability:\n\n- lack of boilerplate\n\n- significant whitespace\n\n- use of keywords\n\nAs for prior art, that goes both ways: Python finally got an assignment expression, and it does not look like C’s – why? Because C’s looked the same as equality testing and was therefore easy to use incorrectly.",
+      "signalScore": 1.2,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 53,
+      "bodyClean": "I don’t think you’re asking this question in good faith. Languages differ by a multitude of things, such as supported paradigms and features, how they jell with each other, which aspect gets the most attention and ease of use and so on. Gotchas in basic features, however, are not one of them. I don’t think anyone would disagree that mutable defaults gotcha is a regrettable part of Python that might be too late to fix. Banning re-use of quotes is just that, a gotcha.\n\nThis comparison is not apt here, C predates Python by 20 years, plus 30 more until this feature got introduced in Python. That’s long enough to call it “a reimagining”, not simply a reimplementation. Whereas four modern languages that the PEP is referring to have implemented string interpolation within a few years from Python at most. JavaScript got it the same year as Python IIRC, 2016. Swift was first released in 2014.",
+      "signalScore": 1.2,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 54,
+      "bodyClean": "As for reusing the opening quotes, I wouldn’t recommend it and would likely try to have a formatter rule to avoid even having such discussions in reviews. However, I personally do not have an issue with parsing this example f\"These are the things: {\", \".join(things)}\", and even less so with syntax highlighting.\n\nf\"These are the things: {\", \".join(things)}\"\n\nIt does make me wonder how much of this is an issue with familiarity; has this been a point of contention or a pain point in other communities that allow quote reusing, like the aforementioned Ruby/JS communities?\n\nIn terms of the benefits, in addition to reducing the complexity of the implementation, I think this increased freedom would be helpful for ad hoc testing/experimenting. On numerous occasions, I have gotten SyntaxError when absent-mindedly reusing opening quotes in a REPL session. While not particularly inconvenient, this PEP would have been nice to have in those situations.\n\nOverall, considering all those things I’m +1 for this PEP.",
+      "signalScore": 1.6,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 55,
+      "bodyClean": "Note that any IDE, code review tool, or text editor that supports syntax highlighting of POSIX sh code already needs to handle nested string delimiters. For example, I’ve got this little shell script that I can use from within WSL to let Windows open a file as though I had double clicked it:\n\n#!/bin/sh\nset -eu\nfilename=\"$1\"\ncd \"$(dirname \"$filename\")\"\nexplorer.exe \"$(basename \"$filename\")\"\n\nUnlike in Python, you don’t have the choice of using different quotes in shell; those nested quotes are necessary for correctness and cannot be avoided.\n\nNote that this isn’t an argument for making Python’s syntax more sh-like, only an argument that nested quotes are already the norm in a major enough and old enough programming language that nearly every general purpose text editor will have a way to handle highlighting of nested quotes already.",
+      "signalScore": 2.4,
+      "triageLabel": "alternative",
+      "skipped": false
+    },
+    {
+      "postId": 56,
+      "bodyClean": "I think the first example from the PEP using \", \".join(things) is not great to explain why we’d want this feature. The second example is better:\n\nf\"{source.removesuffix(\".py\")}.c: $(srcdir)/{source}\"\n\n(though maybe it tries a little too hard to be realistic by using $(srcdir) which looks like another form of interpolation but is just a literal string).\n\nI like the proposed feature, because it makes it possible to copy any valid expression from another part of the code into an interpolation without having to worry about string quotes.",
+      "signalScore": 3.6,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 57,
+      "bodyClean": "It’s a putative language development. Editor vendors are used to having to track those - you might almost say it comes with the territory.",
+      "signalScore": 0,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 58,
+      "bodyClean": "In my lay opinion, once a feature exists there will be people who use it in all manners of clever ways.\n\nI voted no, for the following reason:\n\nHarder for beginners to parse at a glance. This feature absolutely requires some kind of syntax highlighting / code-formatting to understand what is happening in the code. This is a drastic increase in complexity.",
+      "signalScore": 1,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 59,
+      "bodyClean": "That same argument has been used against any new feature. The mere possibility of abuse should not be enough to reject a new feature (TBH, there are better reasons to reject most feature proposals). Only the overwhelming likelihood that most uses would be (“clever”) abuse should count against a feature.\n\nBeginners aren’t expected to know the full grammar of the language, and let’s not forget that most f-strings don’t contain any string literals inside interpolations. I expect that to remain so – most of the time there’s just no reason to put anything beyond a mere variable name or a very simple expression.\n\nIt has been explained over and over now that that’s par for the course for editor maintainers.\n\nVery few, of course, but that’s not even close to being a litmus test for a few feature.\n\nA better way to evaluate proposed new features (especially new syntactic features) is if it composes cleanly with other syntax. Sometimes people seem to use the term “referential transparency”; an example is that if we have f(x+1), assuming a is a brand new variable, it should behave the same as a = x+1; f(a). And vice versa.\n\nSo if we have\n\ndef py2c(source):\nprefix = source.removesuffix(\".py\")\nreturn f\"{prefix}.c\"\n\nIt would be expected that if we replace the variable prefix with its definition, the answer should be the same:\n\ndef py2c(source):\nreturn f\"{source.removesuffix(\".py\")}.c\"",
+      "signalScore": 5,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 60,
+      "bodyClean": "First thanks for all the work so far on this PEP, I’ve been looking forward to this grammar for some time!\n\nThe grammar for fstring_replacement_field accepts a NAME after the optional !, but anything other than s r or a produce a SyntaxError which makes it seem that this should be formally specified in the grammar. Or is this somehow up to the different implementations to define?\n\nThere is also the case of fr strings, which I’ll note the reference implementation handles just fine. In this case, I assume that the r/R character is also part of FSTRING_START. What about the reversed; is r/R captured in this token for rf strings? I know the tokens are stated to not be binding definitions, but part of this PEP is increased clarity.\n\nRelatedly, the tokenizer module in the reference implementation seems to have not caught up with the PEP yet. I assume because it is the python and not the private C implementation. I was curious if the tokens like FSTRING_START would be the type, exact_type, or disappear into STRING before it got to the user.\n\necho 'f\"These are the things: {\", \".join(things)}\"'|./python.exe -m tokenize -e\n1,0-1,26: STRING 'f\"These are the things: {\"'\n1,26-1,27: COMMA ','\n1,28-1,44: STRING '\".join(things)}\"'\n1,44-1,45: NEWLINE '\\n'\n2,0-2,0: ENDMARKER ''\n\nJust a quick note on the nested quotes. I believe @pf_moore mentioned code generators which I probably know equally little about, but round-tripping from text → code → text is very hard with nested f-strings as it stands. Printing out strings always uses single quotes, unless there are single quotes, but not double quotes in the value, then it uses double quotes to print. It will never use triple quotes as delimiters.",
+      "signalScore": 2,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 61,
+      "bodyClean": "That is checked when the AST node is constructed. This is just because our parser handles this much better this way because we don’t want to make single letters keywords or soft keywords. We will mention this in the PEP.\n\nYep, we are not planning of doing all the work until the PEP is accepted (in case is accepted) and we know exactly the set of constraints.\n\nThe PEP leaves the specifics of the token contents undefined and up to the implementation. I am not sure what we will decide for CPython if the PEP is accepted at the end but I can tell you that currently, we capture both. For instance, for fr'hello {1+2} bye':\n\n[TokenInfo(type=61 (FSTRING_START), string=\"fr'\", start=(1, 0), end=(1, 3), line=\"fr'hello {1+2} bye'\\n\"),\nTokenInfo(type=62 (FSTRING_MIDDLE), string='hello ', start=(1, 3), end=(1, 9), line=\"fr'hello {1+2} bye'\\n\"),\nTokenInfo(type=25 (LBRACE), string='{', start=(1, 9), end=(1, 10), line=\"fr'hello {1+2} bye'\\n\"),\nTokenInfo(type=2 (NUMBER), string='1', start=(1, 10), end=(1, 11), line=\"fr'hello {1+2} bye'\\n\"),\nTokenInfo(type=14 (PLUS), string='+', start=(1, 11), end=(1, 12), line=\"fr'hello {1+2} bye'\\n\"),\nTokenInfo(type=2 (NUMBER), string='2', start=(1, 12), end=(1, 13), line=\"fr'hello {1+2} bye'\\n\"),\nTokenInfo(type=26 (RBRACE), string='}', start=(1, 13), end=(1, 14), line=\"fr'hello {1+2} bye'\\n\"),\nTokenInfo(type=63 (FSTRING_END), string=' bye', start=(1, 14), end=(1, 18), line=\"fr'hello {1+2} bye'\\n\"),\nTokenInfo(type=4 (NEWLINE), string='', start=(1, 19), end=(1, 19), line=\"fr'hello {1+2} bye'\\n\")]\n\nand for \"fr'hello {1+2} bye'\":\n\n[TokenInfo(type=61 (FSTRING_START), string=\"rf'\", start=(1, 0), end=(1, 3), line=\"rf'hello {1+2} bye'\\n\"),\nTokenInfo(type=62 (FSTRING_MIDDLE), string='hello ', start=(1, 3), end=(1, 9), line=\"rf'hello {1+2} bye'\\n\"),\nTokenInfo(type=25 (LBRACE), string='{', start=(1, 9), end=(1, 10), line=\"rf'hello {1+2} bye'\\n\"),\nTokenInfo(type=2 (NUMBER), string='1', start=(1, 10), end=(1, 11), line=\"rf'hello {1+2} bye'\\n\"),\nTokenInfo(type=14 (PLUS), string='+', start=(1, 11), end=(1, 12), line=\"rf'hello {1+2} bye'\\n\"),\nTokenInfo(type=2 (NUMBER), string='2', start=(1, 12), end=(1, 13), line=\"rf'hello {1+2} bye'\\n\"),\nTokenInfo(type=26 (RBRACE), string='}', start=(1, 13), end=(1, 14), line=\"rf'hello {1+2} bye'\\n\"),\nTokenInfo(type=63 (FSTRING_END), string=' bye', start=(1, 14), end=(1, 18), line=\"rf'hello {1+2} bye'\\n\"),\nTokenInfo(type=4 (NEWLINE), string='', start=(1, 19), end=(1, 19), line=\"rf'hello {1+2} bye'\\n\")]",
+      "signalScore": 5,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 62,
+      "bodyClean": "It feels oddly asymmetrical that the opening quote is present, but the closing quote is implicit. Does it really have to be that way?",
+      "signalScore": 0.4,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 63,
+      "bodyClean": "No, but it makes the current implementation easier and is not visible (at least from the C tokenizer).\n\nIn any case, the tokens in the PEP are there just for reference to understand what they do but they are an implementation detail. For the tokenizer module, we can obviously think of something that makes more sense as a public API.",
+      "signalScore": 4.2,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 64,
+      "bodyClean": "I think we need to be careful relying on syntax highlighting as a cure for confusing syntax. I use and rely on syntax highlighting, but what about visually impaired programmers or other folks for which highlighting might not help or be available?\n\nI do think it gets worse with nested f-strings, as in this PEP example:\n\nf\"{f\"{f\"infinite\"}\"}\" + \" \" + f\"{f\"nesting!!!\"}\"\n\nThat’s incredibly difficult for a human to parse IMHO. If this is the price we have to pay for consistent implementation, and some arguably useful features [1], then we should ensure that the tools, from the Python parser, to editors, to linters, are aligned about how to help the user understand these complex f-strings.\n\n- although TBH I’ve very rarely been hit by such f-string limitations and they are usually quite easy to work around ↩︎",
+      "signalScore": 3.5,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 65,
+      "bodyClean": "Really? How about i + 1 in Python compared to C, where i is an int in both languages?\n\nIn case the gotcha isn’t obvious, what if i = 2147483647?\n\nThe current restrictions on f-strings are not what I would call a gotcha. If anything, they are (minor?) annoyances – things that cause an explicit error when you try them, not things which silently do the wrong thing.\n\nI disagree.\n\nI think that Python absolutely made the right choice here. If a language provides only one of early-bound and late-bound default values for functions, I state that Python’s choice of early binding is by far better. But that’s an argument for another discussion\n\nBringing the discussion back on topic:\n\nCan you give an example of code which silently does the wrong thing instead of raising an exception because of the lack of re-use of quotes?\n\nIf it really is a gotcha, causing code to silently misbehave, that may push me from “oppose re-use of quotes” to “support re-use”. (Depending on just how contrived or realistic the gotcha is.)",
+      "signalScore": 2.2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 66,
+      "bodyClean": "Then don’t engage with me. I certainly have no desire to argue my case with someone who thinks so little of me.\n\nI disagree. Mutable defaults serve a valuable purpose.\n\nHow? Misusing mutable defaults can be hard to track down, but trying to misuse f-strings by resusing the quotes is hardly difficult to find and fix.",
+      "signalScore": 1.2,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 67,
+      "bodyClean": "Personally, I found the prohibition on reusing the same quote mildly annoying.\n\nf\"You have the following in your basket: {\", \".join(items)}.\" seems perfectly fine to me.\n\nBut I think I would find the restriction much more annoying if I knew that it was unnecessary, and that extra work had been put in just to stop me.",
+      "signalScore": 4.5,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 68,
+      "bodyClean": "Couldn’t resist…\n\ndef bart(foo):\nf\"\"\"{(\n\nfoo := foo + 1,\nprint('Finally, curly brackets in Python ;-)'),\n[\nprint('Teacher: You should not use full Python in f-strings.')\nfor i in range(foo)\n],\nprint(f'But you can... {foo}-)')\n\n)}\"\"\"\n\nbart(7)\n\n…\n\nFinally, curly brackets in Python ;-)\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nTeacher: You should not use full Python in f-strings.\nBut you can... 8-)\n\nThis is already possible in 3.10, but I strongly doubt that it was ever intended. Should we really head on in the same direction even more ?\n\nJust to be clear: I like the PEP and support it, since it simplifies the implementation and removes some annoying bits (e.g. the backslash limitation), but I don’t like the removal of the string literal quoting rules and support for arbitrary nesting of f-strings. By keeping the quote restriction, arbitrary nesting can be prevented.",
+      "signalScore": 2.6,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 69,
+      "bodyClean": "I guess the problem arises on scanning code swiftly, diagonally jumping from one quote/bracket/colon to another in a hot potato style, reading everything else with a side vision.\n\nMeanwhile, reading the code sequentially, line by line left to right causes absolutely no problem.\n\nSo I guess that the quote reuse punishes some reading styles that perfectly worked before.",
+      "signalScore": 1,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 70,
+      "bodyClean": "Having read through everything here, I still believe that the mere possibility of having deeply nested f-strings(and the re-use of quotes) is not a good enough reason to disallow it on the parser level.\n\nUltimately(in my opinion), such restrictions belong in linters and code formatters rather than in the language grammar itself.",
+      "signalScore": 3,
+      "triageLabel": "alternative",
+      "skipped": false
+    },
+    {
+      "postId": 71,
+      "bodyClean": "This is a bit of a silly excuse. To take an adversarial example, C++ is so complicated to parse that the only reasonable way to parse it reliably is to reuse an existing compiler frontend. Which is a concrete impediment to the development of an ecosystem of third-party source-level analysis (and/or transformation) tools.",
+      "signalScore": 1,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 72,
+      "bodyClean": "Wearing my PyPy hat: Overall I like the PEP from a parsing implementation point of view, because it removes a lot of complexity in the current f-string implementation, and likely reduces bugs around position information of the expressions within f-strings as well. Well done @pablogsal, @isidentical and @lys.nikolaou!\n\nMy comment is about the changes to tokenizing (I’m staying out of the language design questions). Given that some of the complexity of implementing f-strings moves there, I think this part of the PEP:\n\nis taking the easy way out. I agree that it doesn’t make sense to prescribe details about the tokens (like whether the starting/ending quotes should be part of them). But I think the PEP should add some detail about how this can be implemented in a tokenizer, because the new approach to tokenizing f-strings is another Python feature that requires leaving classical regular-language-based tokenization.\n\nOne way to do this is either to add some detail about how it works in CPython’s real tokenizer. Another option would be to add some Python code to the PEP that shows how it could be done in the pure-Python tokenization implementation in the tokenize module.\n\nSpeaking of the pure-Python tokenize stdlib module. From what @pablogsal wrote above (and the following comments) it sounded like the plan is to decide what to do about tokenize independently of this PEP. If that’s the plan, the PEP should mention it.",
+      "signalScore": 1.2,
+      "triageLabel": "alternative",
+      "skipped": false
+    },
+    {
+      "postId": 73,
+      "bodyClean": "Will the change to peg parsing improve the speed of f strings. I notice that in python311/312 I see a speed difference between simple % formatting and f strings. As example here are some timeit outputs for several pythons\n\n$ for v in 37 38 39 310 311 312; do echo -n “python$v %: “;python$v -mtimeit -s’a,b,c=1,2.1,“ABCDEF”’ '”%s %s %s”%(a,b,c)‘;echo -n \"python$v f: \";python$v -mtimeit -s’a,b,c=1,2.1,“ABCDEF”’ ‘f\"{a} {b} {c}\"’;done\n\npython37 %: 500000 loops, best of 5: 446 nsec per loop\n\npython37 f: 500000 loops, best of 5: 454 nsec per loop\n\npython38 %: 500000 loops, best of 5: 411 nsec per loop\n\npython38 f: 500000 loops, best of 5: 427 nsec per loop\n\npython39 %: 1000000 loops, best of 5: 396 nsec per loop\n\npython39 f: 500000 loops, best of 5: 410 nsec per loop\n\npython310 %: 500000 loops, best of 5: 407 nsec per loop\n\npython310 f: 500000 loops, best of 5: 408 nsec per loop\n\npython311 %: 1000000 loops, best of 5: 302 nsec per loop\n\npython311 f: 1000000 loops, best of 5: 368 nsec per loop\n\npython312 %: 1000000 loops, best of 5: 307 nsec per loop\n\npython312 f: 1000000 loops, best of 5: 363 nsec per loop\n\nso it seems that recently % formatting speeded up, but f formatting didn’t so much",
+      "signalScore": 1,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 74,
+      "bodyClean": "That’s a fair point.\n\nPerhaps it would be enough to rephrase the PEP to not encourage such use and instead refer to it as an implementation detail. At the moment, it reads in a way which promotes reusing the same quotes inside f-string expressions as a feature.",
+      "signalScore": 1.8,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 75,
+      "bodyClean": "Thanks, everyone for your feedback and for raising your concerns. Your thoughts are fundamental to us and we want to ensure they are correctly reflected in the document and considered when decisions are made. I have prepared a first PR to incorporate some of the important points raised so far. Apologies if I am missing something, I will try to make another pass at a later date. Also, feel free to open PRs yourself if you have any enhancements in mind to the document and we can discuss them in the PR.\n\nThanks a lot for your help and your insights!",
+      "signalScore": 6.2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 76,
+      "bodyClean": "Make sure you compare '%s' to '{x!s}' or compare '%r' to '{x!r}'. In 3.11-3.12, the dis module is showing that these typically lead to identical bytecode, so they should have exactly the same performance. As far as I know, this PEP will result in no bytecode changes and thus have no runtime performance effect on existing code, though it might be worth spelling that out explicitly.",
+      "signalScore": 1.4,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 77,
+      "bodyClean": "Will do",
+      "signalScore": 3,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 78,
+      "bodyClean": "Personally I dislike the idea of nesting f-strings. Preventing it should be easy. Just check that you don’t see another FSTRING_START tag before seeing a FSTRING_END tag. Otherwise we might end up with code like this:\n\nBut I do like the idea of making the parser simpler. And the code golf people might like it. So maybe it will have to be one of those “Just because you can, doesn’t mean you should!” kind of things?",
+      "signalScore": 1.2,
+      "triageLabel": "alternative",
+      "skipped": false
+    },
+    {
+      "postId": 79,
+      "bodyClean": "This PEP looks great! I would be happy to see it implemented\n\nHowever, I think that the abillity to reuse quotes is problematic. I’ve seen people here mention potential security/IDE maintainability issues. But I think that just from the simple readability aspect, this can be quite confusing and unintuitive (Which I believe to be the most important aspect to consider).\n\nThe {} syntax in f strings just doesn’t “feel” like it should be able to do it. For example, if the original syntax for f-strings would consist of the backtick character instead of the brackets, I would say otherwise since the backtick “feels” quote-like, it feels like we’re using a different kind of quote and therefore it should be possible. But the bracket character does not have this intuitive property (at least for me).",
+      "signalScore": 2,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 80,
+      "bodyClean": "Preventing nesting entirely wouldn’t be backwards compatible, f-strings can already be nested if you use different quote styles for each level. I wonder if a bit of a compromise might be possible though? Infinite nesting could be allowed, but with the restriction that any quotes can’t reuse the immediately surrounding quote type. The switching quotes might make it easier to match each up:\n\n>>> f\"{f'{f\"{f'{f\"{f'{1+1}'}\"}'}\"}'}\"",
+      "signalScore": 2.2,
+      "triageLabel": "alternative",
+      "skipped": false
+    },
+    {
+      "postId": 81,
+      "bodyClean": "Good idea; the timings seem much closer for the later pythons when we explicitly specify the f format.",
+      "signalScore": 0,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 82,
+      "bodyClean": "A familiar example is the challenges for f-strings we are having on ast.unparse (a standard library code generator that tries to take an AST and output a valid Python code for it). The f-string code generation is by far the most complicated part due to the implied tracking of quote types and trying to prevent backslashes. And with this complexity, IIRC there are still a few edge cases where we can’t roundtrip some f-strings that appear in the wild (big source code datasets) as regular Python syntax. Lifting quote restrictions would actually help quite a bit in this case where we can simplify the expression code generator for f-strings by denoting the result as '{' + ast.unparse(inner) + '}' as opposed to the complex steps we were taking before.",
+      "signalScore": 2.8,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 83,
+      "bodyClean": "An additional asymmetry is that the final literal text segment after the last {…} is part of the FSTRING_END:\n\nCould FSTRING_START / FSTRING_END to cover just the opening f'/closing ', and literal text pieces everywhere to be FSTRING_MIDDLE?\n\n(I’d even rename that to FSTRING_TEXT or _LITERAL (well too overloaded) or _STATIC… The interesting aspect imho is the contrast to dynamic segments LBRACE…RBRACE, not its position)\n\n[TokenInfo(type=61 (FSTRING_START), string=\"rf'\", start=(1, 0), end=(1, 3), line=\"rf'hello {1+2} bye'\\n\"),\nTokenInfo(type=62 (FSTRING_TEXT), string='hello ', start=(1, 3), end=(1, 9), line=\"rf'hello {1+2} bye'\\n\"),\n...\nTokenInfo(type=62 (FSTRING_TEXT), string=' bye', start=(1, 14), end=(1, 18), line=\"rf'hello {1+2} bye'\\n\"),\nTokenInfo(type=63 (FSTRING_END), string=\"'\", start=(1, 18), end=(1, 19), line=\"rf'hello {1+2} bye'\\n\"),\n...]",
+      "signalScore": 1,
+      "triageLabel": "alternative",
+      "skipped": false
+    },
+    {
+      "postId": 84,
+      "bodyClean": "Thanks for your comment! In general, you should not focus on what the tokens contain.\n\nAs I mentioned before, these tokens are just informative so the reader of the PEP knows what they do, but the implementation is not visible to the user (is the C tokenizer) and has no semantic meaning. We may even change how we implement these tokens in the final implementation if the PEP is affected. What these tokens (the ones in the C tokenizer, which I insist is not visible) will contain is going to be based fundamentally on what makes the implementation simpler.",
+      "signalScore": 4.2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 85,
+      "bodyClean": "You’ve said this before, but it feels like the asymmetry in the tokens is going to keep bothering people. I know it bothers me. I’m trying to understand here why this might be, and I think it’s just that the “grammar” you give here is not very helpful without precisely defining the tokens, and that is exactly what the PEP refuses to do. We could look at the reference implementation, but it’s a huge pile of code that’s not so easy to follow, and it doesn’t seem to have a version of Lib/tokenize.py (which might be more accessible).\n\nWhen I thought about this idea I’ve always started with how the tokenizer could be implemented, in particular what states it should maintain on a stack. (Somehow your suggestion of having a stack of tokenizers didn’t occur to me, but it sounds isomorphic.)\n\n- Regular or classic mode.\n\n- In the “string” part of an f-string, looking for a matching closing quote OR s single {.\n\n- Inside an interpolation expression; this is mostly the same as regular/classic mode, but also stops at !, :, = and }, when outside parens/braces/brackets. (I realize there’s more to it, and we’d like the parser to play a role here too.)\n\n- Possibly a special mode after !. Or maybe ! doesn’t need to be so special. (Though I’d prefer clarity over whether spaces are allowed around the following r, s or a.)\n\n- Definitely a special mode after :, where we are looking for { and }; this is slightly different from “string” mode because we’re not expecting a closing quote.\n\nDid I miss anything?",
+      "signalScore": 3,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 86,
+      "bodyClean": "I sympathise with this point of view. This is one of the reasons we are including examples of the token descriptions so the grammar can be made sense. I also understand that the asymmetry of the token contents may upset people. On the other hand, we want to just avoid the discussion focusing on this because this only affects the implementation and any appreciation of the token contents (the name of the tokens or what part of the f-string these tokens should have) at this stage of the discussion is mainly about the aesthetics and not about the consequences of the grammar change. I apologize if it seems that I am overly insisting on this, but I think is important because the proposal doesn’t change any user-visible thing if the tokens contain the starting quote or not or if they contain the end quote or other alterations and we have many other important points in flight and the implementation is complex and we want to at least have the main PEP accepted before exploring how to clean/improve the actual implementation.\n\nHere you seem to be referring to the description of how to tokenise the f-string text to produce these tokens. Note that even if you specify the switching points the token and their contents are relatively unspecified (should we include the quote at the start or should the tokenizer retain that information? should we emit “empty” tokens for the start and the end or should they contain stuff?).\n\nWe don’t allow them to preserve behavior but technically the parser does because the grammar is:\n\nfstring_replacement_field\n| '{' (yield_expr | star_expressions) \"=\"? [ \"!\" NAME ] [ ':' fstring_format_spec* ] '}'\n\nwhich means that at parsing time it can be any whitespace between “!” and the NAME token for the r, s or a. But we artificially disallow it when the AST node is formed:\n\n>>> f\"{2.34! r}\"\nFile \"<stdin>\", line 1\nf\"{2.34! r}\"\n^^^\nSyntaxError: conversion type must come right after the exclamation mark```\n\nYep but also you can see it as the same as the second mode because if we find a quote we just handle the error because the expression } was not found. Note that in the first mode if we find a ‘}’ is also an error, so is isomorphic to this problem with the quote and the bracket interchanged.\n\nRegarding the algorithm, I don’t think you are missing anything other than how to handle the = sign, which requires the tokenizer to retain the raw source and maybe the fact than looking for { or } is not enough because {{ doesn’t mark the start and }} doesn’t mark the end (there are some tricky stuff like f\"{1:<3}}}\"). Of course, the devil is in the detail because including locations for these tokens and other stuff can be a bit challenging (especially at the end of the string).\n\nMore or less this:\n\ngraphviz (1)759×291 25.3 KB\n\nTaking into account that when the f-string closes we check for unbalanced { and other errors.\n\nIn any case, would you like us to include a refined version of this description in the PEP document for clarification?",
+      "signalScore": 6,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 87,
+      "bodyClean": "One way to refocus the discussion on the important things is to just give in, change the tokens to what people seem to expect, and move on. As you say, it’s not normative anyway, so there’s no reason for the tokens used in the PEP to match your implementation.\n\n(I do think that the tokens as returned by tokenize.py should be described by the PEP, because that is a public API.)\n\nMaybe the PEP should have a section that explains in detail what will change?\n\n- The PEP makes it clear that the AST does not change (since it already supports everything that’s needed). There may be additional nesting, but that shouldn’t be a problem.\n\n- I assume that the semantics don’t change either – everything that can affect the semantics (other than recursion limits) should be represented in the AST.\n\n- So what changes, apart from being able to reuse string quotes? IIUC you believe that it is necessary to accept spaces around the “identifier” following !. But we don’t have to change that – the parser can insist that two tokens are adjacent without intervening whitespace by checking the end line/col of one token and the start line/col of the next. (I discovered this trick when prototyping custom string prefixes for Jim Baker.)\n\n(Anecdote: I was idly typing some Python code this afternoon and received an unexpected syntax error. Upon inspection I realized I had written this:\n\n>>> for x in dir(f): print(f\"{x:20s} : {getattr(f, x, \"NOPE\")!r:.40}\")\n\n)\n\nI’ll respond to the tokenization details later.",
+      "signalScore": 2,
+      "triageLabel": "alternative",
+      "skipped": false
+    },
+    {
+      "postId": 88,
+      "bodyClean": "Hm. I think I may have found an example where I might disagree. But before we argue about this, I think it would help if there was a specification for the tokens – not for what is returned by the tokenizer, but e.g. a regular expression showing what the lexer accepts for each token. This would be helpful for people writing alternate tokenizers.\n\n(In fact, it’s possible that one reason people get hung up on the contents of the tokens is that what they really would like to understand is the input acceptable for each token.)\n\nYes I would like that very much. It would also be nice if we had an executable version of that specification in he form of a Python class into which one can feed examples.",
+      "signalScore": 1,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 89,
+      "bodyClean": "An example where you disagree with treating the tokenizer mode after : then same as the mode for f-string or where you disagree with the proposal in general?\n\nWe can add that, we somehow have something similar now in “consequences of the grammar”. I can adapt it so is more clear.\n\nI don’t think a regular expression is possible (or at least straightforward so it helps for clarifications) because the cut points depend on the level of parenthesis and bracket some of the characters are and some other state the lexer needs to keep track of.\n\nOk, we will incorporate a refined version of that description to the document\n\nIf you don’t mind that the token contents are asymmetric, you can already play with it by getting the tokens from the C tokenizer using the private interface we use for testing (you need to do this from the implementation branch):\n\n>>> import pprint\n>>> import tokenize\n>>> pprint.pprint(list(tokenize._generate_tokens_from_c_tokenizer(\"f' foo { f' {1 + 1:.10f} ' } bar'\")))\n\n[TokenInfo(type=61 (FSTRING_START), string=\"f'\", start=(1, 0), end=(1, 2), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=62 (FSTRING_MIDDLE), string=' foo ', start=(1, 2), end=(1, 7), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=25 (LBRACE), string='{', start=(1, 7), end=(1, 8), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=61 (FSTRING_START), string=\"f'\", start=(1, 9), end=(1, 11), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=62 (FSTRING_MIDDLE), string=' ', start=(1, 11), end=(1, 12), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=25 (LBRACE), string='{', start=(1, 12), end=(1, 13), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=2 (NUMBER), string='1', start=(1, 13), end=(1, 14), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=14 (PLUS), string='+', start=(1, 15), end=(1, 16), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=2 (NUMBER), string='1', start=(1, 17), end=(1, 18), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=11 (COLON), string=':', start=(1, 18), end=(1, 19), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=62 (FSTRING_MIDDLE), string='.10f', start=(1, 19), end=(1, 23), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=26 (RBRACE), string='}', start=(1, 23), end=(1, 24), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=63 (FSTRING_END), string=' ', start=(1, 24), end=(1, 25), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=26 (RBRACE), string='}', start=(1, 27), end=(1, 28), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=63 (FSTRING_END), string=' bar', start=(1, 28), end=(1, 32), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=4 (NEWLINE), string='', start=(1, 33), end=(1, 33), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\")]\n\nI will discuss with @isidentical and @lys.nikolaou about the changes in tokenize.py to see if we can add this to the PEP and the proposed implementation.",
+      "signalScore": 5,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 90,
+      "bodyClean": "An example where you disagree with treating the tokenizer mode after : then same as the mode for f-string or where you disagree with the proposal in general?\n\nThe former – I am still very much in favor of the proposal, I am just trying to tease out details and edge cases.\n\nHere’s my edge case:\n\n- A pair of }} is allowed in the regular “middle” part of an f-string, e.g. f\"a}}z\" produces \"a}z\".\n\n- But inside the format specifier, this is currently not allowed:>>> f\"{X():_}}_}\"\nFile \"<stdin>\", line 1\nf\"{X():_}}_}\"\n^\nSyntaxError: f-string: single '}' is not allowed\n>>>\n\nIf this is truly treated as a middle part it would have interpreted this as a format specifier equal to _}_.\n\nNow, I haven’t built your branch yet so maybe it does that in your version? In that case I give up the quibble (other than that this difference isn’t mentioned in the PEP’s “Consequences …” section).\n\nI did miss that, and I’m glad that it mentions backslashes. I guess there are some other options for comments though, e.g. one could argue that this ought to be valid:\n\nf\"___{\nx\n}___\"\n\nsince the newlines are technically enclosed by brackets, similar to\n\n{\nx\n}\n\nOr if you want to exclude those outer brackets, what about this?\n\nf\"___{(\nx\n)}___\"\n\nI wasn’t thinking of describing the entire f-string as a regex, just each piece. For example a true “middle” piece might be described as follows:\n\nr\"\"\"(?x) # Verbose mode\n(\n\\\\. # Escaped character (ignoring octal/hex)\n|\n{{ # Left brace, must be doubled\n|\n}} # Right brace, must be doubled\n|\n[^'\"{}\\\\] # Everything else\n)*\n(?={) # Must be followed by left brace\n\"\"\"\n\nThis is not the whole story, but it feels like a good start, and (for me at least) it’s more helpful than a hundred words.\n\nI will have to try this for myself. Somehow when I looked at the branch it seemed there weren’t any changes to tokenize.py, seems I was mistaken!",
+      "signalScore": 3,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 91,
+      "bodyClean": "I see what you mean but how do you express with regular expressions the fact that the regular expression for the expression part is “normal tokenization but it must stop at } or : only if is not inside parentheses”? Even if somehow you han-wave over the “normal tokenization” I don’t think you can easily express the parentheses part easily with automaton-based regular expressions.\n\nHumm seems that I didn’t clarify this correctly and there is some confusion. Allow me to clarify it better:\n\n- The example I gave uses the C tokenizer interface (notice the funcion name is _generate_tokens_from_c_tokenizer). This is a non-public interface that we exposed in 3.11 to test the C tokenizer. This is the one that you can already use to play with in our branch.\n\n- At the time they are not changes to the tokenize.py file. I meant that I will discuss with @lys.nikolaou and @isidentical about adding them to the proposed implementation.\n\nApologies for the confusion.",
+      "signalScore": 5.2,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 92,
+      "bodyClean": "I checked and we handle that correctly at the time:\n\n>>> f\"{X():_}}_}\"\nFile \"<stdin>\", line 1\nf\"{X():_}}_}\"\n^\nSyntaxError: unmatched '}'\n\nwe do it here:\n\nWe will mention it in the clarifications",
+      "signalScore": 4,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 93,
+      "bodyClean": "Both of these are valid with our current implementation:\n\n>>> x = 1\n>>> f\"___{\n... x\n... }___\"\n'___1___'\n>>> f\"___{(\n... x\n... )}___\"\n'___1___'\n\nIt also handles debug expressions:\n\n>>> f\"___{\n... 1\n... +\n... 1\n... =}___\"\n'___\\n1\\n+\\n1\\n=2___'\n>>> print(_)\n___\n1\n+\n1\n=2___",
+      "signalScore": 4.2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 94,
+      "bodyClean": "That could be driven by the parser though, right? The parser can have lookaheads for }, : and :=, and then signal to the lexer to switch back.\n\nGot it. I glanced over that (I seem to be missing a lot of detail today – must be the weather :-).\n\nAh, but who says I don’t want to allow }} in a format specifier? Previously maybe we couldn’t but now we could, right?\n\n(Also, could we allow \\{ and \\} to escape curlies? If we could, would we want to? The doubling feels jarring because that’s not how Python escapes anything else.)\n\nThat’s a relief. I guess it’s another part I skimmed incorrectly. The PEP has “Comments, using the # character, are possible only in multi-line f-string literals” which made me think that these also weren’t possible. But if I added a comment to my examples those should work, right?",
+      "signalScore": 1.2,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 95,
+      "bodyClean": "Definite +1 on the PEP as a whole.\n\nLike others in the thread, I voted in favour of grammar consistency in the poll (allowing quote reuse), but I would also like to see the PEP more strongly discourage actually relying on that in manually written code, in the form of a proposed addition to PEP 8.\n\nThe section on string quotes would be the appropriate place for an addition like:\n\n(The part in parentheses probably shouldn’t be added to PEP 8, but could be included in the PEP 701 section on adding the new PEP 8 text)",
+      "signalScore": 3.9,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 96,
+      "bodyClean": "Maybe tweak the phrasing to be “f-strings that span multiple lines”? (As you say, it’s possible to span multiple lines without using triple quotes to make an explicitly multi-line string)",
+      "signalScore": 2.5,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 97,
+      "bodyClean": "In my view, the various mentions of nested f-strings and unreadable code as a possibility are not particularly compelling arguments. It is always possible to write unreadable code.\n\nO0OO0 = 1\nOO0O0 = 0\nOOO00 = O0OO0 + OO0O0 - ...\n\nAnd I haven’t even started defining functions yet!\n\nThe backslash restriction shows up pretty naturally when working with \\n. The other day, I ran into the following real-world example:\n\nf\"{'\\n'.join(mylist)}\\n\"\n\nIt is not intuitive that this raises an error at runtime, which makes it a (possibly unnecessary) point of friction for developers.",
+      "signalScore": 1.2,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 98,
+      "bodyClean": "“It is already possible to write unreadable code so we should not discourage more of it” is definitely not a compelling argument. You might as well jump straight to “it’s possible to write unsafe Python code so there’s no compelling argument against C++”.",
+      "signalScore": 1,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 99,
+      "bodyClean": "I take your meaning, but that’s not what I’m trying to say.\n\nThere are many examples in this thread which are very confusing but also intentionally constructed, like\n\nf\"{some + f\"{nested + f\"string {concat}\"}\"} example\"\n\nThis doesn’t seem to me to be an attempt to show how the feature, being used merely “cleverly” or by a beginner, makes code difficult to understand. Rather, it intends to show that it is possible to construct something unreadable.\n\nThere is a good amount of discussion about nested f-strings here, but I don’t know that anyone in favor of the PEP cares very much about nested f-strings? More than one comment seems to suggest a view that no one yet knows of a legitimate and useful case for nested f-strings, so we’d probably keep them out during code reviews.\n\nThat line of argument might not be convincing to those against. But nobody seems to be strongly in favor of nested f-strings as a particular consequence of this proposal.",
+      "signalScore": 3.2,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 100,
+      "bodyClean": "This will depend on what one considers legitimate, but I found myself writing\n\nprint(f\"{some_dict[\"foo\"]}\")\n\nnot once, but twice in the same day when experimenting in the REPL recently. Even though I hade recently read this thread I was still confuced for a while before I realized what the error was. So quick experiments in the repl is one use-case that I would like this feature for.",
+      "signalScore": 1.4,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 101,
+      "bodyClean": "That usage features use of the outer quote character inside of the f-string.\n\nBy nested f-strings, I mean any use of an f-string inside of the {} format specifiers:\n\nf\"f-string {'containing ' + f'another {\"f-string\"}'}\"",
+      "signalScore": 1,
+      "triageLabel": "alternative",
+      "skipped": false
+    },
+    {
+      "postId": 102,
+      "bodyClean": "10 posts were split to a new topic: String joining design",
+      "signalScore": 3,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 109,
+      "bodyClean": "We actually started with that but it turned out to be a bad idea for the following:\n\n- The tokenizer needs to be able to tokenize the source without the parser driving the modes. This is because for many operations (such as some error reporting, tokenize.py and others) the parser is actually not available.\n\n- When the parser does backtracking we would need the tokenize to “untokenize” the source. This is not only quite chaotic but also is complicated to get “right” with the memorization.\n\n- It breaks the nice separation between the tokenizer and parser. This has proven to help debugging a lot because we can check using our exposed functions that the tokenization works correctly before having to debug the parser. Debugging the parser at the same time as the tokenizer is quite painful.\n\nIn general, we found that just modifying the tokenizer to know when to switch is not only much easier, but also much cleaner and debuggable, and requires many many fewer changes. At the end of the day, one of our cornerstones is making this part of CPython more maintainable so our implementation went this route.",
+      "signalScore": 4.4,
+      "triageLabel": "objection",
+      "skipped": false
+    },
+    {
+      "postId": 112,
+      "bodyClean": "Thanks, this actually makes sense.\n\nTrying to get the discussion back on track (away from .join()) a bit, have you thought about my parenthetical remark about using \\{ and \\} to escape curlies instead of, or in addition to, {{ and }}? I believe that when PEP 498 was discussed, there was a good reason to use the latter, but somehow I can’t find that reason in the PEP, and I can’t recall what it was. Maybe it was for compatibility with str.format()? The doubling has always irked me, and I think I’ve forgotten that it existed several times over the years (because I so rarely have a real need to put a curly brace in an f-string).",
+      "signalScore": 3.6,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 114,
+      "bodyClean": "Not yet, I want to discuss this in detail with @lys.nikolaou and @isidentical and currently we are focusing on making the tokenize.py changes and acting on the feedback so far. We will discuss it and check if is too hard to support. If it proves to be trivial and we all agree we can add it to the proposal. If it proves to be tricky we can do it as a follow-up (maybe in an issue and not in a PEP).\n\nIn any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement but I don’t think there is a way around supporting it",
+      "signalScore": 7,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 115,
+      "bodyClean": "Meanwhile, maybe @ericvsmith knows the answer to this?",
+      "signalScore": 4,
+      "triageLabel": "noise",
+      "skipped": false
+    },
+    {
+      "postId": 116,
+      "bodyClean": "Yes, that was it.",
+      "signalScore": 1,
+      "triageLabel": null,
+      "skipped": true
+    },
+    {
+      "postId": 117,
+      "bodyClean": "It’s unclear from the PEP whether following (new line in f-expression) are valid or not:\n\nf'{1\n+\n1}'\n\nf'{1\\\n+\\\n1}'\n\n# triple-quoted f-string\nf'''{1\n+\n1}'''\n\nf'''{1\\\n+\\\n1}'''\n\nsimilar code is valid in string interpolation, e.g. C# (see [Proposal]: Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines. · Issue #4935 · dotnet/csharplang · GitHub), Kotlin (see Kotlin language specification).",
+      "signalScore": 3,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 118,
+      "bodyClean": "Thanks for your comment! I answered this partially here:\n\nBut I can confirm that this will be incorporated soon into the PEP document",
+      "signalScore": 4.2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 119,
+      "bodyClean": "The SC (sans Pablo, who didn’t get a vote since he’s one of the PEP authors) is happy to accept PEP 701. Thanks for the hard work in getting f-strings in an even better place",
+      "signalScore": 6,
+      "triageLabel": "decision",
+      "skipped": false
+    },
+    {
+      "postId": 120,
+      "bodyClean": "A big thanks to the authors of this PEP and its implementation. This is a nice improvement!\n\nI’m implementing support for PEP 701 in pyright, which has its own tokenizer and parser. I tried to implement it based on the documentation in the PEP, but I found that there’s an important detail missing in the “How to produce these tokens” section. Step 3 doesn’t say anything special about what happens after a : character is encountered. It says that the tokenizer should go back to step 2 after emitting a : token and popping the current tokenizer mode from the stack. However, when in “format specifier” mode (i.e. after the : is encountered), I think the rules for step 2 need to change so double braces ({{ or }}) are no longer assumed to be part of an FSTRING_MIDDLE token.\n\nTo test this, I tried f\"{'':{{1}.pop()}}\" with the latest CPython implementation. This f-string parses without error. The {{ after the : is clearly being treated as two separate { tokens rather than part of an FSTRING_MIDDLE token.\n\nIf I use the same subexpression prior to the :, it works consistently with the PEP’s “step 2” description, and the {{ is treated as part of an FSTRING_MIDDLE token. As proof, the f-string f\"{{1}.pop()}\" results in a syntax error unless a space is added between the two opening braces.\n\nCould the authors of the PEP confirm that my assumption is correct? If so, would it make sense to update the PEP so it accurately reflects the intended behavior?\n\nEdit: Another related question… in “step 3”, the PEP implies that when a = or ! token is seen, the tokenizer should switch back to step 2. I presume that’s incorrect and it should stay in step 3 and continue to produce normal tokens (as opposed to FSTRING_MIDDLE tokens) until it sees a : or '}`.\n\nAnother small topic that isn’t mentioned in the PEP has to do with nested format specifiers. It appears that the implementation supports two levels of nesting but not three.\n\nf\"{'':*^{1:{1}}}\" works\n\nf\"{'':*^{1:{1:{1}}}}\" produces a syntax error (f-string: expressions nested too deeply)\n\nThe PEP indicates that there is a “lower bound of 5 levels of nesting”. I presume this statement applies to nesting of f-strings, not of format specifiers within an f-string. Would it make sense for the PEP to mention a separate lower bound for format specifier nesting?",
+      "signalScore": 2,
+      "triageLabel": "question",
+      "skipped": false
+    },
+    {
+      "postId": 121,
+      "bodyClean": "Thanks @erictraut for the message! I am very excited to know that you are adding PEP 701 support in pyright! Thanks a lot for the great work\n\nLet me answer the points that you raise.\n\nI think we may want to be a bit more explicit here, but the section was intended to be indicative and not prescriptive as different tokenizers would require different ways to approach the problem. You have a good point though because there is ambiguity over how the format specifier should be tokenized in general so we should describe that better. I will try to make a PR after beta freeze as we are currently fully immersed in the Python tokenizer changes.\n\nYou are right here but note this is not new as this is something we just preserved from the previous implementation:\n\nython 3.11.1 (main, Dec 15 2022, 18:32:52) [Clang 14.0.0 (clang-1400.0.29.202)] on darwin\nType \"help\", \"copyright\", \"credits\" or \"license\" for more information.\n>>> f\"{'':{{1}.pop()}}\"\n' '\n\n[quote=\"Eric Traut, post:120, topic:22046, username:erictraut\"]\nAnother small topic that isn’t mentioned in the PEP has to do with nested format specifiers. It appears that the implementation supports two levels of nesting but not three.\n\n`f\"{'':*^{1:{1}}}\"` works\n`f\"{'':*^{1:{1:{1}}}}\"` produces a syntax error (f-string: expressions nested too deeply)\n[/quote]\n\nThis is also something we preserved from the previous implementation:\n\nPython 3.11.1 (main, Dec 15 2022, 18:32:52) [Clang 14.0.0 (clang-1400.0.29.202)] on darwin\nType \"help\", \"copyright\", \"credits\" or \"license\" for more information.\n>>> f\"{'':*^{1:{1:{1}}}}\"\nFile \"<stdin>\", line 1\nf\"{'':*^{1:{1:{1}}}}\"\n^\nSyntaxError: f-string: expressions nested too deeply\n\nFor both of these things we just preserved existing behavior, while for the nesting of f-strings we had to dictate it because now arbitrary nesting is possible while before it was not.\n\nI think this is something that makes sense, just so is more clear what the default prescription/recommendation is.",
+      "signalScore": 5.2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 122,
+      "bodyClean": "Personally, I don’t find any of the arguments against supporting quote reuse to be compelling. I find the benefits of resourcing referential transparency inside f-string expressions to far outweigh any concerns I’ve seen so far, for a couple reasons:\n\nOne, the current status quo can cause huge problems when generating code from a template (like with mako), and can still be a pain even in normal every day use. It’s just simpler to think of an f-string expression as a normal Python expression without any special restrictions.\n\nTwo, allowing quote reuse inside f-strings doesn’t, by itself, make code unreadable. What people are worrying about is actually the abuse of quote reuse.\n\nWhile discouraging the abuse of language syntax is a noble goal, I personally feel that it should never come at the expense of legitimate use of the language. In my opinion a language should empower developers to write concise, readable, and expressive code first. Discouraging misuse of syntax should always come second. That’s because being able to provide the expressive power to describe a legitimately complex system in clear and simple terms is always going to be more important for a language.\n\nAnyhow, any sufficiently powerful syntax can be abused, the question is whether misuse is easy enough that it becomes a footgun. IMO that is not the case here.",
+      "signalScore": 3.2,
+      "triageLabel": "support",
+      "skipped": false
+    },
+    {
+      "postId": 123,
+      "bodyClean": "Not sure this is worth debating any more… the PEP was accepted into Python 3.12",
+      "signalScore": 4,
+      "triageLabel": "decision",
+      "skipped": false
+    },
+    {
+      "postId": 124,
+      "bodyClean": "",
+      "signalScore": 4,
+      "triageLabel": null,
+      "skipped": true
+    }
+  ],
+  "decisions": [
+    {
+      "key": "d1",
+      "title": "Formalize f-string grammar in PEG parser",
+      "kind": "proposal",
+      "status": "accepted",
+      "summary": "The main proposal to move f-strings from a hand-written parser to the formal PEG grammar was accepted.",
+      "confidence": "high",
+      "decidedAt": "2022-12-19T17:53:22.612Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "We believe this will be a great improvement in both the maintainability of CPython and the usability of f-strings.",
+          "evidence": [
+            {
+              "postId": 1,
+              "quote": "The PEP proposes a formalized grammar for f-strings in Python by adding f-strings directly into the Grammar instead of using a two-pass hand-written parser.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "Reduced maintenance costs for f-string parsing code as well us improved usability for users and library developers.",
+          "evidence": [
+            {
+              "postId": 1,
+              "quote": "Other benefits include: Reduced maintenance costs for f-string parsing code as well us improved usability for users and library developers.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d2",
+      "title": "Allow comments inside f-string expressions",
+      "kind": "proposal",
+      "status": "accepted",
+      "summary": "The proposal to treat '#' as a comment character only within the expression part of an f-string was accepted.",
+      "confidence": "medium",
+      "decidedAt": "2022-12-19T21:14:46.739Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "What we are proposing is that this error disappears and anything after the # comment character gets ignored as any comment of any expression (only when the comment is in the expression part).",
+          "evidence": [
+            {
+              "postId": 10,
+              "quote": "What we are proposing is that this error disappears and anything after the # comment character gets ignored as any comment of any expression (only when the comment is in the expression part).",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d3",
+      "title": "Allow unescaped quotes and backslashes inside f-string expressions",
+      "kind": "proposal",
+      "status": "accepted",
+      "summary": "The proposal to allow nested or unescaped quotes within the expression part of an f-string was accepted.",
+      "confidence": "high",
+      "decidedAt": "2022-12-19T20:29:23.068Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "I would like the PEP to note that the existing restrictions on nested quotes (and probably other things) was a deliberate design decision in order to make it easy for editors, syntax highlighters and the like to support f-strings.",
+          "evidence": [
+            {
+              "postId": 7,
+              "quote": "I would like the PEP to note that the existing restrictions on nested quotes (and probably other things) was a deliberate design decision in order to make it easy for editors, syntax highlighters and the like to support f-strings.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "Thanks for working on this. I look forward to backslashes in expressions!",
+          "evidence": [
+            {
+              "postId": 7,
+              "quote": "Thanks for working on this. I look forward to backslashes in expressions!",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d4",
+      "title": "Restrict or allow arbitrary nesting of quotes/braces in f-strings",
+      "kind": "alternative",
+      "status": "rejected",
+      "summary": "The idea of limiting quote reuse or nesting was rejected because it would significantly increase parser maintenance costs.",
+      "confidence": "high",
+      "decidedAt": "2023-01-03T22:59:23.537Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "Another option here is to restrict arbitrary nesting to a specific depth. I think that will allow regex-based lexers to work at the price of having some complex regular expression.",
+          "evidence": [
+            {
+              "postId": 16,
+              "quote": "Another option here is to restrict arbitrary nesting to a specific depth. I think that will allow regex-based lexers to work at the price of having some complex regular expression.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "Ignoring the consistency arguments, limiting quote reuse raises quite a lot the complexity. This is because when parsing the expression part now the parser needs to be aware that is parsing an expression inside an f-string with a given quite...",
+          "evidence": [
+            {
+              "postId": 40,
+              "quote": "limiting quote reuse raises quite a lot the complexity.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "I am not sure what we finally propose (quote reuse or not) as we want to gather some feedback first, but we will discuss this aspect among authors again.",
+          "evidence": [
+            {
+              "postId": 38,
+              "quote": "I am not sure what we finally propose (quote reuse or not) as we want to gather some feedback first.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "Nested f-strings like f\"{f\"infinite\"}\" are incredibly difficult for a human to parse IMHO and require tools to be aligned about how to help the user understand them.",
+          "evidence": [
+            {
+              "postId": 64,
+              "quote": "I do think it gets worse with nested f-strings, as in this PEP example: f\"{f\"{f\"infinite\"}\"}\" + \" \" + f\"{f\"nesting!!!\"}\" That's incredibly difficult for a human to parse IMHO.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "By keeping the quote restriction, arbitrary nesting can be prevented while still simplifying implementation and removing annoying bits like backslash limitations.",
+          "evidence": [
+            {
+              "postId": 68,
+              "quote": "Just to be clear: I like the PEP and support it, since it simplifies the implementation and removes some annoying bits (e.g. the backslash limitation), but I don't like the removal of the string literal quoting rules and support for arbitrary nesting of f-strings.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "Preventing nesting entirely wouldn't be backwards compatible, f-strings can already be nested if you use different quote styles for each level.",
+          "evidence": []
+        },
+        {
+          "text": "I believe that when PEP 498 was discussed, there was a good reason to use the latter, but somehow I can't find that reason in the PEP",
+          "evidence": [
+            {
+              "postId": 112,
+              "quote": "I believe that when PEP 498 was discussed, there was a good reason to use the latter, but somehow I can't find that reason in the PEP",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "In any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement",
+          "evidence": [
+            {
+              "postId": 114,
+              "quote": "In any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "The doubling has always irked me, and I think I've forgotten that it existed several times over the years",
+          "evidence": [
+            {
+              "postId": 112,
+              "quote": "Trying to get the discussion back on track (away from .join()) a bit, have you thought about my parenthetical remark about using \\{ and \\} to escape curlies instead of, or in addition to, {{ and }}?",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "In any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement but I don't think there is a way around supporting it",
+          "evidence": [
+            {
+              "postId": 114,
+              "quote": "In any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement but I don't think there is a way around supporting it",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d5",
+      "title": "Allow and document quote reuse inside f-string expressions",
+      "kind": "proposal",
+      "status": "accepted",
+      "summary": "Authors agreed to add warnings discouraging the use of nested f-strings with reused quotes while still allowing them syntactically.",
+      "confidence": "high",
+      "decidedAt": "2024-02-13T06:20:52.714Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "I consider the first two examples terrible code which should be discouraged and the fact that your PEP allows it is a point against it, not in favour.",
+          "evidence": [
+            {
+              "postId": 22,
+              "quote": "I consider the first two examples terrible code which should be discouraged and the fact that your PEP allows it is a point against it, not in favour.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "The biggest problem for me is the reuse of opening quote feature. I get why you want to lift this restriction, and I get that you want to enable arbitrary nesting of quotes, but I think this is helping the machine more than the human.",
+          "evidence": [
+            {
+              "postId": 34,
+              "quote": "The biggest problem for me is the reuse of opening quote feature. I get why you want to lift this restriction, and I get that you want to enable arbitrary nesting of quotes, but I think this is helping the machine more than the human.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "I voted yes, as I have definitely hit the “you cannot use the same type of quote in the expression part” issue myself. And I think consistency in allowing whatever can be in an expression is easier to explain and understand.",
+          "evidence": [
+            {
+              "postId": 30,
+              "quote": "I voted yes, as I have definitely hit the “you cannot use the same type of quote in the expression part” issue myself. And I think consistency in allowing whatever can be in an expression is easier to explain and understand.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "Having said that, I’d prefer it if the PEP warned agains over-use of this feature, as it has the possibility of being difficult to read.",
+          "evidence": [
+            {
+              "postId": 30,
+              "quote": "Having said that, I’d prefer it if the PEP warned agains over-use of this feature, as it has the possibility of being difficult to read.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "I voted \"no\" since for me, the concerns outweigh the benefits in this case. Heavily nested or reused quote characters is a code smell to me.",
+          "evidence": [
+            {
+              "postId": 34,
+              "quote": "Heavily nested or reused quote characters is a code smell to me.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "I think that personal style choices are not a sufficiently strong argument for forbidding quote reuse.",
+          "evidence": [
+            {
+              "postId": 49,
+              "quote": "At least, I think that personal style choices are not a sufficiently strong argument for forbidding quote reuse.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "I agree with the people saying that the reuse of quotes in f-strings should not be syntactically incorrect but instead be discouraged in the docs.",
+          "evidence": [
+            {
+              "postId": 51,
+              "quote": "I agree with the people saying that the reuse of quotes in f-strings should not be syntactically incorrect but instead be discouraged in the docs.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "At least, I think that personal style choices are not a sufficiently strong argument for forbidding quote reuse.",
+          "evidence": [
+            {
+              "postId": 49,
+              "quote": "At least, I think that personal style choices are not a sufficiently strong argument for forbidding quote reuse.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "It makes it possible to copy any valid expression from another part of the code into an interpolation without having to worry about string quotes.",
+          "evidence": [
+            {
+              "postId": 56,
+              "quote": "I like the proposed feature, because it makes it possible to copy any valid expression from another part of the code into an interpolation without having to worry about string quotes.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "This increased freedom would be helpful for ad hoc testing/experimenting and avoiding SyntaxError when absent-mindedly reusing opening quotes in a REPL session.",
+          "evidence": [
+            {
+              "postId": 54,
+              "quote": "On numerous occasions, I have gotten SyntaxError when absent-mindedly reusing opening quotes in a REPL session. While not particularly inconvenient, this PEP would have been nice to have in those situations.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "Personally, I found the prohibition on reusing the same quote mildly annoying.",
+          "evidence": []
+        },
+        {
+          "text": "Personally, I don't find any of the arguments against supporting quote reuse to be compelling",
+          "evidence": [
+            {
+              "postId": 122,
+              "quote": "Personally, I don't find any of the arguments against supporting quote reuse to be compelling. I find the benefits of resourcing referential transparency inside f-string expressions to far outweigh any concerns I've seen so far",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "Not sure this is worth debating any more… the PEP was accepted into Python 3.12",
+          "evidence": [
+            {
+              "postId": 123,
+              "quote": "Not sure this is worth debating any more… the PEP was accepted into Python 3.12",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d6",
+      "title": "Require parentheses around expressions containing same-quote nesting",
+      "kind": "alternative",
+      "status": "open",
+      "summary": "A suggestion was made to require wrapping such expressions in parentheses for clarity, but no final decision is visible.",
+      "confidence": "medium",
+      "decidedAt": null,
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "Rejected ideas, 1: I think you mean wrap in parentheses, as in the example? Would f’{(a !=b)} be an example for ‘!’?",
+          "evidence": [
+            {
+              "postId": 28,
+              "quote": "Rejected ideas, 1: I think you mean wrap in parentheses, as in the example? Would f’{(a !=b)} be an example for ‘!’?",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d7",
+      "title": "Document IDLE limitations and PEP 8 guidance regarding quote reuse in f-strings",
+      "kind": "alternative",
+      "status": "accepted",
+      "summary": "The PEP was updated to document that IDLE cannot properly handle f-strings reusing opening quotes and users should avoid reformatters.",
+      "confidence": "high",
+      "decidedAt": "2023-01-01T01:00:20.360Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "If quote reuse stays, please do so. The SC should know that approving this as is will break a few things. Perhaps add at least “Lexing all possible f-strings with relational expressions will no longer be possible. In particular, reuse of opening quotes in replacement fields will be a problem.”",
+          "evidence": [
+            {
+              "postId": 28,
+              "quote": "If quote reuse stays, please do so. The SC should know that approving this as is will break a few things. Perhaps add at least “Lexing all possible f-strings with relational expressions will no longer be possible. In particular, reuse of opening quotes in replacement fields will be a problem.”}]}]}, {",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "I would also like to see the PEP more strongly discourage actually relying on that in manually written code, in the form of a proposed addition to PEP 8.",
+          "evidence": [
+            {
+              "postId": 95,
+              "quote": "Like others in the thread, I voted in favour of grammar consistency in the poll (allowing quote reuse), but I would also like to see the PEP more strongly discourage actually relying on that in manually written code",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "The section on string quotes would be the appropriate place for an addition like: (The part in parentheses probably shouldn't be added to PEP 8)",
+          "evidence": [
+            {
+              "postId": 95,
+              "quote": "The section on string quotes would be the appropriate place for an addition like:\n\n(The part in parentheses probably shouldn't be added to PEP 8, but could be included in the PEP 701 section on adding the new PEP 8 text)",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d8",
+      "title": "Allow single quotes inside double-quoted f-string expressions",
+      "kind": "proposal",
+      "status": "accepted",
+      "summary": "The ability to use single quotes within double-quoted f-strings (and vice versa) was accepted as part of the main proposal.",
+      "confidence": "high",
+      "decidedAt": "2022-12-21T13:04:13.485Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "I voted Yes because I think that any (unnecessary) restriction will sooner or later bite someone. But I agree that unnecessary nesting of the same kind of quote is poor style and should be discouraged.",
+          "evidence": [
+            {
+              "postId": 45,
+              "quote": "I voted Yes because I think that any (unnecessary) restriction will sooner or later bite someone.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "f\"Please, have some {assorted_snacks['for_guests'].serve()}, they're delicious!\"",
+          "evidence": [
+            {
+              "postId": 50,
+              "quote": "f\"Please, have some {assorted_snacks['for_guests'].serve()}, they're delicious!\"",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d9",
+      "title": "Tokenization details, token names, and preventing f-strings from looking like regular strings",
+      "kind": "alternative",
+      "status": "rejected",
+      "summary": "The idea that f-strings should strictly look like regular strings without allowing non-intuitive quoting was rejected in favor of flexibility.",
+      "confidence": "high",
+      "decidedAt": "2022-12-30T11:47:46.744Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "IMO f-strings should continue to look like regular Python strings to a Python programmer and not allow non-intuitive quoting just because the parser can handle this...",
+          "evidence": [
+            {
+              "postId": 46,
+              "quote": "IMO f-strings should continue to look like regular Python strings to a Python programmer and not allow non-intuitive quoting just because the parser can handle this.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "I don't think that nesting f-strings should be allowed, but I guess that ship has already sailed.",
+          "evidence": [
+            {
+              "postId": 46,
+              "quote": "I don't think that nesting f-strings should be allowed, but I guess that ship has already sailed.",
+              "verified": true,
+              "matchScore": 0.944
+            }
+          ]
+        },
+        {
+          "text": "The tokens in the PEP are there just for reference to understand what they do but they are an implementation detail and not a public API definition.",
+          "evidence": [
+            {
+              "postId": 63,
+              "quote": "In any case, the tokens in the PEP are there just for reference to understand what they do but they are an implementation detail.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "The tokenizer module in the reference implementation seems to have not caught up with the PEP yet because it is Python and not the private C implementation.",
+          "evidence": [
+            {
+              "postId": 60,
+              "quote": "Relatedly, the tokenizer module in the reference implementation seems to have not caught up with the PEP yet. I assume because it is the python and not the private C implementation.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "What these tokens (the ones in the C tokenizer, which I insist is not visible) will contain is going to be based fundamentally on what makes the implementation simpler.",
+          "evidence": []
+        },
+        {
+          "text": "In general, you should not focus on what the tokens contain.",
+          "evidence": []
+        },
+        {
+          "text": "I apologize if it seems that I am overly insisting on this, but I think is important because the proposal doesn't change any user-visible thing if the tokens contain the starting quote or not",
+          "evidence": []
+        },
+        {
+          "text": "I think it would help if there was a specification for the tokens – not for what is returned by the tokenizer, but e.g. a regular expression showing what the lexer accepts for each token.",
+          "evidence": [
+            {
+              "postId": 88,
+              "quote": "Hm. I think I may have found an example where I might disagree. But before we argue about this, I think it would help if there was a specification for the tokens – not for what is returned by the tokenizer, but e.g. a regular expression showing what the lexer accepts for each token.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "I don't think a regular expression is possible (or at least straightforward so it helps for clarifications) because the cut points depend on the level of parenthesis",
+          "evidence": [
+            {
+              "postId": 89,
+              "quote": "I don't think a regular expression is possible (or at least straightforward so it helps for clarifications) because the cut points depend on the level of parenthesis and bracket some of the characters are and some other state the lexer needs to keep track of.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d10",
+      "title": "Prevent arbitrary nesting of f-strings to maintain readability without relying on syntax highlighting",
+      "kind": "alternative",
+      "status": "rejected",
+      "summary": "The idea to fully remove restrictions allowing any level of f-string nesting was turned down due to readability concerns and potential for confusing syntax.",
+      "confidence": "high",
+      "decidedAt": "2022-12-22T03:45:42.913Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "Harder for beginners to parse at a glance. This feature absolutely requires some kind of syntax highlighting / code-formatting to understand what is happening in the code. This is a drastic increase in complexity.",
+          "evidence": [
+            {
+              "postId": 58,
+              "quote": "Harder for beginners to parse at a glance. This feature absolutely requires some kind of syntax highlighting / code-formatting to understand what is happening in the code. This is a drastic increase in complexity.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "I think we need to be careful relying on syntax highlighting as a cure for confusing syntax and what about visually impaired programmers or other folks for which highlighting might not help or be available?",
+          "evidence": [
+            {
+              "postId": 64,
+              "quote": "I think we need to be careful relying on syntax highlighting as a cure for confusing syntax. I use and rely on syntax highlighting, but what about visually impaired programmers or other folks for which highlighting might not help or be available?",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d11",
+      "title": "Allow f-strings to contain full Python statements (rejected)",
+      "kind": "alternative",
+      "status": "rejected",
+      "summary": "The proposal to allow arbitrary Python code (including statements) inside f-string interpolations was rejected because it breaks the expectation that f-strings contain only simple expressions.",
+      "confidence": "high",
+      "decidedAt": "2022-12-22T11:12:08.301Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "Most of the time there's just no reason to put anything beyond a mere variable name or a very simple expression and beginners aren't expected to know the full grammar of the language.",
+          "evidence": [
+            {
+              "postId": 59,
+              "quote": "Beginners aren't expected to know the full grammar of the language, and let's not forget that most f-strings don't contain any string literals inside interpolations. I expect that to remain so – most of the time there's just no reason to put anything beyond a mere variable name or a very simple expression.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "This is already possible in 3.10, but I strongly doubt that it was ever intended and should we really head on in the same direction even more?",
+          "evidence": [
+            {
+              "postId": 68,
+              "quote": "This is already possible in 3.10, but I strongly doubt that it was ever intended. Should we really head on in the same direction even more ?",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d12",
+      "title": "Move quote reuse restrictions from grammar to linters",
+      "kind": "alternative",
+      "status": "rejected",
+      "summary": "The idea that syntax rules should be enforced by linters rather than the parser was rejected in favor of keeping the restriction in the grammar.",
+      "confidence": "low",
+      "decidedAt": null,
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "Ultimately(in my opinion), such restrictions belong in linters and code formatters rather than in the language grammar itself.",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "key": "d13",
+      "title": "Allow newlines inside f-string expressions and format specifiers",
+      "kind": "proposal",
+      "status": "accepted",
+      "summary": "The main proposal allowed newlines within the expression part of f-strings, treating them like regular string content.",
+      "confidence": "high",
+      "decidedAt": "2023-01-05T14:41:14.608Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "Both of these are valid with our current implementation: f\"___{ x }___\" and f\"___{( x )}___\"",
+          "evidence": [
+            {
+              "postId": 93,
+              "quote": "Both of these are valid with our current implementation:\n\n>>> x = 1\n>>> f\"___{\n... x\n... }___\"\n'___1___'",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "It also handles debug expressions: f\"___{ 1 + 1 =}___\" which prints the formatted result with newlines preserved.",
+          "evidence": [
+            {
+              "postId": 93,
+              "quote": "It also handles debug expressions:\n\n>>> f\"___{\n... 1\n... +\n... 1\n... =}___\"\n'___\\n1\\n+\\n1\\n=2___'",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "It's unclear from the PEP whether following (new line in f-expression) are valid or not",
+          "evidence": [
+            {
+              "postId": 117,
+              "quote": "It's unclear from the PEP whether following (new line in f-expression) are valid or not: f'{1\\n+\\n1}'",
+              "verified": true,
+              "matchScore": 0.9
+            }
+          ]
+        },
+        {
+          "text": "But I can confirm that this will be incorporated soon into the PEP document",
+          "evidence": [
+            {
+              "postId": 118,
+              "quote": "But I can confirm that this will be incorporated soon into the PEP document",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d14",
+      "title": "Use parser-driven mode switching instead of modifying the tokenizer",
+      "kind": "alternative",
+      "status": "accepted",
+      "summary": "The implementation chose to let the parser signal mode changes rather than making the tokenizer context-aware.",
+      "confidence": "high",
+      "decidedAt": "2023-01-03T19:35:27.525Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "That could be driven by the parser though, right? The parser can have lookaheads for }, : and :=, and then signal to the lexer to switch back.",
+          "evidence": [
+            {
+              "postId": 94,
+              "quote": "That could be driven by the parser though, right? The parser can have lookaheads for }, : and :=, and then signal to the lexer to switch back.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "In general, we found that just modifying the tokenizer to know when to switch is not only much easier, but also much cleaner and debuggable",
+          "evidence": [
+            {
+              "postId": 109,
+              "quote": "In general, we found that just modifying the tokenizer to know when to switch is not only much easier, but also much cleaner and debuggable",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d15",
+      "title": "Clarify tokenizer behavior after colon in format specifiers",
+      "kind": "proposal",
+      "status": "accepted",
+      "summary": "The PEP documentation was updated to explicitly state that double braces are not treated as part of the middle token after a colon.",
+      "confidence": "high",
+      "decidedAt": "2023-05-19T17:27:01.772Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "Step 3 doesn't say anything special about what happens after a : character is encountered",
+          "evidence": [
+            {
+              "postId": 120,
+              "quote": "Step 3 doesn't say anything special about what happens after a : character is encountered. It says that the tokenizer should go back to step 2 after emitting a : token and popping the current tokenizer mode from the stack.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "I think we may want to be a bit more explicit here, but the section was intended to be indicative and not prescriptive as different tokenizers would require different ways to approach the problem",
+          "evidence": [
+            {
+              "postId": 121,
+              "quote": "I think we may want to be a bit more explicit here, but the section was intended to be indicative and not prescriptive as different tokenizers would require different ways to approach the problem.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "d16",
+      "title": "Increase limit for nested format specifiers (rejected)",
+      "kind": "alternative",
+      "status": "rejected",
+      "summary": "Users suggested increasing the nesting limit for format specifiers beyond two levels, but the implementation preserved the existing restriction.",
+      "confidence": "high",
+      "decidedAt": "2023-05-19T17:27:01.772Z",
+      "model": "qwen3.5:9b",
+      "reasons": [
+        {
+          "text": "Another small topic that isn't mentioned in the PEP has to do with nested format specifiers. It appears that the implementation supports two levels of nesting but not three",
+          "evidence": [
+            {
+              "postId": 120,
+              "quote": "Another small topic that isn't mentioned in the PEP has to do with nested format specifiers. It appears that the implementation supports two levels of nesting but not three.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        },
+        {
+          "text": "For both of these things we just preserved existing behavior, while for the nesting of f-strings we had to dictate it because now arbitrary nesting is possible while before it was not",
+          "evidence": [
+            {
+              "postId": 121,
+              "quote": "For both of these things we just preserved existing behavior, while for the nesting of f-strings we had to dictate it because now arbitrary nesting is possible while before it was not.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

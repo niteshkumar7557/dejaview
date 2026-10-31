@@ -1,0 +1,31 @@
+{
+  "promptHash": "8ca98c02951bd7f86841d231d8b83f2864285ec4e1c44678c29f3b38ab53804b",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 54] achhina:\nAs for reusing the opening quotes, I wouldn’t recommend it and would likely try to have a formatter rule to avoid even having such discussions in reviews. However, I personally do not have an issue with parsing this example f\"These are the things: {\", \".join(things)}\", and even less so with syntax highlighting.\n\nf\"These are the things: {\", \".join(things)}\"\n\nIt does make me wonder how much of this is an issue with familiarity; has this been a point of contention or a pain point in other communities that allow quote reusing, like the aforementioned Ruby/JS communities?\n\nIn terms of the benefits, in addition to reducing the complexity of the implementation, I think this increased freedom would be helpful for ad hoc testing/experimenting. On numerous occasions, I have gotten SyntaxError when absent-mindedly reusing opening quotes in a REPL session. While not particularly inconvenient, this PEP would have been nice to have in those situations.\n\nOverall, considering all those things I’m +1 for this PEP.\n\n[post 55] godlygeek:\nNote that any IDE, code review tool, or text editor that supports syntax highlighting of POSIX sh code already needs to handle nested string delimiters. For example, I’ve got this little shell script that I can use from within WSL to let Windows open a file as though I had double clicked it:\n\n#!/bin/sh\nset -eu\nfilename=\"$1\"\ncd \"$(dirname \"$filename\")\"\nexplorer.exe \"$(basename \"$filename\")\"\n\nUnlike in Python, you don’t have the choice of using different quotes in shell; those nested quotes are necessary for correctness and cannot be avoided.\n\nNote that this isn’t an argument for making Python’s syntax more sh-like, only an argument that nested quotes are already the norm in a major enough and old enough programming language that nearly every general purpose text editor will have a way to handle highlighting of nested quotes already.\n\n[post 56] guido:\nI think the first example from the PEP using \", \".join(things) is not great to explain why we’d want this feature. The second example is better:\n\nf\"{source.removesuffix(\".py\")}.c: $(srcdir)/{source}\"\n\n(though maybe it tries a little too hard to be realistic by using $(srcdir) which looks like another form of interpolation but is just a literal string).\n\nI like the proposed feature, because it makes it possible to copy any valid expression from another part of the code into an interpolation without having to worry about string quotes.\n\n[post 58] envp:\nIn my lay opinion, once a feature exists there will be people who use it in all manners of clever ways.\n\nI voted no, for the following reason:\n\nHarder for beginners to parse at a glance. This feature absolutely requires some kind of syntax highlighting / code-formatting to understand what is happening in the code. This is a drastic increase in complexity.\n\n[post 59] guido:\nThat same argument has been used against any new feature. The mere possibility of abuse should not be enough to reject a new feature (TBH, there are better reasons to reject most feature proposals). Only the overwhelming likelihood that most uses would be (“clever”) abuse should count against a feature.\n\nBeginners aren’t expected to know the full grammar of the language, and let’s not forget that most f-strings don’t contain any string literals inside interpolations. I expect that to remain so – most of the time there’s just no reason to put anything beyond a mere variable name or a very simple expression.\n\nIt has been explained over and over now that that’s par for the course for editor maintainers.\n\nVery few, of course, but that’s not even close to being a litmus test for a few feature.\n\nA better way to evaluate proposed new features (especially new syntactic features) is if it composes cleanly with other syntax. Sometimes people seem to use the term “referential transparency”; an example is that if we have f(x+1), assuming a is a brand new variable, it should behave the same as a = x+1; f(a). And vice versa.\n\nSo if we have\n\ndef py2c(source):\nprefix = source.removesuffix(\".py\")\nr …\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 54,
+        "label": "support"
+      },
+      {
+        "post_id": 55,
+        "label": "alternative"
+      },
+      {
+        "post_id": 56,
+        "label": "support"
+      },
+      {
+        "post_id": 58,
+        "label": "objection"
+      },
+      {
+        "post_id": 59,
+        "label": "support"
+      }
+    ]
+  },
+  "durationMs": 7652
+}

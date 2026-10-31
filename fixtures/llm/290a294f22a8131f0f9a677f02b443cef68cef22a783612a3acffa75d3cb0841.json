@@ -1,0 +1,31 @@
+{
+  "promptHash": "290a294f22a8131f0f9a677f02b443cef68cef22a783612a3acffa75d3cb0841",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 88] guido:\nHm. I think I may have found an example where I might disagree. But before we argue about this, I think it would help if there was a specification for the tokens – not for what is returned by the tokenizer, but e.g. a regular expression showing what the lexer accepts for each token. This would be helpful for people writing alternate tokenizers.\n\n(In fact, it’s possible that one reason people get hung up on the contents of the tokens is that what they really would like to understand is the input acceptable for each token.)\n\nYes I would like that very much. It would also be nice if we had an executable version of that specification in he form of a Python class into which one can feed examples.\n\n[post 89] pablogsal:\nAn example where you disagree with treating the tokenizer mode after : then same as the mode for f-string or where you disagree with the proposal in general?\n\nWe can add that, we somehow have something similar now in “consequences of the grammar”. I can adapt it so is more clear.\n\nI don’t think a regular expression is possible (or at least straightforward so it helps for clarifications) because the cut points depend on the level of parenthesis and bracket some of the characters are and some other state the lexer needs to keep track of.\n\nOk, we will incorporate a refined version of that description to the document\n\nIf you don’t mind that the token contents are asymmetric, you can already play with it by getting the tokens from the C tokenizer using the private interface we use for testing (you need to do this from the implementation branch):\n\n>>> import pprint\n>>> import tokenize\n>>> pprint.pprint(list(tokenize._generate_tokens_from_c_tokenizer(\"f' foo { f' {1 + 1:.10f} ' } bar'\")))\n\n[TokenInfo(type=61 (FSTRING_START), string=\"f'\", start=(1, 0), end=(1, 2), line=\"f' foo { f' {1 + 1:.10f} ' } bar'\\n\"),\nTokenInfo(type=62 (FSTRING_MIDDLE), string=' foo ', start=(1, 2), end=(1, 7), line …\n\n[post 90] guido:\nAn example where you disagree with treating the tokenizer mode after : then same as the mode for f-string or where you disagree with the proposal in general?\n\nThe former – I am still very much in favor of the proposal, I am just trying to tease out details and edge cases.\n\nHere’s my edge case:\n\n- A pair of }} is allowed in the regular “middle” part of an f-string, e.g. f\"a}}z\" produces \"a}z\".\n\n- But inside the format specifier, this is currently not allowed:>>> f\"{X():_}}_}\"\nFile \"<stdin>\", line 1\nf\"{X():_}}_}\"\n^\nSyntaxError: f-string: single '}' is not allowed\n>>>\n\nIf this is truly treated as a middle part it would have interpreted this as a format specifier equal to _}_.\n\nNow, I haven’t built your branch yet so maybe it does that in your version? In that case I give up the quibble (other than that this difference isn’t mentioned in the PEP’s “Consequences …” section).\n\nI did miss that, and I’m glad that it mentions backslashes. I guess there are some other options for comments though, e.g. one could argue that this ought to be valid:\n\nf\"___{\nx\n}___\"\n\nsince the newlines are technically enclosed by brackets, similar to\n\n{\nx\n}\n\nOr if you want to exclude those outer brackets, what ab …\n\n[post 91] pablogsal:\nI see what you mean but how do you express with regular expressions the fact that the regular expression for the expression part is “normal tokenization but it must stop at } or : only if is not inside parentheses”? Even if somehow you han-wave over the “normal tokenization” I don’t think you can easily express the parentheses part easily with automaton-based regular expressions.\n\nHumm seems that I didn’t clarify this correctly and there is some confusion. Allow me to clarify it better:\n\n- The example I gave uses the C tokenizer interface (notice the funcion name is _generate_tokens_from_c_tokenizer). This is a non-public interface that we exposed in 3.11 to test the C tokenizer. This is the one that you can already use to play with in our branch.\n\n- At the time they are not changes to the tokenize.py file. I meant that I will discuss with @lys.nikolaou and @isidentical about adding them to the proposed implementation.\n\nApologies for the confusion.\n\n[post 92] pablogsal:\nI checked and we handle that correctly at the time:\n\n>>> f\"{X():_}}_}\"\nFile \"<stdin>\", line 1\nf\"{X():_}}_}\"\n^\nSyntaxError: unmatched '}'\n\nwe do it here:\n\nWe will mention it in the clarifications\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 88,
+        "label": "question"
+      },
+      {
+        "post_id": 89,
+        "label": "noise"
+      },
+      {
+        "post_id": 90,
+        "label": "support"
+      },
+      {
+        "post_id": 91,
+        "label": "question"
+      },
+      {
+        "post_id": 92,
+        "label": "noise"
+      }
+    ]
+  },
+  "durationMs": 7719
+}

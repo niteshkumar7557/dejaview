@@ -269,9 +269,31 @@ export class DecisionsRepository {
   }
 
   /** Rejected decisions whose text looks like the text we are looking for. */
+  /**
+   * Rejected decisions that look like a proposal (the PR bot's "already rejected?" check).
+   *
+   * A PR's title and description are long and written in their own words, so we can't ask for every
+   * word to match (plainto_tsquery joins them with AND, which a real PR never passes). Instead we count
+   * the meaningful words (Postgres lexemes, stemmed, no stop words) the PR shares with each rejected
+   * decision's title, summary and reasons, keep those sharing at least 3 (or every word of a shorter
+   * query), and rank by how many they share.
+   */
   async similarRejected(q: string, limit = 10): Promise<DecisionSummary[]> {
     const result = await this.pool.query<DecisionSummaryRow>(
-      `SELECT d.*,
+      `WITH query AS (
+         SELECT array(SELECT DISTINCT lexeme FROM unnest(to_tsvector('english', $1))) AS lexemes
+       ),
+       scored AS (
+         SELECT d.id,
+                cardinality(array(
+                  SELECT unnest(tsvector_to_array(d.search))
+                  INTERSECT
+                  SELECT unnest(query.lexemes)
+                )) AS shared
+           FROM decisions d, query
+          WHERE d.status = 'rejected' AND d.search IS NOT NULL
+       )
+       SELECT d.*,
               t.slug AS topic_slug,
               t.title AS topic_title,
               t.pep_number AS topic_pep_number,
@@ -280,11 +302,12 @@ export class DecisionsRepository {
               (SELECT count(*) FROM evidence e
                 WHERE e.decision_id = d.id AND e.verified)::text AS verified_evidence,
               (SELECT count(*) FROM evidence e WHERE e.decision_id = d.id)::text AS total_evidence
-         FROM decisions d
+         FROM scored s
+         JOIN decisions d ON d.id = s.id
          JOIN topics t ON t.id = d.topic_id
-        WHERE d.status = 'rejected'
-          AND d.search @@ plainto_tsquery('english', $1)
-        ORDER BY ts_rank(d.search, plainto_tsquery('english', $1)) DESC
+        WHERE s.shared > 0
+          AND s.shared >= LEAST(3, (SELECT cardinality(lexemes) FROM query))
+        ORDER BY s.shared DESC, d.id DESC
         LIMIT $2`,
       [q, limit],
     );

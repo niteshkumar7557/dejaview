@@ -1,0 +1,31 @@
+{
+  "promptHash": "22abe16d411688e08e3533b68d95c4ff827ac62e71f0c243d6f288ef2eb3b86b",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 1] pablogsal:\nHi\n\nI am very excited to share with you a PEP that @isidentical, @lys.nikolaou and myself have been working on recently: PEP 701 - PEP 701 – Syntactic formalization of f-strings. We believe this will be a great improvement in both the maintainability of CPython and the usability of f-strings.\n\nWe look forward to hear what you think about this and to getting your feedback!\n\nThanks a lot, everyone for your time!\n\nTLDR\n\n- The PEP proposes a formalized grammar for f-strings in Python by adding f-strings directly into the Grammar instead of using a two-pass hand-written parser.\n\n- This would lift some existing restrictions for f-strings that (we believe) will improve the user experience with f-strings.\n\n- Other benefits include:\n\n- Reduced maintenance costs for f-string parsing code as well us improved usability for users and library developers.\n\n- Better error messages involving f-strings by leveraging the PEG parser machinery.\n\n- The proposed changes would improve overall consistency of the language and provide a way for alternative implementations to accurately implement f-strings.\n\nLink to the PEP\n\n(I am not pasting the PEP contents here to avoid having a diverging version if the PE …\n\n[post 2] pablogsal:\nFor further context you can read the coverage of my talk about this project on the 2022 Python Language Summit:\n\n[post 3] charliermarsh:\nThank you for this – I’m a big fan of the formalization proposed herein!\n\nOne clarification (and apologies for any ignorance – I’ve read through the PEP and skimmed the reference implementation, but I’m more familiar with the RustPython parser than the CPython parser right now): how, if at all, will this impact the AST representation? And will there be any formalization of the rules by which f-strings are “resolved” to AST nodes?\n\nI’m referring, e.g., to the logic that I think lives in _PyPegen_concatenate_strings, to combine adjacent constant strings in the JoinedStr, along with the rules for resolving implicit string concatenations containing f-strings and “normal” strings. This is another area in which we’ve implemented custom logic for RustPython based on observing CPython’s behavior. I’m assuming that it’s an entirely separate topic and one that will not be impacted by this PEP as written, which is fine, but I wanted to confirm my understanding and flag it as a pain point with similar characteristics to the f-string parsing itself.\n\n[post 4] pablogsal:\nThanks for the feedback @charliermarsh!\n\nNop, the AST will be the same. In fact, that’s how we are checking the implementation: by comparing ASTs of most PyPi packages\n\nNoted. I promise to discuss it with the co-authors but for this PEP we don’t envision changing any of those semantics, as our main target is maintainability for CPython and user experience for end users (not tool authors ATM).\n\nIn any case, we can chat offline about this if you want to elaborate. You can write to pablogsal (at) python (dot) org if you want\n\n[post 6] pablogsal:\nThere isn’t any reason why this would not be possible. This change is not different from any other syntax change in Python: tools need to update to handle the new syntax and old syntax will work the same way.\n\nIDEs and other review tools need to parse the code and any parser will be able to handle this new syntax because is equivalent to how parsers need to handle nested parenthesis. There is no hard requirement for a PEG parser.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 1,
+        "label": "proposal"
+      },
+      {
+        "post_id": 2,
+        "label": "noise"
+      },
+      {
+        "post_id": 3,
+        "label": "question"
+      },
+      {
+        "post_id": 4,
+        "label": "support"
+      },
+      {
+        "post_id": 6,
+        "label": "support"
+      }
+    ]
+  },
+  "durationMs": 13649
+}

@@ -1,0 +1,31 @@
+{
+  "promptHash": "b9da42cee268428f93f0e5beba5c995d3570b3eabc273aba1c9c4a69619c57f5",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 49] h-vetinari:\nWhy? There’s a clear marker in the second one that says “stuff between {} is treated differently” (discourse even does the highlighting for that). f-strings have been around for almost 6 years now, and that {} does un-string-like things is the whole point, which people seem to have gotten with relative ease.\n\nSeveral of the examples against quote reuse have minimal code being executed to interpolate the string. Once that part becomes longer, like\n\nf\"Please, have some {assorted_snacks[\"for_guests\"].serve()}, they're delicious!\"\n\nit becomes much less ambiguous (YMMV) which parts are string and what parts are string interpolation.\n\nFor example, not being able to simply use a some_dict[\"key\"] within the interpolation part, in a way that’s consistent way with the (usually black-enforced) style of double-quotes in the rest of the code base is really annoying, and a constant source of stylistic and mental friction.\n\nMy POV is that it’s completely fine if someone doesn’t like nested quotes of the same kind. But like simplicity, another oft-repeated koan is “we’re all consenting adults here”, and – as the poll shows – there’s a sizeable portion of people who want the quote reuse to be possi …\n\n[post 50] malemburg:\nI’m pretty sure that black can be fixed to allow single quotes in {} parts of f-strings to continue to allow use of string literals - perhaps even enforce this\n\nThis code doesn’t look much different, but it clearly matches expectations when writing Python string literals:\n\nf\"Please, have some {assorted_snacks['for_guests'].serve()}, they're delicious!\"\n\nI frankly don’t understand, why people would want to disrupt Python’s quote handling on purpose. If a programming language requires code highlighting to be fully understood by humans, then something is wrong, and Python has a long history of having a nice human friendly syntax.\n\nFor more complex templating logic, it’s much better to go with e.g. Jinja2. f-string are simply a nice compact way of getting access to variables. The fact that you can use arbitrary expressions is one of the “features” I talked about in my previous post. This is mostly due to keeping the implementation simple and avoid limiting ways of accessing variables, but not really intended for arbitrary code execution. Of course, people still use the feature that way and that’s unfortunate, IMO.\n\n[post 51] ajoino:\nI don’t think it disrupts the quote handling really. The first time I tried to subscript a key in an f-string I was surprised that I had to change from double to single quote. So in that case the current qoute handling was disruptive. It felt like an arbritrary restriction.\n\nFurthermore, I don’t really see the readability issues that are brought up here, maybe because I started using Python after f-strings were introduced and because I’ve always used syntax highlighting tools.\n\nI agree with the people saying that the reuse of quotes in f-strings should not be syntactically incorrect but instead be discouraged in the docs.\n\n[post 52] stoneleaf:\nIf all the languages are “compatible”, what makes them different?\n\nThe reason I fell in love with Python was its readability:\n\n- lack of boilerplate\n\n- significant whitespace\n\n- use of keywords\n\nAs for prior art, that goes both ways: Python finally got an assignment expression, and it does not look like C’s – why? Because C’s looked the same as equality testing and was therefore easy to use incorrectly.\n\n[post 53] monk-time:\nI don’t think you’re asking this question in good faith. Languages differ by a multitude of things, such as supported paradigms and features, how they jell with each other, which aspect gets the most attention and ease of use and so on. Gotchas in basic features, however, are not one of them. I don’t think anyone would disagree that mutable defaults gotcha is a regrettable part of Python that might be too late to fix. Banning re-use of quotes is just that, a gotcha.\n\nThis comparison is not apt here, C predates Python by 20 years, plus 30 more until this feature got introduced in Python. That’s long enough to call it “a reimagining”, not simply a reimplementation. Whereas four modern languages that the PEP is referring to have implemented string interpolation within a few years from Python at most. JavaScript got it the same year as Python IIRC, 2016. Swift was first released in 2014.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 49,
+        "label": "objection"
+      },
+      {
+        "post_id": 50,
+        "label": "support"
+      },
+      {
+        "post_id": 51,
+        "label": "support"
+      },
+      {
+        "post_id": 52,
+        "label": "question"
+      },
+      {
+        "post_id": 53,
+        "label": "objection"
+      }
+    ]
+  },
+  "durationMs": 7726
+}

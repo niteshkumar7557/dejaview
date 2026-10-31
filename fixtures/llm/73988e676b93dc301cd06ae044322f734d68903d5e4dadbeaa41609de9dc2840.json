@@ -1,0 +1,31 @@
+{
+  "promptHash": "73988e676b93dc301cd06ae044322f734d68903d5e4dadbeaa41609de9dc2840",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 109] pablogsal:\nWe actually started with that but it turned out to be a bad idea for the following:\n\n- The tokenizer needs to be able to tokenize the source without the parser driving the modes. This is because for many operations (such as some error reporting, tokenize.py and others) the parser is actually not available.\n\n- When the parser does backtracking we would need the tokenize to “untokenize” the source. This is not only quite chaotic but also is complicated to get “right” with the memorization.\n\n- It breaks the nice separation between the tokenizer and parser. This has proven to help debugging a lot because we can check using our exposed functions that the tokenization works correctly before having to debug the parser. Debugging the parser at the same time as the tokenizer is quite painful.\n\nIn general, we found that just modifying the tokenizer to know when to switch is not only much easier, but also much cleaner and debuggable, and requires many many fewer changes. At the end of the day, one of our cornerstones is making this part of CPython more maintainable so our implementation went this route.\n\n[post 112] guido:\nThanks, this actually makes sense.\n\nTrying to get the discussion back on track (away from .join()) a bit, have you thought about my parenthetical remark about using \\{ and \\} to escape curlies instead of, or in addition to, {{ and }}? I believe that when PEP 498 was discussed, there was a good reason to use the latter, but somehow I can’t find that reason in the PEP, and I can’t recall what it was. Maybe it was for compatibility with str.format()? The doubling has always irked me, and I think I’ve forgotten that it existed several times over the years (because I so rarely have a real need to put a curly brace in an f-string).\n\n[post 114] pablogsal:\nNot yet, I want to discuss this in detail with @lys.nikolaou and @isidentical and currently we are focusing on making the tokenize.py changes and acting on the feedback so far. We will discuss it and check if is too hard to support. If it proves to be trivial and we all agree we can add it to the proposal. If it proves to be tricky we can do it as a follow-up (maybe in an issue and not in a PEP).\n\nIn any case, I think the question is if we can support both, right (for backwards compat). The double { makes it somehow harder to implement but I don’t think there is a way around supporting it\n\n[post 115] pablogsal:\nMeanwhile, maybe @ericvsmith knows the answer to this?\n\n[post 117] zufuliu:\nIt’s unclear from the PEP whether following (new line in f-expression) are valid or not:\n\nf'{1\n+\n1}'\n\nf'{1\\\n+\\\n1}'\n\n# triple-quoted f-string\nf'''{1\n+\n1}'''\n\nf'''{1\\\n+\\\n1}'''\n\nsimilar code is valid in string interpolation, e.g. C# (see [Proposal]: Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines. · Issue #4935 · dotnet/csharplang · GitHub), Kotlin (see Kotlin language specification).\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 109,
+        "label": "objection"
+      },
+      {
+        "post_id": 112,
+        "label": "support"
+      },
+      {
+        "post_id": 114,
+        "label": "question"
+      },
+      {
+        "post_id": 115,
+        "label": "noise"
+      },
+      {
+        "post_id": 117,
+        "label": "question"
+      }
+    ]
+  },
+  "durationMs": 7477
+}

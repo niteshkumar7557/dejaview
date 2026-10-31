@@ -1,0 +1,31 @@
+{
+  "promptHash": "b568eaae7ae3968812afc1a1cffdc7d2fce2b0d599b9076c7bed7f2cb9076178",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 76] sweeneyde:\nMake sure you compare '%s' to '{x!s}' or compare '%r' to '{x!r}'. In 3.11-3.12, the dis module is showing that these typically lead to identical bytecode, so they should have exactly the same performance. As far as I know, this PEP will result in no bytecode changes and thus have no runtime performance effect on existing code, though it might be worth spelling that out explicitly.\n\n[post 78] mem_dixy:\nPersonally I dislike the idea of nesting f-strings. Preventing it should be easy. Just check that you don’t see another FSTRING_START tag before seeing a FSTRING_END tag. Otherwise we might end up with code like this:\n\nBut I do like the idea of making the parser simpler. And the code golf people might like it. So maybe it will have to be one of those “Just because you can, doesn’t mean you should!” kind of things?\n\n[post 79] UltimateLobster:\nThis PEP looks great! I would be happy to see it implemented\n\nHowever, I think that the abillity to reuse quotes is problematic. I’ve seen people here mention potential security/IDE maintainability issues. But I think that just from the simple readability aspect, this can be quite confusing and unintuitive (Which I believe to be the most important aspect to consider).\n\nThe {} syntax in f strings just doesn’t “feel” like it should be able to do it. For example, if the original syntax for f-strings would consist of the backtick character instead of the brackets, I would say otherwise since the backtick “feels” quote-like, it feels like we’re using a different kind of quote and therefore it should be possible. But the bracket character does not have this intuitive property (at least for me).\n\n[post 80] TeamSpen210:\nPreventing nesting entirely wouldn’t be backwards compatible, f-strings can already be nested if you use different quote styles for each level. I wonder if a bit of a compromise might be possible though? Infinite nesting could be allowed, but with the restriction that any quotes can’t reuse the immediately surrounding quote type. The switching quotes might make it easier to match each up:\n\n>>> f\"{f'{f\"{f'{f\"{f'{1+1}'}\"}'}\"}'}\"\n\n[post 82] isidentical:\nA familiar example is the challenges for f-strings we are having on ast.unparse (a standard library code generator that tries to take an AST and output a valid Python code for it). The f-string code generation is by far the most complicated part due to the implied tracking of quote types and trying to prevent backslashes. And with this complexity, IIRC there are still a few edge cases where we can’t roundtrip some f-strings that appear in the wild (big source code datasets) as regular Python syntax. Lifting quote restrictions would actually help quite a bit in this case where we can simplify the expression code generator for f-strings by denoting the result as '{' + ast.unparse(inner) + '}' as opposed to the complex steps we were taking before.\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 76,
+        "label": "support"
+      },
+      {
+        "post_id": 78,
+        "label": "alternative"
+      },
+      {
+        "post_id": 79,
+        "label": "objection"
+      },
+      {
+        "post_id": 80,
+        "label": "alternative"
+      },
+      {
+        "post_id": 82,
+        "label": "support"
+      }
+    ]
+  },
+  "durationMs": 7376
+}

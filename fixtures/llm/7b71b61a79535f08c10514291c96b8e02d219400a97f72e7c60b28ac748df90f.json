@@ -1,0 +1,105 @@
+{
+  "promptHash": "7b71b61a79535f08c10514291c96b8e02d219400a97f72e7c60b28ac748df90f",
+  "model": "qwen3.5:9b",
+  "stage": "extract",
+  "prompt": "You read part of a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nFind the ideas in these posts that were proposed or discussed: the main proposal, alternative designs,\ndifferent spellings or names, extra features people asked for, and ideas that were turned down.\nList at most 5 ideas, most important first (prefer ideas that were rejected or decided).\n\nFor each idea give:\n- title: a short name for the idea itself (at most 12 words), without labels like \"Rejected:\" or \"Proposal:\"\n- kind: \"proposal\" for the main proposal or a new feature, \"alternative\" for a different way of doing it\n- status: \"accepted\" if it was adopted, \"rejected\" if the authors or deciders turned it down,\n  \"withdrawn\" if its own proposer dropped it, \"open\" if no outcome is visible in these posts\n- summary: one short sentence on what happened to the idea\n- reasons: at most 2 reasons why it got that status, each with exactly one evidence item (post_id and quote).\n\nRules for quotes:\n- Copy the quote WORD FOR WORD from the post with that post_id. Do not paraphrase, fix or shorten words.\n- At most 25 words per quote. Never invent a quote.\n- Only use posts shown below.\n\nPosts:\n\n[post 1] pablogsal (2022-12-19):\nHi\n\nI am very excited to share with you a PEP that @isidentical, @lys.nikolaou and myself have been working on recently: PEP 701 - PEP 701 – Syntactic formalization of f-strings. We believe this will be a great improvement in both the maintainability of CPython and the usability of f-strings.\n\nWe look forward to hear what you think about this and to getting your feedback!\n\nThanks a lot, everyone for your time!\n\nTLDR\n\n- The PEP proposes a formalized grammar for f-strings in Python by adding f-strings directly into the Grammar instead of using a two-pass hand-written parser.\n\n- This would lift some existing restrictions for f-strings that (we believe) will improve the user experience with f-strings.\n\n- Other benefits include:\n\n- Reduced maintenance costs for f-string parsing code as well us improved usability for users and library developers.\n\n- Better error messages involving f-strings by leveraging the PEG parser machinery.\n\n- The proposed changes would improve overall consistency of the language and provide a way for alternative implementations to accurately implement f-strings.\n\nLink to the PEP\n\n(I am not pasting the PEP contents here to avoid having a diverging version if the PEP is updated)\n\n[post 3] charliermarsh (2022-12-19):\nThank you for this – I’m a big fan of the formalization proposed herein!\n\nOne clarification (and apologies for any ignorance – I’ve read through the PEP and skimmed the reference implementation, but I’m more familiar with the RustPython parser than the CPython parser right now): how, if at all, will this impact the AST representation? And will there be any formalization of the rules by which f-strings are “resolved” to AST nodes?\n\nI’m referring, e.g., to the logic that I think lives in _PyPegen_concatenate_strings, to combine adjacent constant strings in the JoinedStr, along with the rules for resolving implicit string concatenations containing f-strings and “normal” strings. This is another area in which we’ve implemented custom logic for RustPython based on observing CPython’s behavior. I’m assuming that it’s an entirely separate topic and one that will not be impacted by this PEP as written, which is fine, but I wanted to confirm my understanding and flag it as a pain point with similar characteristics to the f-string parsing itself.\n\n[post 4] pablogsal (2022-12-19):\nThanks for the feedback @charliermarsh!\n\nNop, the AST will be the same. In fact, that’s how we are checking the implementation: by comparing ASTs of most PyPi packages\n\nNoted. I promise to discuss it with the co-authors but for this PEP we don’t envision changing any of those semantics, as our main target is maintainability for CPython and user experience for end users (not tool authors ATM).\n\nIn any case, we can chat offline about this if you want to elaborate. You can write to pablogsal (at) python (dot) org if you want\n\n[post 6] pablogsal (2022-12-19):\nThere isn’t any reason why this would not be possible. This change is not different from any other syntax change in Python: tools need to update to handle the new syntax and old syntax will work the same way.\n\nIDEs and other review tools need to parse the code and any parser will be able to handle this new syntax because is equivalent to how parsers need to handle nested parenthesis. There is no hard requirement for a PEG parser.\n\n[post 7] ericvsmith (2022-12-19):\nAs you know, I’m in favor of this PEP.\n\nI would like the PEP to note that the existing restrictions on nested quotes (and probably other things) was a deliberate design decision in order to make it easy for editors, syntax highlighters and the like to “support” f-strings. All they really had to do is add “f” to “r”, “b”, “u” and they could at least get past the f-string.\n\nAlong the same lines, I think it would also be worth polling some notable editors and see if this change will cause them any headaches, and record that info in the PEP.\n\nThanks for working on this. I look forward to backslashes in expressions!\n\n[post 8] pablogsal (2022-12-19):\nMost editors that support other languages need to deal with that anyway. For instance in ruby you can do:\n\n>>> puts \"#{ \"1 + 2\" }\"\n1 + 2\n\nor even\n\n>>> puts \"#{ \"#{\" #{1 + 2} \"}\" }\"\n3\n\nThe change indeed implies that tools and editors need to do some work to parse the new syntax but it shouldn’t be something that either they are not dealing with in other languages or something that is impossible to be implemented.\n\nIn any case, this is a good idea: we will try to reach out to some IDE authors and other tools to gather some feedback as per your proposal\n\n[post 9] smontanaro (2022-12-19):\nNot sure where to make comments. Is there something on GitHub? At any rate… Item 3 in the Motivation section states:\n\nComments are forbidden even in multi-line f-strings:\n>>> f'''A complex trick: {\n... bag['bag'] # recursive bags!\n... }'''\nSyntaxError: f-string expression part cannot include '#'\n\nI don’t know if that’s expected to change, but I will point out that while you can insert “comments” in regular strings, they are just part of the string:\n\n>>> '''A complex trick: {\n... bag['bag'] # recursive bags!\n... }'''\n\"A complex trick: {\\n bag['bag'] # recursive bags!\\n}\"\n\nDo you intend to support actual comments in f-strings or just allow # ... to be embedded within the string? I’d be disappointed to find the semantics between f-strings and regular strings had diverged (though, of course they have already).\n\n[post 10] pablogsal (2022-12-19):\nThanks for the feedback @smontanaro ! Unfortunately I am afraid I don’t follow your concern.\n\nHere the ‘#’ is not a comment because is a character of the string itself as is on the example that you mentioned:\n\n>>> '''A complex trick: {\n... bag['bag'] # recursive bags!\n... }'''\n\"A complex trick: {\\n bag['bag'] # recursive bags!\\n}\"\n\nNotice in f-strings, the expression part of the string is not part of the string itself and that part is evaluated. Currently, if you try to use a comment there you get this:\n\n>>> f\"\"\"A complex trick: {\n... bag['bag'] # recursive bags!\n... }\"\"\"\nFile \"<stdin>\", line 3\n}\"\"\"\n^\nSyntaxError: f-string expression part cannot include '#'\n\nWhat we are proposing is that this error disappears and anything after the # comment character gets ignored as any comment of any expression (only when the comment is in the expression part).\n\nNotice this does not change semantics between f-strings and strings because you can still put the # character in the string part of the f-string. That is:\n\n>>> f\"\"\"A complex trick: # look a comment here {\n... 1+1\n... } # look, another comment\"\"\"\n'A complex trick: # look a comment here 2 # look, another comment'\n\nThe comments that we want to allow are only on the expression part.\n\n[post 11] pf_moore (2022-12-19):\nIsn’t the difference here that the # ... is inside a {...} pair? I would certainly expect that outside of {...}, # ... would be treated just as normal text (i.e., as part of the string).\n\nEdit: I see that @pablogsal answered this more fully while I was typing…\n\n[post 13] pablogsal (2022-12-19):\nExactly Noting will change on the string parts of f-strings.\n\n[post 14] tjreedy (2022-12-19):\nRationale: while allowing backslash escapes is no problem (point 2), as they must already be recognized to detect strings, allowing un-escaped quotes and infinite nesting (points 1 and 3) is, certainly for regex-based syntax highlighting, which IDLE uses. Regexes are known to not handle any nesting easily and indefinite nesting not at all. Detecting indentifiers, strings, and comments in code does not require dealing with nested parentheses at all. IDLE has a ‘hyperparser’, used for various purposes, that detects the same elements, plus line ends, scanning backwards. I suspect that it would also not work for f strings with the changes proposed.\n\nLess important comments:\n\nMotivation point 4: the linked Wikipedia section says nothing about escape sequences.\n\nIn the next sentence, does ‘regular grammar’ have the technical meaning of the restricted grammar corresponding to ‘regular expressions’ or the colloquial meaning of ‘normal’ (which is different now then when 536 was written)?\n\nOne limitation that this will not and I presume this cannot fix is that set expressions (displays and comprehensions) must still be surrounded by spaces to avoid ‘{{’ and ‘}}’.\n\n[post 15] pablogsal (2022-12-19):\nThis is correct, this means that it will not be possible to lex strings anymore using regular expressions. After this PEP (at least in its current form), string quotes in f-strings must be dealt with the same way parentheses-highlighting is dealt with.\n\n@tjreedy Would you like us to reflect this in the PEP?\n\nNotice that forcing the parser to reject reused quotes would complicate the lexer and the parser considerably because it means that it cannot just “parse” the expression part in a regular way because it needs to be aware that is inside an in-flight f-string in order to reject repeated quotes. This was easy to do in a two-pass method because the main parser is unaware of what’s inside the f-string but that won’t be true any more once we move this to the main parser.\n\nIn any case, if this point proves to be too controversial, we are happy to consider dropping it\n\nOh, thanks for pointing that out. Something went wrong there in the writing. We will fix it\n\n[Edit] Corrected it here\n\nHere “regular grammar” means adding f-strings to the main (PEG) parser as part of the formal grammar (the one in Grammar/python.gram).\n\nCorrect, there is no way to disambiguate that.\n\n[post 16] pablogsal (2022-12-19):\nAnother option here is to restrict arbitrary nesting to a specific depth. I think that will allow regex-based lexers to work at the price of having some complex regular expression.\n\n@tjreedy do you think that would be a good compromise? If not, what can we do to make it easier to support in IDLE?\n\n[post 20] barry (2022-12-19):\nThis might cause problems for Emacs modes for Python.\n\n[post 21] pablogsal (2022-12-19):\nSurely emacs supports JavaScript and Ruby and both languages have interpolation strings with the same constraints as this PEP so I think that a solution to this problem already exists there, although I am not sure how that works as I am not familiar with emacs. Maybe someone more versed in how this is supported can help us understand how that is being handled.\n\n[post 22] steven.daprano (2022-12-19):\nYou describe f-strings as “literals” in the PEP. Please don’t do that. F-strings can contain executable code and can have side-effects. They are code not string literals.\n\nWe don’t talk about “def literals” and “lambda literals”. The documentation doesn’t even refer to list or dict literals (rather, “displays”). We shouldn’t abuse the word literal to describe f-strings either.\n\nThe PEP says:\n\n(emphasis added) and then give three examples:\n\nf\"These are the things: {\", \".join(things)}\"\n\nf\"{source.removesuffix(\".py\")}.c: $(srcdir)/{source}\"\n\nf\"{f\"{f\"infinite\"}\"}\" + \" \" + f\"{f\"nesting!!!\"}\"\n\nThe first two might be perfectly understandable to the parser, but as a human reader, they make it more complicated and error-prone to work out which quotes delimit the f-string and which do not.\n\nEspecially when the f-string may be concatenated with other strings, or embedded in larger expressions. Even more especially when used with long line lengths.\n\nTaken in isolation, the human reader can just look at the start of the line and see the f\" token, and then skip to the end of the line to find the matching close quote. But in real code, where f-strings are often embedded in complex expressions and long lines, it is not that easy. You have to manually parse the f-string, counting quotes and braces, and work out which ones are paired with which other ones.\n\nYou know. The sort of thing computers are excellent at but people suck at.\n\nI consider the first two examples terrible code which should be discouraged and the fact that your PEP allows it is a point against it, not in favour.\n\nEspecially since we can get the same effect by just changing one of the pairs of quotes to '. So in this regard, the PEP doesn’t even add functionality. It just encourages people to write code which is harder to read and more error prone.\n\nIn Python 1.x and 2.x, we had the backtick for evaluating the repr of objects. It could be nested exactly as you have here:\n\n# Python 2.7\n\n>>> `(`123`, 456)`\n\n\"('123', 456)\"\n\nOne of the reasons we got rid of it was because it was too hard for the human reader to read nested backtick expressions.\n\nAlso keep in mind that many editors will have very simple-minded colourizers. Code inside f-strings may not be colourized, or if it is, the colourizer surely won’t include a full blown Python parser. So it will likely colour the first example as a comma-separated pair of strings:\n\nf\"These are the things: {\" COMMA \".join(things)}\"\n\nand the second looks like you are calling a .py method on a string literal, followed by a quote instead of the opening paren. Many editors will colour this as a syntax error, or at least least, incorrectly.\n\nf\"{source.removesuffix(\" .py \")}.c: $(srcdir)/{source}\"\n\n[post 23] pablogsal (2022-12-19):\nThanks a lot for the feedback @steven.daprano and thanks for taking the time to add some context to the explanations!\n\nWe will correct this in the document soon.\n\nIf I understand correctly your concern is that the nesting of the same kind of quote will make it harder for humans to parse and will lead to code that may be harder to read because the quote character is the same on start and end (as opposed to other delimiters). Would that summarise your concerns correctly?\n\nYes, this is being discussed currently in this thread and we will update the PEP after discussing about it.\n\nAlso notice that as I indicated before any editor that supports other popular languages including ruby and JavaScript will have the same problem as arbitrary nesting with quote reuse is allowed in those languages.\n\nReminder: at most 5 ideas; give each reason one quote copied word for word (at most 25 words)\nfrom the post with that post_id; use status \"open\" when no outcome is visible.",
+  "response": {
+    "ideas": [
+      {
+        "title": "Formalize f-string grammar in PEG parser",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The main proposal to move f-strings from a hand-written parser to the formal PEG grammar was accepted.",
+        "reasons": [
+          {
+            "text": "We believe this will be a great improvement in both the maintainability of CPython and the usability of f-strings.",
+            "evidence": [
+              {
+                "post_id": 1,
+                "quote": "The PEP proposes a formalized grammar for f-strings in Python by adding f-strings directly into the Grammar instead of using a two-pass hand-written parser."
+              }
+            ]
+          },
+          {
+            "text": "Reduced maintenance costs for f-string parsing code as well us improved usability for users and library developers.",
+            "evidence": [
+              {
+                "post_id": 1,
+                "quote": "Other benefits include: Reduced maintenance costs for f-string parsing code as well us improved usability for users and library developers."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Allow comments inside f-string expressions",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The proposal to treat '#' as a comment character only within the expression part of an f-string was accepted.",
+        "reasons": [
+          {
+            "text": "What we are proposing is that this error disappears and anything after the # comment character gets ignored as any comment of any expression (only when the comment is in the expression part).",
+            "evidence": [
+              {
+                "post_id": 10,
+                "quote": "What we are proposing is that this error disappears and anything after the # comment character gets ignored as any comment of any expression (only when the comment is in the expression part)."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Allow unescaped quotes inside f-string expressions",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The proposal to allow nested or unescaped quotes within the expression part of an f-string was accepted.",
+        "reasons": [
+          {
+            "text": "I would like the PEP to note that the existing restrictions on nested quotes (and probably other things) was a deliberate design decision in order to make it easy for editors, syntax highlighters and the like to support f-strings.",
+            "evidence": [
+              {
+                "post_id": 7,
+                "quote": "I would like the PEP to note that the existing restrictions on nested quotes (and probably other things) was a deliberate design decision in order to make it easy for editors, syntax highlighters and the like to support f-strings."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Allow backslashes inside f-string expressions",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The proposal to allow backslash escapes within the expression part of an f-string was accepted.",
+        "reasons": [
+          {
+            "text": "Thanks for working on this. I look forward to backslashes in expressions!",
+            "evidence": [
+              {
+                "post_id": 7,
+                "quote": "Thanks for working on this. I look forward to backslashes in expressions!"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Restrict quote nesting depth for editor support",
+        "kind": "alternative",
+        "status": "open",
+        "summary": "An alternative proposal to limit the depth of nested quotes to allow regex-based lexers was discussed but no decision is visible.",
+        "reasons": [
+          {
+            "text": "Another option here is to restrict arbitrary nesting to a specific depth. I think that will allow regex-based lexers to work at the price of having some complex regular expression.",
+            "evidence": [
+              {
+                "post_id": 16,
+                "quote": "Another option here is to restrict arbitrary nesting to a specific depth. I think that will allow regex-based lexers to work at the price of having some complex regular expression."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "durationMs": 106331
+}

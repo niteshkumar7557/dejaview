@@ -1,0 +1,31 @@
+{
+  "promptHash": "b45ed4e8b9e5b23ec7f4033308e70ebcebc9e9ac3d9bc0e41504adbe6ebe7a2b",
+  "model": "qwen3.5:4b",
+  "stage": "triage",
+  "prompt": "You label posts from a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nGive every post exactly one label:\n- proposal: suggests a new idea, feature, design or change\n- alternative: suggests a different way to do something already proposed\n- objection: argues against an idea, points out a problem, or votes -1\n- support: agrees with or argues for an idea, or votes +1\n- decision: announces a final outcome (accepted, rejected, withdrawn, deferred)\n- question: asks something without arguing for or against\n- noise: greetings, thanks, off-topic, meta talk\n\nExamples:\n\"I am -1 on this, it breaks old code.\" -> objection\n\"Why not spell it 'x as y' instead?\" -> alternative\n\"The Steering Council has decided to accept this PEP.\" -> decision\n\"Thanks for writing this up!\" -> noise\n\nPosts:\n\n[post 71] pitrou:\nThis is a bit of a silly excuse. To take an adversarial example, C++ is so complicated to parse that the only reasonable way to parse it reliably is to reuse an existing compiler frontend. Which is a concrete impediment to the development of an ecosystem of third-party source-level analysis (and/or transformation) tools.\n\n[post 72] cfbolz:\nWearing my PyPy hat: Overall I like the PEP from a parsing implementation point of view, because it removes a lot of complexity in the current f-string implementation, and likely reduces bugs around position information of the expressions within f-strings as well. Well done @pablogsal, @isidentical and @lys.nikolaou!\n\nMy comment is about the changes to tokenizing (I’m staying out of the language design questions). Given that some of the complexity of implementing f-strings moves there, I think this part of the PEP:\n\nis taking the easy way out. I agree that it doesn’t make sense to prescribe details about the tokens (like whether the starting/ending quotes should be part of them). But I think the PEP should add some detail about how this can be implemented in a tokenizer, because the new approach to tokenizing f-strings is another Python feature that requires leaving classical regular-language-based tokenization.\n\nOne way to do this is either to add some detail about how it works in CPython’s real tokenizer. Another option would be to add some Python code to the PEP that shows how it could be done in the pure-Python tokenization implementation in the tokenize module.\n\nSpeaking of th …\n\n[post 73] replabrobin:\nWill the change to peg parsing improve the speed of f strings. I notice that in python311/312 I see a speed difference between simple % formatting and f strings. As example here are some timeit outputs for several pythons\n\n$ for v in 37 38 39 310 311 312; do echo -n “python$v %: “;python$v -mtimeit -s’a,b,c=1,2.1,“ABCDEF”’ '”%s %s %s”%(a,b,c)‘;echo -n \"python$v f: \";python$v -mtimeit -s’a,b,c=1,2.1,“ABCDEF”’ ‘f\"{a} {b} {c}\"’;done\n\npython37 %: 500000 loops, best of 5: 446 nsec per loop\n\npython37 f: 500000 loops, best of 5: 454 nsec per loop\n\npython38 %: 500000 loops, best of 5: 411 nsec per loop\n\npython38 f: 500000 loops, best of 5: 427 nsec per loop\n\npython39 %: 1000000 loops, best of 5: 396 nsec per loop\n\npython39 f: 500000 loops, best of 5: 410 nsec per loop\n\npython310 %: 500000 loops, best of 5: 407 nsec per loop\n\npython310 f: 500000 loops, best of 5: 408 nsec per loop\n\npython311 %: 1000000 loops, best of 5: 302 nsec per loop\n\npython311 f: 1000000 loops, best of 5: 368 nsec per loop\n\npython312 %: 1000000 loops, best of 5: 307 nsec per loop\n\npython312 f: 1000000 loops, best of 5: 363 nsec per loop\n\nso it seems that recently % formatting speeded up, but f formatting didn’t so much\n\n[post 74] malemburg:\nThat’s a fair point.\n\nPerhaps it would be enough to rephrase the PEP to not encourage such use and instead refer to it as an implementation detail. At the moment, it reads in a way which promotes reusing the same quotes inside f-string expressions as a feature.\n\n[post 75] pablogsal:\nThanks, everyone for your feedback and for raising your concerns. Your thoughts are fundamental to us and we want to ensure they are correctly reflected in the document and considered when decisions are made. I have prepared a first PR to incorporate some of the important points raised so far. Apologies if I am missing something, I will try to make another pass at a later date. Also, feel free to open PRs yourself if you have any enhancements in mind to the document and we can discuss them in the PR.\n\nThanks a lot for your help and your insights!\n\nAnswer with one label per post, using each post's number as post_id.",
+  "response": {
+    "labels": [
+      {
+        "post_id": 71,
+        "label": "objection"
+      },
+      {
+        "post_id": 72,
+        "label": "alternative"
+      },
+      {
+        "post_id": 73,
+        "label": "question"
+      },
+      {
+        "post_id": 74,
+        "label": "objection"
+      },
+      {
+        "post_id": 75,
+        "label": "support"
+      }
+    ]
+  },
+  "durationMs": 7889
+}

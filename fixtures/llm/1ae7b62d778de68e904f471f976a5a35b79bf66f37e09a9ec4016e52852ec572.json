@@ -1,0 +1,141 @@
+{
+  "promptHash": "1ae7b62d778de68e904f471f976a5a35b79bf66f37e09a9ec4016e52852ec572",
+  "model": "qwen3.5:9b",
+  "stage": "extract",
+  "prompt": "You read part of a public discussion about: PEP 701 – Syntactic formalization of f-strings\n\nFind the ideas in these posts that were proposed or discussed: the main proposal, alternative designs,\ndifferent spellings or names, extra features people asked for, and ideas that were turned down.\nList at most 5 ideas, most important first (prefer ideas that were rejected or decided).\n\nFor each idea give:\n- title: a short name for the idea itself (at most 12 words), without labels like \"Rejected:\" or \"Proposal:\"\n- kind: \"proposal\" for the main proposal or a new feature, \"alternative\" for a different way of doing it\n- status: \"accepted\" if it was adopted, \"rejected\" if the authors or deciders turned it down,\n  \"withdrawn\" if its own proposer dropped it, \"open\" if no outcome is visible in these posts\n- summary: one short sentence on what happened to the idea\n- reasons: at most 2 reasons why it got that status, each with exactly one evidence item (post_id and quote).\n\nRules for quotes:\n- Copy the quote WORD FOR WORD from the post with that post_id. Do not paraphrase, fix or shorten words.\n- At most 25 words per quote. Never invent a quote.\n- Only use posts shown below.\n\nPosts:\n\n[post 34] barry (2022-12-20):\nI appreciate the goals of the PEP, and support more consistency in the various parsers, both for CPython and across alternative implementations. I do think it will break editors and other syntax highlighting tools, but hopefully they will eventually catch up.\n\nThe biggest problem for me is the reuse of opening quote feature. I get why you want to lift this restriction, and I get that you want to enable arbitrary nesting of quotes, but I think this is helping the machine more than the human. Even the simple example from the PEP is challenging for me to parse.\n\n>>> f\"These are the things: {\", \".join(things)}\"\n\nI read code left to right, so as soon as I hit that second quote, I start scratching my head and asking “what’s going on here?”\n\nOkay, I can eventually work it out, but it won’t remain obvious. It’s worse for some of the more complex examples, and I suspect it’ll be one of those things that trip up every reader of code like this, bringing their comprehension of the intent to a screeching halt. If I had to review such code, I wouldn’t let it in. It’s like everything is now an f-nail, and JWZ’s famous quote about regexps comes to mind.\n\nAre these concerns enough to add artificial constraints on the implementation? Maybe, since the PEP already carves out at least one restriction. But maybe for consistency, the answer should be to let people write terrible, unreadable code!\n\nI voted “no” since for me, the concerns outweigh the benefits in this case. Heavily nested or reused quote characters is a code smell to me.\n\n[post 36] brettcannon (2022-12-20):\nI have no idea, hence why I said, “my answer for VS Code”, not “for all editor developers worldwide”.\n\n[post 37] pablogsal (2022-12-20):\nThanks a lot, @tjreedy for taking the time to give all this context about IDLE and how this would affect it. Your experience here is very important to us.\n\nWe will reflect this on the PEP so this is taken very seriously when making decisions but I can promise that we will discuss this issue among the authors to see what we can do after we gather some other feedback from other places.\n\nThanks for the correction, we will fix it!\n\nWe will incorporate this to the PEP.\n\nI will try to rephase that. Answering your question (if I understand it correctly) f’{(a !=b)} works currently without parens and that will keep working:\n\n>>> a = b = 1\n>>> f\"{a != b}\"\n'False'\n\nThanks a lot for this feedback! We will get to fix it as soon as possible!\n\n[post 38] pablogsal (2022-12-20):\nHmm, this is a good point @steven.daprano! Thanks a lot for raising this with us. At the very least we will reflect this on the PEP so it will be taken as an important aspect of the balance.\n\nI am not sure what we finally propose (quote reuse or not) as we want to gather some feedback first, but we will discuss this aspect among authors again. I think this is an important point but we need to think about it carefully because is less “consistent” and it raises the maintenance cost quite a lot.\n\nIn any case, thanks for pointing it out and for the examples!\n\n[post 39] Rosuav (2022-12-20):\nIf I’m understanding correctly, the only way for the initial quote to be contained within an f-string is if it is also inside an (unbalanced) open brace, right? So it shouldn’t be ambiguous.\n\n[post 40] pablogsal (2022-12-20):\nIgnoring the consistency arguments, limiting quote reuse raises quite a lot the complexity. This is because when parsing the expression part now the parser needs to be aware that is parsing an expression inside an f-string with a given quite, and that becomes even more tricky when f-strings are nested with different quotes.\n\nThis doesn’t mean that this invalidates the “code smell” argument by any means: I just want to give some context on the maintenance point. I totally understand why you voted “no” (and that’s why I really want feedback from everyone).\n\nI think this is an important point that I guess is not going to have an easy answer. But I promise that we will do our best to reflect all of these considerations in the PEP when a decision is taken and to take all of these into account for our final proposal.\n\n[post 44] pf_moore (2022-12-20):\nIs the possibility of code generators worth mentioning here? I imagine it would be more complex to write a code generator that needed to track what types of quote have been used when generating f-strings.\n\nHaving said that, I can’t imagine why a code generator would be making heavy use of f-strings in the first place, as if you’re already generating the code, why not generate the expression that the f-string is equivalent to? But I’ve never written a code generator, so my intuitions on what’s likely to be common are suspect, at best\n\n[post 45] robbo (2022-12-21):\nI voted Yes because I think that any (unnecessary) restriction will sooner or later bite someone. But I agree that unnecessary nesting of the same kind of quote is poor style and should be discouraged. [Rob Cliffe]\n\n[post 46] malemburg (2022-12-21):\nIMO f-strings should continue to look like regular Python strings to a Python programmer and not allow non-intuitive quoting just because the parser can handle this (since it knows that it’s actually parsing outside the string definition context).\n\nIt would be really strange to have the parser complain about:\n\nwhile accepting:\n\nOtherwise, a programmer can easily lose track of where the f-string starts and ends.\n\nI also don’t think that nesting f-strings should be allowed, but I guess that ship has already sailed.\n\nPersonally, I find the tendency of Python getting more and more complex in many niche areas unfortunate. Often these additions are not done willingly, but get added by accident (e.g. in the case of nested f-strings), but, of course, people find these “features” and start using them. And then we’re stuck with those “features” because of backwards compatibility concerns.\n\n[post 48] monk-time (2022-12-21):\nReading this discussion, I find it difficult to understand why prior art (this feature as implemented in other languages) is given so little weight. Shouldn’t we strive for general compatibility so as to make it easier for users to learn and use the language? Instead of introducing another stumbling block where a programmer must go “Oh, this language has this common feature, so I assume it works the same as in all other languages… hey, what’s this error?”\n\nIt also feels to me (and forgive me if I’m wrong) that people reacting to unreadability of f\"test {\"-\".join(words)} test\" do so without taking syntax highlighting into account. In pure black - I agree, it’s unpleasant to parse, but with color it’s really no problem to see where pure string ends and embedded code begins.\n\n[post 49] h-vetinari (2022-12-21):\nWhy? There’s a clear marker in the second one that says “stuff between {} is treated differently” (discourse even does the highlighting for that). f-strings have been around for almost 6 years now, and that {} does un-string-like things is the whole point, which people seem to have gotten with relative ease.\n\nSeveral of the examples against quote reuse have minimal code being executed to interpolate the string. Once that part becomes longer, like\n\nf\"Please, have some {assorted_snacks[\"for_guests\"].serve()}, they're delicious!\"\n\nit becomes much less ambiguous (YMMV) which parts are string and what parts are string interpolation.\n\nFor example, not being able to simply use a some_dict[\"key\"] within the interpolation part, in a way that’s consistent way with the (usually black-enforced) style of double-quotes in the rest of the code base is really annoying, and a constant source of stylistic and mental friction.\n\nMy POV is that it’s completely fine if someone doesn’t like nested quotes of the same kind. But like simplicity, another oft-repeated koan is “we’re all consenting adults here”, and – as the poll shows – there’s a sizeable portion of people who want the quote reuse to be possible. It would be easier to argue the case against enabling that if the costs were borne by the implementation, but even that’s not the case - the implementation would get simpler[1], the language more regular (for those who care about it), and people could choose whether to embrace or forbid its use in their codebase.\n\nAt least, I think that personal style choices are not a sufficiently strong argument for forbidding quote reuse.\n\n- speaking about CPython here, not other software like editors ↩︎\n\n[post 50] malemburg (2022-12-21):\nI’m pretty sure that black can be fixed to allow single quotes in {} parts of f-strings to continue to allow use of string literals - perhaps even enforce this\n\nThis code doesn’t look much different, but it clearly matches expectations when writing Python string literals:\n\nf\"Please, have some {assorted_snacks['for_guests'].serve()}, they're delicious!\"\n\nI frankly don’t understand, why people would want to disrupt Python’s quote handling on purpose. If a programming language requires code highlighting to be fully understood by humans, then something is wrong, and Python has a long history of having a nice human friendly syntax.\n\nFor more complex templating logic, it’s much better to go with e.g. Jinja2. f-string are simply a nice compact way of getting access to variables. The fact that you can use arbitrary expressions is one of the “features” I talked about in my previous post. This is mostly due to keeping the implementation simple and avoid limiting ways of accessing variables, but not really intended for arbitrary code execution. Of course, people still use the feature that way and that’s unfortunate, IMO.\n\n[post 51] ajoino (2022-12-21):\nI don’t think it disrupts the quote handling really. The first time I tried to subscript a key in an f-string I was surprised that I had to change from double to single quote. So in that case the current qoute handling was disruptive. It felt like an arbritrary restriction.\n\nFurthermore, I don’t really see the readability issues that are brought up here, maybe because I started using Python after f-strings were introduced and because I’ve always used syntax highlighting tools.\n\nI agree with the people saying that the reuse of quotes in f-strings should not be syntactically incorrect but instead be discouraged in the docs.\n\n[post 52] stoneleaf (2022-12-21):\nIf all the languages are “compatible”, what makes them different?\n\nThe reason I fell in love with Python was its readability:\n\n- lack of boilerplate\n\n- significant whitespace\n\n- use of keywords\n\nAs for prior art, that goes both ways: Python finally got an assignment expression, and it does not look like C’s – why? Because C’s looked the same as equality testing and was therefore easy to use incorrectly.\n\n[post 53] monk-time (2022-12-21):\nI don’t think you’re asking this question in good faith. Languages differ by a multitude of things, such as supported paradigms and features, how they jell with each other, which aspect gets the most attention and ease of use and so on. Gotchas in basic features, however, are not one of them. I don’t think anyone would disagree that mutable defaults gotcha is a regrettable part of Python that might be too late to fix. Banning re-use of quotes is just that, a gotcha.\n\nThis comparison is not apt here, C predates Python by 20 years, plus 30 more until this feature got introduced in Python. That’s long enough to call it “a reimagining”, not simply a reimplementation. Whereas four modern languages that the PEP is referring to have implemented string interpolation within a few years from Python at most. JavaScript got it the same year as Python IIRC, 2016. Swift was first released in 2014.\n\n[post 54] achhina (2022-12-21):\nAs for reusing the opening quotes, I wouldn’t recommend it and would likely try to have a formatter rule to avoid even having such discussions in reviews. However, I personally do not have an issue with parsing this example f\"These are the things: {\", \".join(things)}\", and even less so with syntax highlighting.\n\nf\"These are the things: {\", \".join(things)}\"\n\nIt does make me wonder how much of this is an issue with familiarity; has this been a point of contention or a pain point in other communities that allow quote reusing, like the aforementioned Ruby/JS communities?\n\nIn terms of the benefits, in addition to reducing the complexity of the implementation, I think this increased freedom would be helpful for ad hoc testing/experimenting. On numerous occasions, I have gotten SyntaxError when absent-mindedly reusing opening quotes in a REPL session. While not particularly inconvenient, this PEP would have been nice to have in those situations.\n\nOverall, considering all those things I’m +1 for this PEP.\n\n[post 55] godlygeek (2022-12-21):\nNote that any IDE, code review tool, or text editor that supports syntax highlighting of POSIX sh code already needs to handle nested string delimiters. For example, I’ve got this little shell script that I can use from within WSL to let Windows open a file as though I had double clicked it:\n\n#!/bin/sh\nset -eu\nfilename=\"$1\"\ncd \"$(dirname \"$filename\")\"\nexplorer.exe \"$(basename \"$filename\")\"\n\nUnlike in Python, you don’t have the choice of using different quotes in shell; those nested quotes are necessary for correctness and cannot be avoided.\n\nNote that this isn’t an argument for making Python’s syntax more sh-like, only an argument that nested quotes are already the norm in a major enough and old enough programming language that nearly every general purpose text editor will have a way to handle highlighting of nested quotes already.\n\nReminder: at most 5 ideas; give each reason one quote copied word for word (at most 25 words)\nfrom the post with that post_id; use status \"open\" when no outcome is visible.",
+  "response": {
+    "ideas": [
+      {
+        "title": "Allow reusing opening quotes inside f-string expressions",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The main proposal to allow arbitrary quote characters in f-string expressions was adopted despite concerns about readability.",
+        "reasons": [
+          {
+            "text": "I voted \"no\" since for me, the concerns outweigh the benefits in this case. Heavily nested or reused quote characters is a code smell to me.",
+            "evidence": [
+              {
+                "post_id": 34,
+                "quote": "Heavily nested or reused quote characters is a code smell to me."
+              }
+            ]
+          },
+          {
+            "text": "I think that personal style choices are not a sufficiently strong argument for forbidding quote reuse.",
+            "evidence": [
+              {
+                "post_id": 49,
+                "quote": "At least, I think that personal style choices are not a sufficiently strong argument for forbidding quote reuse."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Restrict f-string nesting to avoid parser complexity",
+        "kind": "alternative",
+        "status": "rejected",
+        "summary": "The idea of limiting quote reuse or nesting was rejected because it would significantly increase parser maintenance costs.",
+        "reasons": [
+          {
+            "text": "Ignoring the consistency arguments, limiting quote reuse raises quite a lot the complexity. This is because when parsing the expression part now the parser needs to be aware that is parsing an expression inside an f-string with a given quite...",
+            "evidence": [
+              {
+                "post_id": 40,
+                "quote": "limiting quote reuse raises quite a lot the complexity."
+              }
+            ]
+          },
+          {
+            "text": "I am not sure what we finally propose (quote reuse or not) as we want to gather some feedback first, but we will discuss this aspect among authors again.",
+            "evidence": [
+              {
+                "post_id": 38,
+                "quote": "I am not sure what we finally propose (quote reuse or not) as we want to gather some feedback first."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Discourage quote reuse via documentation instead of syntax",
+        "kind": "alternative",
+        "status": "accepted",
+        "summary": "An alternative approach was discussed where quote reuse is discouraged in docs rather than being syntactically forbidden.",
+        "reasons": [
+          {
+            "text": "I agree with the people saying that the reuse of quotes in f-strings should not be syntactically incorrect but instead be discouraged in the docs.",
+            "evidence": [
+              {
+                "post_id": 51,
+                "quote": "I agree with the people saying that the reuse of quotes in f-strings should not be syntactically incorrect but instead be discouraged in the docs."
+              }
+            ]
+          },
+          {
+            "text": "At least, I think that personal style choices are not a sufficiently strong argument for forbidding quote reuse.",
+            "evidence": [
+              {
+                "post_id": 49,
+                "quote": "At least, I think that personal style choices are not a sufficiently strong argument for forbidding quote reuse."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Allow single quotes inside double-quoted f-string expressions",
+        "kind": "proposal",
+        "status": "accepted",
+        "summary": "The ability to use single quotes within double-quoted f-strings (and vice versa) was accepted as part of the main proposal.",
+        "reasons": [
+          {
+            "text": "I voted Yes because I think that any (unnecessary) restriction will sooner or later bite someone. But I agree that unnecessary nesting of the same kind of quote is poor style and should be discouraged.",
+            "evidence": [
+              {
+                "post_id": 45,
+                "quote": "I voted Yes because I think that any (unnecessary) restriction will sooner or later bite someone."
+              }
+            ]
+          },
+          {
+            "text": "f\"Please, have some {assorted_snacks['for_guests'].serve()}, they're delicious!\"",
+            "evidence": [
+              {
+                "post_id": 50,
+                "quote": "f\"Please, have some {assorted_snacks['for_guests'].serve()}, they're delicious!\""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Prevent f-strings from looking like regular Python strings",
+        "kind": "alternative",
+        "status": "rejected",
+        "summary": "The idea that f-strings should strictly look like regular strings without allowing non-intuitive quoting was rejected in favor of flexibility.",
+        "reasons": [
+          {
+            "text": "IMO f-strings should continue to look like regular Python strings to a Python programmer and not allow non-intuitive quoting just because the parser can handle this...",
+            "evidence": [
+              {
+                "post_id": 46,
+                "quote": "IMO f-strings should continue to look like regular Python strings to a Python programmer and not allow non-intuitive quoting just because the parser can handle this."
+              }
+            ]
+          },
+          {
+            "text": "I don't think that nesting f-strings should be allowed, but I guess that ship has already sailed.",
+            "evidence": [
+              {
+                "post_id": 46,
+                "quote": "I don't think that nesting f-strings should be allowed, but I guess that ship has already sailed."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "durationMs": 138140
+}
