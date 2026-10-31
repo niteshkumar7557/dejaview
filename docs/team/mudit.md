@@ -1,5 +1,7 @@
 # Mudit: Data, API and worker
 
+![The data side of DejaView](mudit-flow.png)
+
 You own the **backbone**: getting discussions in, storing everything in Postgres with raw SQL, running the
 slow pipeline jobs in the background, serving the API, and deploying. You are the only part that touches the
 database.
@@ -392,6 +394,8 @@ Everything above was the **front door**: getting discussions in. This part is th
 the part of the system that remembers everything, runs the slow jobs in the background and serves
 the results to the dashboard.
 
+![The schema from design.md §7](mudit-schema.png)
+
 ## Step 8 — The database
 
 ### The schema file
@@ -672,6 +676,8 @@ SELECT to_regclass('public.jobs') IS NOT NULL AS ready
 because a Postgres with no tables answers `SELECT 1` perfectly happily. The dashboard needs to know
 the difference between "the database is down" and "you forgot to run the migrations".
 
+![The real test output](mudit-tests.png)
+
 ## Step 12 — Testing against a real database
 
 No mock database. The tests run against a real Postgres, because most of the bugs in this kind of code
@@ -699,6 +705,8 @@ schemas can hold two sets of tables with the same names, side by side.
 Now the three files cannot touch each other, and the suite runs in parallel.
 
 **Result: 89 tests, all passing, in about 300 ms.**
+
+![The API answering with the rows it really returned](mudit-api-run.png)
 
 ## Step 13 — Proving it works for real
 
