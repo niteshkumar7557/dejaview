@@ -17,9 +17,9 @@ async function main(): Promise<void> {
   mkdirSync(UPLOAD_DIR, { recursive: true });
 
   const pool = openPool();
-  const { matcher, fromLinker } = await loadPrMatcher();
+  const { matcher, fromLinker, reason } = await loadPrMatcher();
   if (!fromLinker) {
-    console.warn("packages/linker is not published yet - using the simple PR matcher.");
+    console.warn(`PR matcher: ${reason} - using the simple matcher for now.`);
   }
 
   const context = createContext(pool, matcher, { apiToken: process.env.DEJAVIEW_API_TOKEN });
