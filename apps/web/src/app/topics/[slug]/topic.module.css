@@ -1,0 +1,13 @@
+.stack { display: flex; flex-direction: column; gap: var(--gap); }
+.sources { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: var(--fs-small); margin-top: -12px; }
+.sources a { text-decoration: underline; text-decoration-color: var(--control); text-underline-offset: 3px; }
+.muted { color: var(--muted); }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 8px; }
+.filters a {
+  height: 28px; display: inline-flex; align-items: center; padding: 0 10px; border-radius: var(--radius-control);
+  font-size: var(--fs-small); color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.filters a:hover { background: var(--raised); color: var(--text); }
+.filters a[aria-current="true"] { background: var(--active); color: var(--text); font-weight: 500; }
+.timelineLayout { display: grid; grid-template-columns: minmax(0, 1fr) 384px; gap: var(--gap); align-items: start; margin-top: 8px; }
+@media (max-width: 1099px) { .timelineLayout { grid-template-columns: minmax(0, 1fr); } .timelineLayout > aside { position: static; } }

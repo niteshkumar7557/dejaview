@@ -53,8 +53,8 @@ Each person may edit their **own** `docs/team/<name>.md` (tick off tasks as you 
    Post in the team chat before opening the PR, and every owner must look at it before it merges.
 4. **Root files:** adding your workspace's script or a dependency through `npm install -w <your-workspace>` is fine.
    If `package-lock.json` conflicts, take `main`'s version and re-run `npm install`.
-5. **Every commit and PR names the coding agent and models** (CI checks it). AI agents never commit: they
-   hand you the commit message and PR description (see `CLAUDE.md`).
+5. **Every commit and PR names the coding agent and models** (CI checks it). The AI agent commits, pushes
+   and opens the PR (no AI co-author line); you review and merge with **Rebase and merge** (see `CLAUDE.md`).
 6. **No stubs, real tests.** Every PR adds tests for what it adds. CI never calls the LLM (`LLM_MODE=replay`).
 7. **Each person can explain their own part in Q&A**, and should be able to explain the whole flow above.
 

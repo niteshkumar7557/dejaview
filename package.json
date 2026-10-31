@@ -10,11 +10,13 @@
   },
   "workspaces": [
     "apps/*",
+    "db",
     "packages/*"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit -p . && npm run typecheck --workspaces --if-present",
     "test": "vitest run",
+    "migrate": "tsx db/migrate.ts",
     "check:conventions": "tsx scripts/check-conventions.ts"
   },
   "devDependencies": {
