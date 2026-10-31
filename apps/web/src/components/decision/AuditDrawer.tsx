@@ -3,7 +3,7 @@
 import type { LlmCallView } from "@dejaview/shared";
 import { useEffect, useRef, useState } from "react";
 import { trapTab } from "@/lib/focus-trap";
-import { formatCount } from "@/lib/format";
+import { formatCount, stageLabel } from "@/lib/format";
 import { DUR, EASE, gsap, registerMotion, useGSAP, withMotion } from "@/lib/motion";
 import { Icon } from "../shell/Icon";
 import { Button } from "../ui/Button";
@@ -26,6 +26,8 @@ export function AuditDrawer({ calls }: { calls: LlmCallView[] }) {
       const drawer = panel.current;
       const backdrop = root.current?.querySelector(`.${styles.backdrop}`);
       if (!backdrop) return;
+      // Reopening during the close animation: stop it, or its onComplete unmounts the open drawer.
+      gsap.killTweensOf([drawer, backdrop]);
       if (open) {
         closeButton.current?.focus();
         withMotion(
@@ -90,7 +92,7 @@ export function AuditDrawer({ calls }: { calls: LlmCallView[] }) {
               {calls.map((c) => (
                 <li key={c.id} className={styles.call}>
                   <div className={styles.callHead}>
-                    <span className={styles.callStage}>{c.stage[0]!.toUpperCase() + c.stage.slice(1)}</span>
+                    <span className={styles.callStage}>{stageLabel(c.stage)}</span>
                     <span className="mono">{c.model}</span>
                     {/* taste-skill-ignore: dash marks a missing duration */}
                     <span className="num">{c.durationMs === null ? "—" : `${(c.durationMs / 1000).toFixed(1)} s`}</span>

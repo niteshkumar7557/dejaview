@@ -8,8 +8,8 @@ const check = (decisionIds: number[], similarRejectedIds: number[]): PrCheckView
 
 describe("prCheckResult", () => {
   it("counts the decisions a PR touches", () => {
-    expect(prCheckResult(check([1, 3], []))).toBe("2 past decisions touch this code");
-    expect(prCheckResult(check([1], []))).toBe("1 past decision touches this code");
+    expect(prCheckResult(check([1, 3], []))).toBe("2 related past decisions");
+    expect(prCheckResult(check([1], []))).toBe("1 related past decision");
   });
   it("flags a PR that repeats a rejected idea", () => expect(prCheckResult(check([], [11]))).toBe("Looks like a rejected idea"));
   it("says when nothing matched", () => expect(prCheckResult(check([], []))).toBe("No past decisions"));

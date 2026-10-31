@@ -84,11 +84,11 @@ What changed to fit the real API:
 Still open: Abhijeet's pipeline isn't merged, so extract/eval jobs fail in the worker (the UI shows the error).
 Pitch deck placeholders still need the real eval numbers.
 
-Deferred minors from the final review (fix if time allows): the strip's `<svg role="img">` hides its
-links from screen readers (use `role="group"`); the drawer can vanish if reopened within 280 ms;
-topic and decision pages fetch twice (wrap in
-React `cache()`); several eval runs per PEP would repeat sections; the audit drawer throws on an empty
-`stage`; the mock dataset ships in the client bundle even in HTTP mode.
+Deferred minors from the final review: all fixed (thread-strip links readable by screen readers, audit
+drawer reopen race and empty-stage crash, double fetches deduped with React `cache()`, one eval section per
+PEP, sample dataset loaded lazily so the live dashboard does not ship it).
 
 Team asks still open: Mudit, add `decisionId` to `EvalMatch`, `decidedAt` to `DecisionSummary`,
-`nextJobId` to `JobView`, store the PR title in `pr_checks`; Ansh, wrap code names in backticks in PR comments.
+`nextJobId` to `JobView`, store the PR title in `pr_checks`, pass a real dashboard URL (not
+`NEXT_PUBLIC_API_URL`) to the PR comment; Ansh, show rejected decisions that `matchPr` returns in
+`renderPrComment` (today they vanish from the comment).
