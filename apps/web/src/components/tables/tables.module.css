@@ -1,11 +1,11 @@
-.table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+/* Every cell keeps 12px of side padding so the hover highlight never touches the text; the table is
+   pulled out by the same 12px so its text still lines up with the headings above it. */
+.table { width: calc(100% + 24px); margin: 0 -12px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .table th {
   height: 36px; padding: 0 12px; text-align: left; vertical-align: bottom; padding-bottom: 8px;
   font-size: var(--fs-label); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap;
 }
 .table td { padding: 14px 12px; border-top: 1px solid var(--rule); vertical-align: top; }
-.table th:first-child, .table td:first-child { padding-left: 0; }
-.table th:last-child, .table td:last-child { padding-right: 0; }
 .table .num { text-align: right; white-space: nowrap; }
 .table tbody tr { transition: background-color 120ms ease; }
 .table tbody tr:hover { background: var(--raised); }
@@ -27,8 +27,9 @@
 
 @media (max-width: 640px) {
   .table thead { display: none; }
-  .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
-  .table tr { padding: 12px 0; border-top: 1px solid var(--rule); }
+  .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table { display: block; width: calc(100% + 24px); }
+  .table tr { padding: 12px; border-top: 1px solid var(--rule); }
   .table td { border: 0; padding: 2px 0; }
   .table td[data-label] { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; text-align: right; }
   .table td[data-label]::before { content: attr(data-label); color: var(--muted); font-size: 13px; text-align: left; }
