@@ -253,6 +253,22 @@ describe.skipIf(!databaseUrl)("the data layer (needs DATABASE_URL)", () => {
     expect(card?.people).toEqual(["bob"]);
   });
 
+  it("replaces a decision's code links when the link step runs again", async () => {
+    // Re-running a link job (a retry after a crash, or a better linker) used to add every link a second time.
+    const saved = await topics.saveThread(sampleThread);
+    const [decisionId] = await decisions.saveExtraction({ topicId: saved.topicId, result: sampleExtraction, postIds: saved.postIds });
+    const anchor = (symbol: string, file: string) => ({
+      repo: "python/cpython", symbol, originalPath: file, originalCommit: null, currentPath: file,
+      relocatedBy: null, linkMethod: "symbol_mention" as const, evidencePostId: null,
+    });
+
+    await decisions.saveAnchors(decisionId ?? 0, [anchor("__init__", "Lib/a.py"), anchor("__init__", "Lib/b.py")], saved.postIds);
+    await decisions.saveAnchors(decisionId ?? 0, [anchor("typing.override", "Lib/typing.py")], saved.postIds);
+
+    const card = await decisions.getCard(decisionId ?? 0);
+    expect(card?.anchors.map((a) => a.currentPath)).toEqual(["Lib/typing.py"]);
+  });
+
   it("shows the timeline with the posts that fed a decision", async () => {
     const saved = await topics.saveThread(sampleThread);
     await topics.updateAnnotations(saved.postIds, sampleExtraction.posts);

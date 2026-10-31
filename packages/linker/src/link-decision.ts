@@ -78,12 +78,14 @@ export async function linkDecision(
     });
   }
 
-  // Symbols provide supporting links only when an actual definition is found.
+  // Symbols provide supporting links only when an actual definition is found, and only for names
+  // that point at one place: a name defined all over CPython says nothing about which code is meant.
   for (const { post, reference } of references) {
-    if (reference.type !== "symbol") continue;
-    const definitions = await findSymbolDefinitions(ctx.repoDir, reference.symbol);
+    if (reference.type !== "symbol" || !isSpecificSymbol(reference.symbol)) continue;
+    const definitions = (await findSymbolDefinitions(ctx.repoDir, reference.symbol))
+      .filter((definition) => qualifiedSymbolMatchesPath(reference.symbol, definition.path));
+    if (new Set(definitions.map((definition) => definition.path)).size > MAX_FILES_PER_SYMBOL) continue;
     for (const definition of definitions) {
-      if (!qualifiedSymbolMatchesPath(reference.symbol, definition.path)) continue;
       addAnchor(anchors, {
         repo: ctx.repo,
         symbol: reference.symbol,
@@ -98,6 +100,22 @@ export async function linkDecision(
   }
 
   return anchors;
+}
+
+/** More files than this for one name means the name is too common to anchor a decision. */
+const MAX_FILES_PER_SYMBOL = 3;
+
+/**
+ * Whether a referenced name is specific enough to link. A real attrs thread linked one decision to
+ * 847 files through `__init__` and the `a`, `b`, `path` of its example code. Dotted names
+ * (`typing.override`) are checked against the file path instead, so they always pass here. A bare
+ * name must look like an API (`TokenInfo`, `PyErr_SetString`, `_generate_tokens`), not a dunder
+ * that most classes define or a plain lowercase word.
+ */
+export function isSpecificSymbol(symbol: string): boolean {
+  if (symbol.includes(".")) return true;
+  if (/^__\w+__$/.test(symbol)) return false;
+  return symbol.includes("_") || /[a-z][A-Z]/.test(symbol);
 }
 
 function pullRequestTarget(reference: Reference, defaultRepo: string): { repository: string; number: number } | null {
