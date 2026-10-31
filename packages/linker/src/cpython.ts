@@ -77,19 +77,7 @@ export async function findSymbolDefinitions(
   const symbolName = finalSymbolPart(symbol);
   if (!symbolName) return [];
 
-  let candidates: string[];
-  try {
-    const { stdout } = await execFileAsync("git", [
-      "-C", repositoryPath, "grep", "-l", "-I", "-F", "-e", symbolName,
-      "HEAD", "--", "*.py", "*.pyi", "*.c", "*.h",
-    ]);
-    candidates = stdout.split("\n").filter(Boolean).map((candidate) => candidate.replace(/^HEAD:/, ""));
-  } catch (error) {
-    // git grep exits 1 when there are no matches; other errors also fail closed.
-    if (errorCode(error) === 1) return [];
-    return [];
-  }
-
+  const candidates = await definitionCandidates(repositoryPath, symbolName);
   const definitions: SymbolDefinition[] = [];
   for (const candidate of candidates) {
     let source: string;
@@ -109,6 +97,40 @@ export async function findSymbolDefinitions(
   }
 
   return uniqueDefinitions(definitions);
+}
+
+/**
+ * Files at HEAD with a line that could define `name`, in path order. Grepping for the bare name made
+ * every file that merely mentions it a candidate (~1,800 CPython files for "type"), and each one was
+ * then read with `git show`, so linking a thread full of everyday words took tens of minutes.
+ * These patterns are deliberately looser than the checks in findSymbolDefinitions, which still decide:
+ * - Python: `def name`, `async def name` or `class name` at the start of a line.
+ * - C: a line where only a return type (words, spaces, `*`) comes before `name(`, which covers
+ *   `int name(` and the CPython style with the return type on the line above.
+ * `name` is a plain identifier (finalSymbolPart checks it), so it needs no escaping.
+ */
+export async function definitionCandidates(repositoryPath: string, name: string): Promise<string[]> {
+  const python = `^[[:space:]]*(async[[:space:]]+)?(def|class)[[:space:]]+${name}([^[:alnum:]_]|$)`;
+  const c = `^[[:alnum:]_[:space:]*]*${name}[[:space:]]*\\(`;
+  const [pythonFiles, cFiles] = await Promise.all([
+    gitGrepFiles(repositoryPath, python, ["*.py", "*.pyi"]),
+    gitGrepFiles(repositoryPath, c, ["*.c", "*.h"]),
+  ]);
+  return [...pythonFiles, ...cFiles].sort();
+}
+
+async function gitGrepFiles(repositoryPath: string, pattern: string, globs: string[]): Promise<string[]> {
+  try {
+    const { stdout } = await execFileAsync(
+      "git",
+      ["-C", repositoryPath, "grep", "-l", "-I", "-E", "-e", pattern, "HEAD", "--", ...globs],
+      { maxBuffer: 10 * 1024 * 1024 },
+    );
+    return stdout.split("\n").filter(Boolean).map((file) => file.replace(/^HEAD:/, ""));
+  } catch {
+    // git grep exits 1 when nothing matches; any other error also fails closed (no candidates).
+    return [];
+  }
 }
 
 function pythonDefinitionKinds(source: string, name: string): Array<"python_function" | "python_class"> {
@@ -216,11 +238,6 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function errorCode(error: unknown): number | undefined {
-  if (typeof error !== "object" || error === null || !("code" in error)) return undefined;
-  const code = error.code;
-  return typeof code === "number" ? code : undefined;
-}
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
