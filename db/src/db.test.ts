@@ -438,6 +438,26 @@ describe.skipIf(!databaseUrl)("the data layer (needs DATABASE_URL)", () => {
     expect(calls[0]?.prompt).toBe("merge these ideas");
   });
 
+  it("keeps the audit trail when a re-run reuses earlier model answers", async () => {
+    // Ingesting a thread again answers every prompt from the stored calls; the new decisions showed
+    // "0 model calls" because only calls made by the new job were linked.
+    const first = await jobs.enqueue("extract", { topicSlug: SLUG });
+    await new PostgresLlmCallStore(pool, first.id).save({
+      promptHash: "hash-reused-later", model: "qwen3.5:9b", stage: "extract",
+      prompt: "find the ideas", response: { ideas: [] }, durationMs: 80000,
+    });
+
+    const saved = await topics.saveThread(sampleThread);
+    const [decisionId] = await decisions.saveExtraction({ topicId: saved.topicId, result: sampleExtraction, postIds: saved.postIds });
+    const rerun = await jobs.enqueue("extract", { topicSlug: SLUG });
+    const store = new PostgresLlmCallStore(pool, rerun.id);
+    expect(await store.get("hash-reused-later")).not.toBeNull();
+    await store.linkCallsToDecisions([decisionId ?? 0]);
+
+    const calls = await llmCalls.listForDecision(decisionId ?? 0);
+    expect(calls.map((c) => c.prompt)).toEqual(["find the ideas"]);
+  });
+
   it("saves and reads the eval scorecard", async () => {
     const saved = await topics.saveThread(sampleThread);
     await evalRuns.save({
