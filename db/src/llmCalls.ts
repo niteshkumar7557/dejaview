@@ -19,6 +19,9 @@ interface LlmCallRow {
 }
 
 export class PostgresLlmCallStore implements LlmCallStore {
+  /** Stored calls this store answered from (a re-run reuses earlier answers instead of asking again). */
+  private readonly reusedCallIds = new Set<number>();
+
   constructor(
     private readonly pool: Pool,
     private readonly jobId: number | null = null,
@@ -31,6 +34,7 @@ export class PostgresLlmCallStore implements LlmCallStore {
     );
     const row = result.rows[0];
     if (!row) return null;
+    this.reusedCallIds.add(row.id);
     return {
       promptHash: row.prompt_hash,
       model: row.model,
@@ -70,6 +74,22 @@ export class PostgresLlmCallStore implements LlmCallStore {
               JOIN llm_calls c ON c.job_id = $2
          ON CONFLICT DO NOTHING`,
       [decisionIds, jobId],
+    );
+  }
+
+  /**
+   * Points decisions at every call behind them: the ones this store's job made and the earlier ones
+   * it reused. Linking only the job's own calls left a re-ingested thread with an empty audit trail.
+   */
+  async linkCallsToDecisions(decisionIds: number[]): Promise<void> {
+    if (decisionIds.length === 0) return;
+    await this.pool.query(
+      `INSERT INTO decision_llm_calls (decision_id, llm_call_id)
+            SELECT d.id, c.id
+              FROM unnest($1::int[]) AS d(id)
+              JOIN llm_calls c ON c.job_id = $2 OR c.id = ANY($3::int[])
+         ON CONFLICT DO NOTHING`,
+      [decisionIds, this.jobId, [...this.reusedCallIds]],
     );
   }
 

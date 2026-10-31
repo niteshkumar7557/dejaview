@@ -152,7 +152,7 @@ export async function handleExtract(job: JobRow, context: WorkerContext): Promis
     result,
     postIds,
   });
-  await context.llmCalls.linkJobCallsToDecisions(job.id, decisionIds);
+  await llmStore.linkCallsToDecisions(decisionIds);
 
   await context.jobs.enqueue("link", {
     topicId,
