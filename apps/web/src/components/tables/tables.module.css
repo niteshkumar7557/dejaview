@@ -1,9 +1,9 @@
 .table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .table th {
   height: 36px; padding: 0 12px; text-align: left; vertical-align: bottom; padding-bottom: 8px;
-  font-size: var(--fs-small); font-weight: 400; color: var(--muted); white-space: nowrap;
+  font-size: var(--fs-label); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap;
 }
-.table td { padding: 12px; border-top: 1px solid var(--rule); vertical-align: top; }
+.table td { padding: 14px 12px; border-top: 1px solid var(--rule); vertical-align: top; }
 .table th:first-child, .table td:first-child { padding-left: 0; }
 .table th:last-child, .table td:last-child { padding-right: 0; }
 .table .num { text-align: right; white-space: nowrap; }
@@ -13,7 +13,7 @@
 .identity { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .identity a.title, .title { color: var(--text); font-weight: 500; }
 .identity a.title:hover { text-decoration: underline; text-underline-offset: 3px; }
-.sub { font-size: var(--fs-small); color: var(--muted); }
+.sub { font-size: var(--fs-small); line-height: var(--lh-small); color: var(--muted); margin-top: 2px; }
 .statusCell { width: 1%; white-space: nowrap; }
 .muted { color: var(--muted); }
 .dash { color: var(--muted); }

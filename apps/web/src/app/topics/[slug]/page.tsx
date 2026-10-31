@@ -11,7 +11,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { Tabs } from "@/components/ui/Tabs";
-import { formatCount } from "@/lib/format";
+import { formatCount, plural, topicHeading } from "@/lib/format";
 import { getTopicOnce } from "@/lib/cached";
 import { getSource } from "@/lib/source";
 import { statusCounts } from "@/lib/timeline";
@@ -51,8 +51,8 @@ export default async function TopicPage({ params, searchParams }: { params: Para
       <div className={styles.stack}>
         <PageTitle
           crumbs={[{ href: "/", label: "Overview" }, { href: base, label: name }]}
-          title={`${name}: ${topic.title}`}
-          subline={`${formatCount(posts.length)} posts from ${topic.sourceCount} sources. Posts read by qwen3.5:4b, decisions written by qwen3.5:9b.`}
+          title={topicHeading(topic.pepNumber, topic.title)}
+          subline={`${plural(posts.length, "post")} from ${plural(topic.sourceCount, "source")}. Posts read by qwen3.5:4b, decisions written by qwen3.5:9b.`}
           actions={<ButtonLink href={`/eval#pep-${topic.pepNumber ?? slug}`} variant="primary">Run evaluation</ButtonLink>}
         />
         <ul className={styles.sources}>

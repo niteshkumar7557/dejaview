@@ -20,7 +20,7 @@ export default async function IngestPage() {
     };
   });
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--gap)" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--section-gap)" }}>
       <PageTitle
         title="Ingest a discussion"
         subline="DejaView reads the thread, keeps the posts that argue for or against something, and writes each decision with quotes it can check. On the laptop GPU a 300-post thread takes several minutes."

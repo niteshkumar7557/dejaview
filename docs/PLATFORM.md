@@ -8,6 +8,7 @@
 > read `design.md` to understand the project**. If the two ever disagree, `design.md` is the official
 > version and this file should be fixed.
 >
+> - How to run and present the demo, page by page, and the improvements backlog: [`docs/DEMO.md`](DEMO.md).
 > - Who owns which folder: [`docs/team/README.md`](team/README.md).
 > - This file describes the code **as it is in the repo** (status checked on 31 Oct 2026, around midnight).
 >   Section 12 says what is finished and what is still missing.

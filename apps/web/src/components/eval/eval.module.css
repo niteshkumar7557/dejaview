@@ -1,4 +1,4 @@
-.stack { display: flex; flex-direction: column; gap: var(--gap); }
+.stack { display: flex; flex-direction: column; gap: var(--section-gap); }
 .bars { display: flex; flex-direction: column; }
 .barRow {
   display: grid; grid-template-columns: 96px minmax(0, 1fr) 150px 170px; align-items: center; gap: 16px;
@@ -11,11 +11,11 @@
 .value { text-align: right; }
 .agree { text-align: right; color: var(--muted); }
 .sectionHead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; margin-bottom: 8px; scroll-margin-top: 24px; }
-.sectionTitle { font-size: var(--fs-section); font-weight: 600; }
+.sectionTitle { font-size: var(--fs-h2); line-height: var(--lh-h2); font-weight: 600; letter-spacing: -0.01em; }
 .sectionMeta { color: var(--muted); font-size: var(--fs-small); }
 .table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .table th:first-child { width: 52%; }
-.table th { text-align: left; font-weight: 400; font-size: var(--fs-small); color: var(--muted); padding: 0 12px 8px 0; }
+.table th { text-align: left; font-size: var(--fs-label); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; padding: 0 12px 10px 0; }
 .table td { border-top: 1px solid var(--rule); padding: 12px 12px 12px 0; vertical-align: top; }
 .table th:last-child, .table td:last-child { padding-right: 0; text-align: right; width: 110px; }
 .gtTitle { font-weight: 500; }

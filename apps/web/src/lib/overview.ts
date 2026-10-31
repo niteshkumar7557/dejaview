@@ -37,7 +37,7 @@ export function overviewKpis(topics: TopicSummary[], decisions: DecisionSummary[
     {
       label: "Recall against the PEP",
       value: formatPercent(meanRecall),
-      sub: recalls.length ? `mean of ${recalls.length} evaluated PEPs` : "no PEP evaluated yet",
+      sub: recalls.length === 1 ? "from 1 evaluated PEP" : recalls.length ? `mean of ${recalls.length} evaluated PEPs` : "no PEP evaluated yet",
     },
   ];
 }

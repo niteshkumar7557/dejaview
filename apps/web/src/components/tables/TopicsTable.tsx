@@ -1,6 +1,6 @@
 import type { TopicSummary } from "@dejaview/shared";
 import Link from "next/link";
-import { formatCount, formatPercent, ofTotal } from "@/lib/format";
+import { formatCount, formatPercent, ofTotal, plural } from "@/lib/format";
 import { Ref } from "../ui/Ref";
 import styles from "./tables.module.css";
 
@@ -29,7 +29,7 @@ export function TopicsTable({ rows }: { rows: TopicRow[] }) {
               <div className={styles.identity}>
                 <Link className={styles.title} href={`/topics/${topic.slug}`}>{topic.title}</Link>
                 <span className={styles.sub}>
-                  {topic.pepNumber !== null && <Ref kind="pep" value={String(topic.pepNumber)} />} · {topic.sourceCount} sources
+                  {topic.pepNumber !== null && <Ref kind="pep" value={String(topic.pepNumber)} />} · {plural(topic.sourceCount, "source")}
                 </span>
               </div>
             </td>

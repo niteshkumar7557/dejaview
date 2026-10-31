@@ -6,9 +6,9 @@ import type { PrCheckView } from "@dejaview/shared";
  */
 export function prCheckResult(check: PrCheckView): string {
   if (check.decisionIds.length) {
-    return check.decisionIds.length === 1
-      ? "1 related past decision"
-      : `${check.decisionIds.length} related past decisions`;
+    // Count the rejected look-alikes too: the comment shows them, so the list should not say fewer.
+    const related = new Set([...check.decisionIds, ...check.similarRejectedIds]).size;
+    return related === 1 ? "1 related past decision" : `${related} related past decisions`;
   }
   if (check.similarRejectedIds.length) return "Looks like a rejected idea";
   return "No past decisions";
