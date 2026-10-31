@@ -11,6 +11,15 @@ ul, ol { padding: 0; list-style: none; }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
+/* Draw our own dropdown arrow: the native one sits ~4px from the border and looks cramped. Each select's
+   own rule must reserve ~32px of right padding for it and set background-color (not the background
+   shorthand, which would wipe this image). */
+select {
+  appearance: none; -webkit-appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%235d5f60' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 12px 12px;
+}
+select:disabled { cursor: not-allowed; }
 img, svg { display: block; }
 pre, code { font-family: var(--font-mono), ui-monospace, monospace; } /* taste-skill-ignore: real code */
 

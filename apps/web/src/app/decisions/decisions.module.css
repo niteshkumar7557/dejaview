@@ -3,8 +3,9 @@
 .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
 .field input, .field select {
   height: var(--control-height); padding: 0 10px; min-width: 0;
-  border: 1px solid var(--control); border-radius: var(--radius-control); background: var(--surface);
+  border: 1px solid var(--control); border-radius: var(--radius-control); background-color: var(--surface);
 }
+.field select { padding: 0 34px 0 12px; } /* room for the arrow drawn in globals.css */
 .field input { width: 300px; max-width: 100%; }
 .field input::placeholder { color: var(--faint); }
 .check { display: inline-flex; align-items: center; gap: 6px; height: var(--control-height); color: var(--text); }
