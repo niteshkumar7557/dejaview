@@ -641,10 +641,10 @@ Summary of the rules that drive our workflow. Full consolidated rules: Appendix 
    - A CI job (`.github/workflows/conventions.yml` → `scripts/check-conventions.ts`) that fails a PR if any
      non-merge commit in it lacks a filled `Coding agent:` or `Models used in project:` line, or if the PR
      description lacks either. It re-runs when the PR description is edited.
-6a. **Team rule: AI agents never commit.** Claude Code, MiniMax M3 or any other agent must not commit, push,
-   merge or open PRs. At the end of every completed, committable task the agent outputs a ready-to-use
-   **commit message** (with the two required lines) and a **PR description** (filling the PR template), after
-   running typecheck and tests. Humans commit, push and open the PR. Details in `CLAUDE.md`.
+6a. **Team rule: the AI agent commits and opens PRs; humans merge.** The agent commits on a `<name>/<topic>`
+   branch (with the two required lines and **no** `Co-Authored-By` or other AI attribution), pushes it and
+   opens the PR with `gh pr create`. The teammate reviews and merges with **Rebase and merge** (so every commit
+   on `main` keeps the two lines). The agent never merges and never pushes to `main`. Details in `CLAUDE.md`.
 7. No secrets ever: `LLM_API_TOKEN`, `GITHUB_TOKEN`, `DEJAVIEW_API_TOKEN` only in `.env` (listed in
    `.gitignore`) and deployment/GitHub secrets. Commit a `.env.example` with empty values.
 8. Required in the repo: `HACKATHON.md`, real tests, a GitHub Actions CI workflow that installs the project
