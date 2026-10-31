@@ -815,6 +815,8 @@ npm run render-pr-images -w @dejaview/api
 
 | File | What it shows | Where the content comes from |
 |---|---|---|
+| `dejaview-flow.gif` | The whole flow, moving: the discussion travelling through the six stages | The clickable page below, captured frame by frame with headless Chrome |
+| `dejaview-flow.html` | The same flow, clickable: click a stage for its files, its numbers and its links | The live API and the running database |
 | `mudit-flow.png` | The flow of the data side, top to bottom | Drawn from the real folders and contracts |
 | `mudit-api-run.png` | The API answering, with the rows it returned | `GET /api/topics` and `GET /api/topics/pep-698/timeline` on the running server |
 | `mudit-tests.png` | The test run and the list of test files | `npm test` and `vitest list --filesOnly`, run by the script |

@@ -1,0 +1,2839 @@
+{
+  "meta": {
+    "files": "170",
+    "edges": "187",
+    "discussions": "4",
+    "generatedAt": "2026-10-31 20:00"
+  },
+  "nodes": [
+    {
+      "id": "apps/action/src/action.ts",
+      "workspace": "apps/action",
+      "lines": 343,
+      "kind": "source"
+    },
+    {
+      "id": "apps/action/src/main.ts",
+      "workspace": "apps/action",
+      "lines": 10,
+      "kind": "source"
+    },
+    {
+      "id": "apps/action/test/action.test.ts",
+      "workspace": "apps/action",
+      "lines": 273,
+      "kind": "test"
+    },
+    {
+      "id": "apps/api/scripts/render-code-graph.ts",
+      "workspace": "apps/api",
+      "lines": 743,
+      "kind": "script"
+    },
+    {
+      "id": "apps/api/scripts/render-flow.ts",
+      "workspace": "apps/api",
+      "lines": 561,
+      "kind": "script"
+    },
+    {
+      "id": "apps/api/scripts/render-pr-images.ts",
+      "workspace": "apps/api",
+      "lines": 369,
+      "kind": "script"
+    },
+    {
+      "id": "apps/api/src/api.test.ts",
+      "workspace": "apps/api",
+      "lines": 318,
+      "kind": "test"
+    },
+    {
+      "id": "apps/api/src/app.ts",
+      "workspace": "apps/api",
+      "lines": 42,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/context.ts",
+      "workspace": "apps/api",
+      "lines": 60,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/paths.ts",
+      "workspace": "apps/api",
+      "lines": 10,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/prMatcher.ts",
+      "workspace": "apps/api",
+      "lines": 62,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/routes/decisions.ts",
+      "workspace": "apps/api",
+      "lines": 74,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/routes/eval.ts",
+      "workspace": "apps/api",
+      "lines": 35,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/routes/health.ts",
+      "workspace": "apps/api",
+      "lines": 47,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/routes/ingest.ts",
+      "workspace": "apps/api",
+      "lines": 87,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/routes/jobs.ts",
+      "workspace": "apps/api",
+      "lines": 41,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/routes/prChecks.ts",
+      "workspace": "apps/api",
+      "lines": 96,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/routes/topics.ts",
+      "workspace": "apps/api",
+      "lines": 44,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/server.ts",
+      "workspace": "apps/api",
+      "lines": 37,
+      "kind": "source"
+    },
+    {
+      "id": "apps/api/src/simpleMatcher.ts",
+      "workspace": "apps/api",
+      "lines": 63,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/next.config.ts",
+      "workspace": "apps/web",
+      "lines": 20,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/decisions/[id]/page.tsx",
+      "workspace": "apps/web",
+      "lines": 92,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/decisions/page.tsx",
+      "workspace": "apps/web",
+      "lines": 80,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/error.tsx",
+      "workspace": "apps/web",
+      "lines": 22,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/eval/page.tsx",
+      "workspace": "apps/web",
+      "lines": 58,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/ingest/page.tsx",
+      "workspace": "apps/web",
+      "lines": 37,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/layout.tsx",
+      "workspace": "apps/web",
+      "lines": 36,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/loading.tsx",
+      "workspace": "apps/web",
+      "lines": 27,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/not-found.tsx",
+      "workspace": "apps/web",
+      "lines": 32,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/page.tsx",
+      "workspace": "apps/web",
+      "lines": 58,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/pr-checks/page.tsx",
+      "workspace": "apps/web",
+      "lines": 67,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/app/topics/[slug]/page.tsx",
+      "workspace": "apps/web",
+      "lines": 100,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/decision/AnchorList.tsx",
+      "workspace": "apps/web",
+      "lines": 38,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/decision/AuditDrawer.tsx",
+      "workspace": "apps/web",
+      "lines": 113,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/decision/EvidenceQuote.tsx",
+      "workspace": "apps/web",
+      "lines": 22,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/decision/MadrButton.tsx",
+      "workspace": "apps/web",
+      "lines": 19,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/decision/PeopleList.tsx",
+      "workspace": "apps/web",
+      "lines": 23,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/decision/ReasonList.tsx",
+      "workspace": "apps/web",
+      "lines": 19,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/eval/GroundTruthTable.tsx",
+      "workspace": "apps/web",
+      "lines": 44,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/eval/RecallBars.tsx",
+      "workspace": "apps/web",
+      "lines": 23,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/eval/RunEval.tsx",
+      "workspace": "apps/web",
+      "lines": 60,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/ingest/IngestPanel.tsx",
+      "workspace": "apps/web",
+      "lines": 184,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/pr/CommentPreview.tsx",
+      "workspace": "apps/web",
+      "lines": 28,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/shell/Icon.tsx",
+      "workspace": "apps/web",
+      "lines": 22,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/shell/Mark.tsx",
+      "workspace": "apps/web",
+      "lines": 12,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/shell/PhoneMenu.tsx",
+      "workspace": "apps/web",
+      "lines": 82,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/shell/Shell.tsx",
+      "workspace": "apps/web",
+      "lines": 22,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/shell/Sidebar.tsx",
+      "workspace": "apps/web",
+      "lines": 59,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/shell/TopBar.tsx",
+      "workspace": "apps/web",
+      "lines": 59,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/shell/nav.test.ts",
+      "workspace": "apps/web",
+      "lines": 11,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/components/shell/nav.ts",
+      "workspace": "apps/web",
+      "lines": 20,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/tables/DecisionsTable.tsx",
+      "workspace": "apps/web",
+      "lines": 76,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/tables/PrCheckRows.tsx",
+      "workspace": "apps/web",
+      "lines": 20,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/tables/TopicsTable.tsx",
+      "workspace": "apps/web",
+      "lines": 54,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/thread-strip/HighlightContext.tsx",
+      "workspace": "apps/web",
+      "lines": 22,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/thread-strip/ThreadRail.tsx",
+      "workspace": "apps/web",
+      "lines": 46,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/thread-strip/ThreadStrip.tsx",
+      "workspace": "apps/web",
+      "lines": 95,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/thread-strip/Timeline.tsx",
+      "workspace": "apps/web",
+      "lines": 93,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/ui/Button.tsx",
+      "workspace": "apps/web",
+      "lines": 14,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/ui/Card.tsx",
+      "workspace": "apps/web",
+      "lines": 22,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/ui/EmptyState.tsx",
+      "workspace": "apps/web",
+      "lines": 6,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/ui/KpiStrip.tsx",
+      "workspace": "apps/web",
+      "lines": 17,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/ui/PageTitle.tsx",
+      "workspace": "apps/web",
+      "lines": 40,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/ui/Ref.tsx",
+      "workspace": "apps/web",
+      "lines": 16,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/ui/StatusPill.tsx",
+      "workspace": "apps/web",
+      "lines": 22,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/ui/Tabs.tsx",
+      "workspace": "apps/web",
+      "lines": 15,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/components/ui/VerifiedMark.tsx",
+      "workspace": "apps/web",
+      "lines": 17,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/api-paths.test.ts",
+      "workspace": "apps/web",
+      "lines": 23,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/api-paths.ts",
+      "workspace": "apps/web",
+      "lines": 42,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/cached.ts",
+      "workspace": "apps/web",
+      "lines": 10,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/data-source.ts",
+      "workspace": "apps/web",
+      "lines": 40,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/errors.test.ts",
+      "workspace": "apps/web",
+      "lines": 12,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/errors.ts",
+      "workspace": "apps/web",
+      "lines": 12,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/eval.test.ts",
+      "workspace": "apps/web",
+      "lines": 69,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/eval.ts",
+      "workspace": "apps/web",
+      "lines": 61,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/focus-trap.test.ts",
+      "workspace": "apps/web",
+      "lines": 16,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/focus-trap.ts",
+      "workspace": "apps/web",
+      "lines": 26,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/format.test.ts",
+      "workspace": "apps/web",
+      "lines": 44,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/format.ts",
+      "workspace": "apps/web",
+      "lines": 38,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/http-source.test.ts",
+      "workspace": "apps/web",
+      "lines": 104,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/http-source.ts",
+      "workspace": "apps/web",
+      "lines": 86,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/ingest.test.ts",
+      "workspace": "apps/web",
+      "lines": 117,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/ingest.ts",
+      "workspace": "apps/web",
+      "lines": 114,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/kpi.ts",
+      "workspace": "apps/web",
+      "lines": 6,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/lazy-source.test.ts",
+      "workspace": "apps/web",
+      "lines": 32,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/lazy-source.ts",
+      "workspace": "apps/web",
+      "lines": 30,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/madr.test.ts",
+      "workspace": "apps/web",
+      "lines": 42,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/madr.ts",
+      "workspace": "apps/web",
+      "lines": 52,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/menu.test.ts",
+      "workspace": "apps/web",
+      "lines": 10,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/menu.ts",
+      "workspace": "apps/web",
+      "lines": 8,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/mock-job.test.ts",
+      "workspace": "apps/web",
+      "lines": 38,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/mock-job.ts",
+      "workspace": "apps/web",
+      "lines": 71,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/mock-source.test.ts",
+      "workspace": "apps/web",
+      "lines": 64,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/mock-source.ts",
+      "workspace": "apps/web",
+      "lines": 65,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/motion.test.ts",
+      "workspace": "apps/web",
+      "lines": 34,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/motion.ts",
+      "workspace": "apps/web",
+      "lines": 38,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/overview.test.ts",
+      "workspace": "apps/web",
+      "lines": 47,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/overview.ts",
+      "workspace": "apps/web",
+      "lines": 44,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/pr-checks.test.ts",
+      "workspace": "apps/web",
+      "lines": 40,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/pr-checks.ts",
+      "workspace": "apps/web",
+      "lines": 32,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/refs.test.ts",
+      "workspace": "apps/web",
+      "lines": 14,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/refs.ts",
+      "workspace": "apps/web",
+      "lines": 15,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/search-params.test.ts",
+      "workspace": "apps/web",
+      "lines": 18,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/search-params.ts",
+      "workspace": "apps/web",
+      "lines": 21,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/source.ts",
+      "workspace": "apps/web",
+      "lines": 20,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/strip-geometry.test.ts",
+      "workspace": "apps/web",
+      "lines": 30,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/strip-geometry.ts",
+      "workspace": "apps/web",
+      "lines": 33,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/timeline.test.ts",
+      "workspace": "apps/web",
+      "lines": 41,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/timeline.ts",
+      "workspace": "apps/web",
+      "lines": 37,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/use-job.ts",
+      "workspace": "apps/web",
+      "lines": 62,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/lib/verified.test.ts",
+      "workspace": "apps/web",
+      "lines": 13,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/lib/verified.ts",
+      "workspace": "apps/web",
+      "lines": 8,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/mocks/dataset.ts",
+      "workspace": "apps/web",
+      "lines": 535,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/mocks/threads.ts",
+      "workspace": "apps/web",
+      "lines": 110,
+      "kind": "source"
+    },
+    {
+      "id": "apps/web/src/mocks/views.test.ts",
+      "workspace": "apps/web",
+      "lines": 91,
+      "kind": "test"
+    },
+    {
+      "id": "apps/web/src/mocks/views.ts",
+      "workspace": "apps/web",
+      "lines": 175,
+      "kind": "source"
+    },
+    {
+      "id": "apps/worker/src/adapters.ts",
+      "workspace": "apps/worker",
+      "lines": 137,
+      "kind": "source"
+    },
+    {
+      "id": "apps/worker/src/handlers.ts",
+      "workspace": "apps/worker",
+      "lines": 226,
+      "kind": "source"
+    },
+    {
+      "id": "apps/worker/src/index.ts",
+      "workspace": "apps/worker",
+      "lines": 174,
+      "kind": "source"
+    },
+    {
+      "id": "apps/worker/src/llmIntegration.test.ts",
+      "workspace": "apps/worker",
+      "lines": 117,
+      "kind": "test"
+    },
+    {
+      "id": "apps/worker/src/worker.test.ts",
+      "workspace": "apps/worker",
+      "lines": 316,
+      "kind": "test"
+    },
+    {
+      "id": "packages/ingest/src/cli.ts",
+      "workspace": "packages/ingest",
+      "lines": 119,
+      "kind": "source"
+    },
+    {
+      "id": "packages/ingest/src/discourse.test.ts",
+      "workspace": "packages/ingest",
+      "lines": 132,
+      "kind": "test"
+    },
+    {
+      "id": "packages/ingest/src/discourse.ts",
+      "workspace": "packages/ingest",
+      "lines": 161,
+      "kind": "source"
+    },
+    {
+      "id": "packages/ingest/src/github.test.ts",
+      "workspace": "packages/ingest",
+      "lines": 113,
+      "kind": "test"
+    },
+    {
+      "id": "packages/ingest/src/github.ts",
+      "workspace": "packages/ingest",
+      "lines": 235,
+      "kind": "source"
+    },
+    {
+      "id": "packages/ingest/src/http.ts",
+      "workspace": "packages/ingest",
+      "lines": 55,
+      "kind": "source"
+    },
+    {
+      "id": "packages/ingest/src/index.ts",
+      "workspace": "packages/ingest",
+      "lines": 6,
+      "kind": "source"
+    },
+    {
+      "id": "packages/ingest/src/testing.ts",
+      "workspace": "packages/ingest",
+      "lines": 55,
+      "kind": "source"
+    },
+    {
+      "id": "packages/ingest/src/upload.test.ts",
+      "workspace": "packages/ingest",
+      "lines": 121,
+      "kind": "test"
+    },
+    {
+      "id": "packages/ingest/src/upload.ts",
+      "workspace": "packages/ingest",
+      "lines": 202,
+      "kind": "source"
+    },
+    {
+      "id": "packages/ingest/src/url.test.ts",
+      "workspace": "packages/ingest",
+      "lines": 77,
+      "kind": "test"
+    },
+    {
+      "id": "packages/ingest/src/url.ts",
+      "workspace": "packages/ingest",
+      "lines": 115,
+      "kind": "source"
+    },
+    {
+      "id": "packages/linker/src/cpython.ts",
+      "workspace": "packages/linker",
+      "lines": 226,
+      "kind": "source"
+    },
+    {
+      "id": "packages/linker/src/github.ts",
+      "workspace": "packages/linker",
+      "lines": 284,
+      "kind": "source"
+    },
+    {
+      "id": "packages/linker/src/index.ts",
+      "workspace": "packages/linker",
+      "lines": 19,
+      "kind": "source"
+    },
+    {
+      "id": "packages/linker/src/link-decision.ts",
+      "workspace": "packages/linker",
+      "lines": 146,
+      "kind": "source"
+    },
+    {
+      "id": "packages/linker/src/pr.ts",
+      "workspace": "packages/linker",
+      "lines": 204,
+      "kind": "source"
+    },
+    {
+      "id": "packages/linker/src/references.ts",
+      "workspace": "packages/linker",
+      "lines": 100,
+      "kind": "source"
+    },
+    {
+      "id": "packages/linker/src/relocate-anchor.ts",
+      "workspace": "packages/linker",
+      "lines": 134,
+      "kind": "source"
+    },
+    {
+      "id": "packages/linker/test/cpython.test.ts",
+      "workspace": "packages/linker",
+      "lines": 125,
+      "kind": "test"
+    },
+    {
+      "id": "packages/linker/test/github.test.ts",
+      "workspace": "packages/linker",
+      "lines": 158,
+      "kind": "test"
+    },
+    {
+      "id": "packages/linker/test/link-decision.test.ts",
+      "workspace": "packages/linker",
+      "lines": 266,
+      "kind": "test"
+    },
+    {
+      "id": "packages/linker/test/pr.test.ts",
+      "workspace": "packages/linker",
+      "lines": 148,
+      "kind": "test"
+    },
+    {
+      "id": "packages/linker/test/references.test.ts",
+      "workspace": "packages/linker",
+      "lines": 61,
+      "kind": "test"
+    },
+    {
+      "id": "packages/linker/test/relocate-anchor.test.ts",
+      "workspace": "packages/linker",
+      "lines": 171,
+      "kind": "test"
+    },
+    {
+      "id": "packages/pipeline/src/index.ts",
+      "workspace": "packages/pipeline",
+      "lines": 3,
+      "kind": "source"
+    },
+    {
+      "id": "packages/pipeline/src/llm/client.ts",
+      "workspace": "packages/pipeline",
+      "lines": 335,
+      "kind": "source"
+    },
+    {
+      "id": "packages/pipeline/tests/llm/client.test.ts",
+      "workspace": "packages/pipeline",
+      "lines": 381,
+      "kind": "test"
+    },
+    {
+      "id": "packages/shared/src/api.ts",
+      "workspace": "packages/shared",
+      "lines": 192,
+      "kind": "source"
+    },
+    {
+      "id": "packages/shared/src/domain.ts",
+      "workspace": "packages/shared",
+      "lines": 195,
+      "kind": "source"
+    },
+    {
+      "id": "packages/shared/src/index.ts",
+      "workspace": "packages/shared",
+      "lines": 3,
+      "kind": "source"
+    },
+    {
+      "id": "db/migrate.ts",
+      "workspace": "db",
+      "lines": 73,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/client.ts",
+      "workspace": "db",
+      "lines": 33,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/db.test.ts",
+      "workspace": "db",
+      "lines": 448,
+      "kind": "test"
+    },
+    {
+      "id": "db/src/decisions.ts",
+      "workspace": "db",
+      "lines": 492,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/evalRuns.ts",
+      "workspace": "db",
+      "lines": 81,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/identity.test.ts",
+      "workspace": "db",
+      "lines": 187,
+      "kind": "test"
+    },
+    {
+      "id": "db/src/identity.ts",
+      "workspace": "db",
+      "lines": 279,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/identityResolver.ts",
+      "workspace": "db",
+      "lines": 114,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/index.ts",
+      "workspace": "db",
+      "lines": 32,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/jobs.ts",
+      "workspace": "db",
+      "lines": 153,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/llmCalls.ts",
+      "workspace": "db",
+      "lines": 106,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/prChecks.ts",
+      "workspace": "db",
+      "lines": 61,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/testing.ts",
+      "workspace": "db",
+      "lines": 67,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/timeline.ts",
+      "workspace": "db",
+      "lines": 55,
+      "kind": "source"
+    },
+    {
+      "id": "db/src/topics.ts",
+      "workspace": "db",
+      "lines": 299,
+      "kind": "source"
+    },
+    {
+      "id": "scripts/check-conventions.ts",
+      "workspace": "scripts",
+      "lines": 37,
+      "kind": "script"
+    },
+    {
+      "id": "scripts/conventions.test.ts",
+      "workspace": "scripts",
+      "lines": 98,
+      "kind": "test"
+    },
+    {
+      "id": "scripts/conventions.ts",
+      "workspace": "scripts",
+      "lines": 90,
+      "kind": "script"
+    }
+  ],
+  "edges": [
+    {
+      "from": "apps/action/src/action.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/action/src/action.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/action/src/main.ts",
+      "to": "apps/action/src/action.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./action.js"
+    },
+    {
+      "from": "apps/api/src/app.ts",
+      "to": "apps/api/src/context.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./context.js"
+    },
+    {
+      "from": "apps/api/src/app.ts",
+      "to": "apps/api/src/routes/decisions.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./routes/decisions.js"
+    },
+    {
+      "from": "apps/api/src/app.ts",
+      "to": "apps/api/src/routes/eval.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./routes/eval.js"
+    },
+    {
+      "from": "apps/api/src/app.ts",
+      "to": "apps/api/src/routes/health.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./routes/health.js"
+    },
+    {
+      "from": "apps/api/src/app.ts",
+      "to": "apps/api/src/routes/ingest.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./routes/ingest.js"
+    },
+    {
+      "from": "apps/api/src/app.ts",
+      "to": "apps/api/src/routes/jobs.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./routes/jobs.js"
+    },
+    {
+      "from": "apps/api/src/app.ts",
+      "to": "apps/api/src/routes/prChecks.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./routes/prChecks.js"
+    },
+    {
+      "from": "apps/api/src/app.ts",
+      "to": "apps/api/src/routes/topics.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./routes/topics.js"
+    },
+    {
+      "from": "apps/api/src/context.ts",
+      "to": "db/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": false,
+      "detail": "@dejaview/db"
+    },
+    {
+      "from": "apps/api/src/context.ts",
+      "to": "apps/api/src/prMatcher.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./prMatcher.js"
+    },
+    {
+      "from": "apps/api/src/prMatcher.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/api/src/routes/decisions.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": false,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/api/src/routes/decisions.ts",
+      "to": "apps/api/src/context.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "../context.js"
+    },
+    {
+      "from": "apps/api/src/routes/eval.ts",
+      "to": "apps/api/src/context.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "../context.js"
+    },
+    {
+      "from": "apps/api/src/routes/health.ts",
+      "to": "apps/api/src/context.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "../context.js"
+    },
+    {
+      "from": "apps/api/src/routes/ingest.ts",
+      "to": "packages/ingest/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": false,
+      "detail": "@dejaview/ingest"
+    },
+    {
+      "from": "apps/api/src/routes/ingest.ts",
+      "to": "apps/api/src/context.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "../context.js"
+    },
+    {
+      "from": "apps/api/src/routes/ingest.ts",
+      "to": "apps/api/src/paths.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../paths.js"
+    },
+    {
+      "from": "apps/api/src/routes/jobs.ts",
+      "to": "apps/api/src/context.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "../context.js"
+    },
+    {
+      "from": "apps/api/src/routes/prChecks.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/api/src/routes/prChecks.ts",
+      "to": "apps/api/src/context.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "../context.js"
+    },
+    {
+      "from": "apps/api/src/routes/topics.ts",
+      "to": "apps/api/src/context.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "../context.js"
+    },
+    {
+      "from": "apps/api/src/server.ts",
+      "to": "apps/api/src/app.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./app.js"
+    },
+    {
+      "from": "apps/api/src/server.ts",
+      "to": "apps/api/src/context.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./context.js"
+    },
+    {
+      "from": "apps/api/src/server.ts",
+      "to": "apps/api/src/prMatcher.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./prMatcher.js"
+    },
+    {
+      "from": "apps/api/src/server.ts",
+      "to": "apps/api/src/paths.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./paths.js"
+    },
+    {
+      "from": "apps/api/src/simpleMatcher.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/api/src/simpleMatcher.ts",
+      "to": "apps/api/src/prMatcher.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./prMatcher.js"
+    },
+    {
+      "from": "apps/web/src/app/topics/[slug]/page.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/decision/AnchorList.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/decision/AnchorList.tsx",
+      "to": "apps/web/src/components/ui/Ref.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/Ref"
+    },
+    {
+      "from": "apps/web/src/components/decision/AuditDrawer.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/decision/AuditDrawer.tsx",
+      "to": "apps/web/src/components/shell/Icon.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../shell/Icon"
+    },
+    {
+      "from": "apps/web/src/components/decision/AuditDrawer.tsx",
+      "to": "apps/web/src/components/ui/Button.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/Button"
+    },
+    {
+      "from": "apps/web/src/components/decision/EvidenceQuote.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/decision/EvidenceQuote.tsx",
+      "to": "apps/web/src/components/ui/Ref.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/Ref"
+    },
+    {
+      "from": "apps/web/src/components/decision/EvidenceQuote.tsx",
+      "to": "apps/web/src/components/ui/VerifiedMark.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/VerifiedMark"
+    },
+    {
+      "from": "apps/web/src/components/decision/MadrButton.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/decision/MadrButton.tsx",
+      "to": "apps/web/src/components/ui/Button.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/Button"
+    },
+    {
+      "from": "apps/web/src/components/decision/ReasonList.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/decision/ReasonList.tsx",
+      "to": "apps/web/src/components/decision/EvidenceQuote.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./EvidenceQuote"
+    },
+    {
+      "from": "apps/web/src/components/eval/GroundTruthTable.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/eval/RecallBars.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/eval/RunEval.tsx",
+      "to": "apps/web/src/components/ui/Button.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/Button"
+    },
+    {
+      "from": "apps/web/src/components/ingest/IngestPanel.tsx",
+      "to": "apps/web/src/components/ui/Button.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/Button"
+    },
+    {
+      "from": "apps/web/src/components/pr/CommentPreview.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/shell/Icon.tsx",
+      "to": "apps/web/src/components/shell/nav.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./nav"
+    },
+    {
+      "from": "apps/web/src/components/shell/PhoneMenu.tsx",
+      "to": "apps/web/src/components/shell/Icon.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./Icon"
+    },
+    {
+      "from": "apps/web/src/components/shell/PhoneMenu.tsx",
+      "to": "apps/web/src/components/shell/Sidebar.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./Sidebar"
+    },
+    {
+      "from": "apps/web/src/components/shell/Shell.tsx",
+      "to": "apps/web/src/components/shell/Sidebar.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./Sidebar"
+    },
+    {
+      "from": "apps/web/src/components/shell/Shell.tsx",
+      "to": "apps/web/src/components/shell/TopBar.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./TopBar"
+    },
+    {
+      "from": "apps/web/src/components/shell/Sidebar.tsx",
+      "to": "apps/web/src/components/shell/Icon.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./Icon"
+    },
+    {
+      "from": "apps/web/src/components/shell/Sidebar.tsx",
+      "to": "apps/web/src/components/shell/Mark.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./Mark"
+    },
+    {
+      "from": "apps/web/src/components/shell/Sidebar.tsx",
+      "to": "apps/web/src/components/shell/nav.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./nav"
+    },
+    {
+      "from": "apps/web/src/components/shell/TopBar.tsx",
+      "to": "apps/web/src/components/shell/Icon.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./Icon"
+    },
+    {
+      "from": "apps/web/src/components/shell/TopBar.tsx",
+      "to": "apps/web/src/components/shell/nav.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./nav"
+    },
+    {
+      "from": "apps/web/src/components/shell/TopBar.tsx",
+      "to": "apps/web/src/components/shell/PhoneMenu.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./PhoneMenu"
+    },
+    {
+      "from": "apps/web/src/components/tables/DecisionsTable.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/tables/DecisionsTable.tsx",
+      "to": "apps/web/src/components/thread-strip/HighlightContext.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../thread-strip/HighlightContext"
+    },
+    {
+      "from": "apps/web/src/components/tables/DecisionsTable.tsx",
+      "to": "apps/web/src/components/ui/Ref.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/Ref"
+    },
+    {
+      "from": "apps/web/src/components/tables/DecisionsTable.tsx",
+      "to": "apps/web/src/components/ui/StatusPill.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/StatusPill"
+    },
+    {
+      "from": "apps/web/src/components/tables/DecisionsTable.tsx",
+      "to": "apps/web/src/components/ui/VerifiedMark.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/VerifiedMark"
+    },
+    {
+      "from": "apps/web/src/components/tables/PrCheckRows.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/tables/PrCheckRows.tsx",
+      "to": "apps/web/src/components/ui/Ref.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/Ref"
+    },
+    {
+      "from": "apps/web/src/components/tables/TopicsTable.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/tables/TopicsTable.tsx",
+      "to": "apps/web/src/components/ui/Ref.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/Ref"
+    },
+    {
+      "from": "apps/web/src/components/thread-strip/ThreadRail.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/thread-strip/ThreadRail.tsx",
+      "to": "apps/web/src/components/ui/StatusPill.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/StatusPill"
+    },
+    {
+      "from": "apps/web/src/components/thread-strip/ThreadRail.tsx",
+      "to": "apps/web/src/components/thread-strip/HighlightContext.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./HighlightContext"
+    },
+    {
+      "from": "apps/web/src/components/thread-strip/ThreadStrip.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/thread-strip/ThreadStrip.tsx",
+      "to": "apps/web/src/components/thread-strip/HighlightContext.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./HighlightContext"
+    },
+    {
+      "from": "apps/web/src/components/thread-strip/Timeline.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/components/thread-strip/Timeline.tsx",
+      "to": "apps/web/src/components/ui/Ref.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/Ref"
+    },
+    {
+      "from": "apps/web/src/components/thread-strip/Timeline.tsx",
+      "to": "apps/web/src/components/ui/StatusPill.tsx",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../ui/StatusPill"
+    },
+    {
+      "from": "apps/web/src/components/ui/StatusPill.tsx",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/api-paths.ts",
+      "to": "apps/web/src/lib/data-source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./data-source"
+    },
+    {
+      "from": "apps/web/src/lib/cached.ts",
+      "to": "apps/web/src/lib/source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./source"
+    },
+    {
+      "from": "apps/web/src/lib/data-source.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/errors.ts",
+      "to": "apps/web/src/lib/http-source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./http-source"
+    },
+    {
+      "from": "apps/web/src/lib/eval.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/http-source.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/http-source.ts",
+      "to": "apps/web/src/lib/api-paths.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./api-paths"
+    },
+    {
+      "from": "apps/web/src/lib/http-source.ts",
+      "to": "apps/web/src/lib/data-source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./data-source"
+    },
+    {
+      "from": "apps/web/src/lib/http-source.ts",
+      "to": "apps/web/src/lib/verified.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./verified"
+    },
+    {
+      "from": "apps/web/src/lib/ingest.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/lazy-source.ts",
+      "to": "apps/web/src/lib/data-source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./data-source"
+    },
+    {
+      "from": "apps/web/src/lib/madr.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/madr.ts",
+      "to": "apps/web/src/lib/format.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./format"
+    },
+    {
+      "from": "apps/web/src/lib/mock-job.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/mock-source.ts",
+      "to": "apps/web/src/mocks/dataset.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../mocks/dataset"
+    },
+    {
+      "from": "apps/web/src/lib/mock-source.ts",
+      "to": "apps/web/src/mocks/views.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "../mocks/views"
+    },
+    {
+      "from": "apps/web/src/lib/mock-source.ts",
+      "to": "apps/web/src/lib/data-source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./data-source"
+    },
+    {
+      "from": "apps/web/src/lib/mock-source.ts",
+      "to": "apps/web/src/lib/mock-job.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./mock-job"
+    },
+    {
+      "from": "apps/web/src/lib/mock-source.ts",
+      "to": "apps/web/src/lib/verified.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./verified"
+    },
+    {
+      "from": "apps/web/src/lib/overview.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/overview.ts",
+      "to": "apps/web/src/lib/format.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./format"
+    },
+    {
+      "from": "apps/web/src/lib/overview.ts",
+      "to": "apps/web/src/lib/kpi.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./kpi"
+    },
+    {
+      "from": "apps/web/src/lib/pr-checks.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/refs.ts",
+      "to": "apps/web/src/lib/format.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./format"
+    },
+    {
+      "from": "apps/web/src/lib/search-params.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": false,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/search-params.ts",
+      "to": "apps/web/src/lib/data-source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./data-source"
+    },
+    {
+      "from": "apps/web/src/lib/source.ts",
+      "to": "apps/web/src/lib/data-source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./data-source"
+    },
+    {
+      "from": "apps/web/src/lib/source.ts",
+      "to": "apps/web/src/lib/http-source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./http-source"
+    },
+    {
+      "from": "apps/web/src/lib/source.ts",
+      "to": "apps/web/src/lib/lazy-source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./lazy-source"
+    },
+    {
+      "from": "apps/web/src/lib/strip-geometry.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/timeline.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": false,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/lib/use-job.ts",
+      "to": "apps/web/src/lib/errors.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./errors"
+    },
+    {
+      "from": "apps/web/src/lib/use-job.ts",
+      "to": "apps/web/src/lib/ingest.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./ingest"
+    },
+    {
+      "from": "apps/web/src/lib/use-job.ts",
+      "to": "apps/web/src/lib/source.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./source"
+    },
+    {
+      "from": "apps/web/src/mocks/dataset.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/mocks/threads.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": false,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/mocks/threads.ts",
+      "to": "apps/web/src/mocks/dataset.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./dataset"
+    },
+    {
+      "from": "apps/web/src/mocks/views.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/web/src/mocks/views.ts",
+      "to": "apps/web/src/mocks/dataset.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./dataset"
+    },
+    {
+      "from": "apps/web/src/mocks/views.ts",
+      "to": "apps/web/src/mocks/threads.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./threads"
+    },
+    {
+      "from": "apps/worker/src/adapters.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/worker/src/handlers.ts",
+      "to": "db/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": false,
+      "detail": "@dejaview/db"
+    },
+    {
+      "from": "apps/worker/src/handlers.ts",
+      "to": "packages/ingest/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": false,
+      "detail": "@dejaview/ingest"
+    },
+    {
+      "from": "apps/worker/src/handlers.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "apps/worker/src/handlers.ts",
+      "to": "apps/worker/src/adapters.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./adapters.js"
+    },
+    {
+      "from": "apps/worker/src/index.ts",
+      "to": "db/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": false,
+      "detail": "@dejaview/db"
+    },
+    {
+      "from": "apps/worker/src/index.ts",
+      "to": "apps/worker/src/adapters.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./adapters.js"
+    },
+    {
+      "from": "apps/worker/src/index.ts",
+      "to": "apps/worker/src/handlers.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./handlers.js"
+    },
+    {
+      "from": "packages/ingest/src/cli.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "packages/ingest/src/cli.ts",
+      "to": "packages/ingest/src/discourse.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./discourse.js"
+    },
+    {
+      "from": "packages/ingest/src/cli.ts",
+      "to": "packages/ingest/src/github.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./github.js"
+    },
+    {
+      "from": "packages/ingest/src/cli.ts",
+      "to": "packages/ingest/src/upload.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./upload.js"
+    },
+    {
+      "from": "packages/ingest/src/cli.ts",
+      "to": "packages/ingest/src/url.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./url.js"
+    },
+    {
+      "from": "packages/ingest/src/discourse.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "packages/ingest/src/discourse.ts",
+      "to": "packages/ingest/src/http.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./http.js"
+    },
+    {
+      "from": "packages/ingest/src/discourse.ts",
+      "to": "packages/ingest/src/url.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./url.js"
+    },
+    {
+      "from": "packages/ingest/src/github.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "packages/ingest/src/github.ts",
+      "to": "packages/ingest/src/http.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./http.js"
+    },
+    {
+      "from": "packages/ingest/src/github.ts",
+      "to": "packages/ingest/src/url.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./url.js"
+    },
+    {
+      "from": "packages/ingest/src/index.ts",
+      "to": "packages/ingest/src/http.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./http.js"
+    },
+    {
+      "from": "packages/ingest/src/index.ts",
+      "to": "packages/ingest/src/url.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./url.js"
+    },
+    {
+      "from": "packages/ingest/src/index.ts",
+      "to": "packages/ingest/src/discourse.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./discourse.js"
+    },
+    {
+      "from": "packages/ingest/src/index.ts",
+      "to": "packages/ingest/src/github.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./github.js"
+    },
+    {
+      "from": "packages/ingest/src/index.ts",
+      "to": "packages/ingest/src/upload.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./upload.js"
+    },
+    {
+      "from": "packages/ingest/src/testing.ts",
+      "to": "packages/ingest/src/http.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./http.js"
+    },
+    {
+      "from": "packages/ingest/src/upload.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "packages/linker/src/github.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "packages/linker/src/index.ts",
+      "to": "packages/linker/src/references.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./references.js"
+    },
+    {
+      "from": "packages/linker/src/index.ts",
+      "to": "packages/linker/src/references.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./references.js"
+    },
+    {
+      "from": "packages/linker/src/index.ts",
+      "to": "packages/linker/src/cpython.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./cpython.js"
+    },
+    {
+      "from": "packages/linker/src/index.ts",
+      "to": "packages/linker/src/cpython.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./cpython.js"
+    },
+    {
+      "from": "packages/linker/src/index.ts",
+      "to": "packages/linker/src/github.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./github.js"
+    },
+    {
+      "from": "packages/linker/src/index.ts",
+      "to": "packages/linker/src/github.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./github.js"
+    },
+    {
+      "from": "packages/linker/src/index.ts",
+      "to": "packages/linker/src/link-decision.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./link-decision.js"
+    },
+    {
+      "from": "packages/linker/src/index.ts",
+      "to": "packages/linker/src/link-decision.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./link-decision.js"
+    },
+    {
+      "from": "packages/linker/src/index.ts",
+      "to": "packages/linker/src/relocate-anchor.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./relocate-anchor.js"
+    },
+    {
+      "from": "packages/linker/src/index.ts",
+      "to": "packages/linker/src/pr.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./pr.js"
+    },
+    {
+      "from": "packages/linker/src/link-decision.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "packages/linker/src/link-decision.ts",
+      "to": "packages/linker/src/cpython.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./cpython.js"
+    },
+    {
+      "from": "packages/linker/src/link-decision.ts",
+      "to": "packages/linker/src/github.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./github.js"
+    },
+    {
+      "from": "packages/linker/src/link-decision.ts",
+      "to": "packages/linker/src/references.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./references.js"
+    },
+    {
+      "from": "packages/linker/src/pr.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "packages/linker/src/references.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "packages/linker/src/relocate-anchor.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "packages/linker/src/relocate-anchor.ts",
+      "to": "packages/linker/src/cpython.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./cpython.js"
+    },
+    {
+      "from": "packages/pipeline/src/llm/client.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "packages/shared/src/api.ts",
+      "to": "packages/shared/src/domain.ts",
+      "kind": "RELATIVE",
+      "typeOnly": true,
+      "detail": "./domain.js"
+    },
+    {
+      "from": "packages/shared/src/index.ts",
+      "to": "packages/shared/src/domain.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./domain.js"
+    },
+    {
+      "from": "packages/shared/src/index.ts",
+      "to": "packages/shared/src/api.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./api.js"
+    },
+    {
+      "from": "db/src/decisions.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "db/src/evalRuns.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "db/src/identity.ts",
+      "to": "db/src/identityResolver.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./identityResolver.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/client.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./client.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/topics.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./topics.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/decisions.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./decisions.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/jobs.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./jobs.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/llmCalls.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./llmCalls.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/evalRuns.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./evalRuns.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/prChecks.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./prChecks.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/timeline.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./timeline.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/testing.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./testing.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/identity.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./identity.js"
+    },
+    {
+      "from": "db/src/index.ts",
+      "to": "db/src/identityResolver.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./identityResolver.js"
+    },
+    {
+      "from": "db/src/jobs.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "db/src/llmCalls.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "db/src/prChecks.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "db/src/timeline.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "db/src/topics.ts",
+      "to": "packages/shared/src/index.ts",
+      "kind": "WORKSPACE",
+      "typeOnly": true,
+      "detail": "@dejaview/shared"
+    },
+    {
+      "from": "db/src/topics.ts",
+      "to": "db/src/client.ts",
+      "kind": "RELATIVE",
+      "typeOnly": false,
+      "detail": "./client.js"
+    }
+  ],
+  "discussions": [
+    {
+      "slug": "pep-698",
+      "title": "PEP 698: A typing.override decorator",
+      "posts": 11,
+      "authors": 8,
+      "mentions": [],
+      "symbols": [
+        {
+          "symbol": "peps.python.org",
+          "post": 1
+        },
+        {
+          "symbol": "typing.override",
+          "post": 1
+        },
+        {
+          "symbol": "mail.python.org",
+          "post": 1
+        },
+        {
+          "symbol": "python.org",
+          "post": 1
+        },
+        {
+          "symbol": "V23I4D6DEOFW4BBPWBMYTHZUOMKR7KQE",
+          "post": 1
+        },
+        {
+          "symbol": "github.com",
+          "post": 2
+        },
+        {
+          "symbol": "NeilGirdhar",
+          "post": 2
+        },
+        {
+          "symbol": "typing.py",
+          "post": 3
+        },
+        {
+          "symbol": "sea2.discourse",
+          "post": 4
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 4
+        },
+        {
+          "symbol": "discuss.python.org",
+          "post": 4
+        },
+        {
+          "symbol": "typing.override",
+          "post": 4
+        },
+        {
+          "symbol": "emoji.discourse",
+          "post": 4
+        },
+        {
+          "symbol": "smile.png",
+          "post": 4
+        },
+        {
+          "symbol": "stackoverflow.com",
+          "post": 5
+        },
+        {
+          "symbol": "github.com",
+          "post": 5
+        },
+        {
+          "symbol": "github.com",
+          "post": 6
+        },
+        {
+          "symbol": "us1.discourse",
+          "post": 6
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 6
+        },
+        {
+          "symbol": "discuss.python.org",
+          "post": 6
+        },
+        {
+          "symbol": "typing.deprecated",
+          "post": 7
+        },
+        {
+          "symbol": "typing.override",
+          "post": 7
+        },
+        {
+          "symbol": "sea2.discourse",
+          "post": 8
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 8
+        },
+        {
+          "symbol": "discuss.python.org",
+          "post": 8
+        },
+        {
+          "symbol": "typing.override",
+          "post": 8
+        },
+        {
+          "symbol": "typing.TYPE_CHECKING",
+          "post": 8
+        },
+        {
+          "symbol": "a.py",
+          "post": 8
+        },
+        {
+          "symbol": "a.override",
+          "post": 8
+        }
+      ],
+      "issues": [
+        {
+          "ref": "python/peps#pull/2893",
+          "post": 6
+        },
+        {
+          "ref": "578ba5e445",
+          "post": 6
+        }
+      ]
+    },
+    {
+      "slug": "pep-701",
+      "title": "PEP 701 – Syntactic formalization of f-strings",
+      "posts": 114,
+      "authors": 43,
+      "mentions": [
+        {
+          "path": "Lib/tokenize.py",
+          "post": 95,
+          "author": "guido"
+        }
+      ],
+      "symbols": [
+        {
+          "symbol": "emoji.discourse",
+          "post": 12
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 12
+        },
+        {
+          "symbol": "wave.png",
+          "post": 12
+        },
+        {
+          "symbol": "lys.nikolaou",
+          "post": 12
+        },
+        {
+          "symbol": "peps.python.org",
+          "post": 12
+        },
+        {
+          "symbol": "us1.discourse",
+          "post": 12
+        },
+        {
+          "symbol": "pyfound.blogspot.com",
+          "post": 13
+        },
+        {
+          "symbol": "f.html",
+          "post": 13
+        },
+        {
+          "symbol": "us1.discourse",
+          "post": 13
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 13
+        },
+        {
+          "symbol": "F5F6F6",
+          "post": 13
+        },
+        {
+          "symbol": "RustPython",
+          "post": 14
+        },
+        {
+          "symbol": "e.g",
+          "post": 14
+        },
+        {
+          "symbol": "JoinedStr",
+          "post": 14
+        },
+        {
+          "symbol": "sea2.discourse",
+          "post": 15
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 15
+        },
+        {
+          "symbol": "discuss.python.org",
+          "post": 15
+        },
+        {
+          "symbol": "PyPi",
+          "post": 15
+        },
+        {
+          "symbol": "emoji.discourse",
+          "post": 15
+        },
+        {
+          "symbol": "slight_smile.png",
+          "post": 15
+        },
+        {
+          "symbol": "avatars.discourse",
+          "post": 19
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 19
+        },
+        {
+          "symbol": "emoji.discourse",
+          "post": 19
+        },
+        {
+          "symbol": "GitHub",
+          "post": 20
+        },
+        {
+          "symbol": "SyntaxError",
+          "post": 20
+        },
+        {
+          "symbol": "SyntaxError",
+          "post": 21
+        },
+        {
+          "symbol": "i.e",
+          "post": 22
+        },
+        {
+          "symbol": "emoji.discourse",
+          "post": 22
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 22
+        },
+        {
+          "symbol": "slightly_smiling_face.png",
+          "post": 22
+        }
+      ],
+      "issues": [
+        {
+          "ref": "88d4484552",
+          "post": 12
+        },
+        {
+          "ref": "8354042ac9",
+          "post": 12
+        },
+        {
+          "ref": "4d8bd7c9fc",
+          "post": 13
+        },
+        {
+          "ref": "1468f0c201",
+          "post": 13
+        },
+        {
+          "ref": "python/peps#pull/2933",
+          "post": 25
+        },
+        {
+          "ref": "277962ea3b",
+          "post": 34
+        },
+        {
+          "ref": "720aa63241",
+          "post": 34
+        },
+        {
+          "ref": "gh-73473",
+          "post": 38
+        },
+        {
+          "ref": "python/peps#pull/2939",
+          "post": 85
+        },
+        {
+          "ref": "0769f95751",
+          "post": 92
+        },
+        {
+          "ref": "e94d37122b",
+          "post": 96
+        },
+        {
+          "ref": "383a3f0d08",
+          "post": 102
+        },
+        {
+          "ref": "dotnet/csharplang#issues/4935",
+          "post": 118
+        }
+      ]
+    },
+    {
+      "slug": "uploaded-demo",
+      "title": "Uploaded discussion",
+      "posts": 2,
+      "authors": 2,
+      "mentions": [],
+      "symbols": [],
+      "issues": []
+    },
+    {
+      "slug": "pep-695",
+      "title": "PEP 695: Type Parameter Syntax",
+      "posts": 140,
+      "authors": 48,
+      "mentions": [],
+      "symbols": [
+        {
+          "symbol": "peps.python.org",
+          "post": 128
+        },
+        {
+          "symbol": "mail.python.org",
+          "post": 128
+        },
+        {
+          "symbol": "python.org",
+          "post": 128
+        },
+        {
+          "symbol": "emoji.discourse",
+          "post": 131
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 131
+        },
+        {
+          "symbol": "slight_smile.png",
+          "post": 131
+        },
+        {
+          "symbol": "sea2.discourse",
+          "post": 132
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 132
+        },
+        {
+          "symbol": "discuss.python.org",
+          "post": 132
+        },
+        {
+          "symbol": "typing.TypeAlias",
+          "post": 133
+        },
+        {
+          "symbol": "ListOrSet",
+          "post": 134
+        },
+        {
+          "symbol": "MyDict",
+          "post": 134
+        },
+        {
+          "symbol": "sea2.discourse",
+          "post": 135
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 135
+        },
+        {
+          "symbol": "discuss.python.org",
+          "post": 135
+        },
+        {
+          "symbol": "ListOrSet",
+          "post": 135
+        },
+        {
+          "symbol": "github.com",
+          "post": 136
+        },
+        {
+          "symbol": "us1.discourse",
+          "post": 136
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 136
+        },
+        {
+          "symbol": "B8B8B8",
+          "post": 136
+        },
+        {
+          "symbol": "bugs.python.org",
+          "post": 136
+        },
+        {
+          "symbol": "GitHub",
+          "post": 136
+        },
+        {
+          "symbol": "emoji.discourse",
+          "post": 137
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 137
+        },
+        {
+          "symbol": "magic_wand.png",
+          "post": 137
+        },
+        {
+          "symbol": "peps.python.org",
+          "post": 138
+        },
+        {
+          "symbol": "TypeVars",
+          "post": 138
+        },
+        {
+          "symbol": "emoji.discourse",
+          "post": 138
+        },
+        {
+          "symbol": "cdn.com",
+          "post": 138
+        },
+        {
+          "symbol": "slight_smile.png",
+          "post": 138
+        }
+      ],
+      "issues": [
+        {
+          "ref": "python/cpython#issues/88160",
+          "post": 136
+        },
+        {
+          "ref": "341ce0e2",
+          "post": 136
+        },
+        {
+          "ref": "746f11201a",
+          "post": 136
+        },
+        {
+          "ref": "5fce367659",
+          "post": 136
+        },
+        {
+          "ref": "0aa7bf1dc6",
+          "post": 152
+        },
+        {
+          "ref": "python/typing#issues/548",
+          "post": 181
+        },
+        {
+          "ref": "python/cpython#issues/88160",
+          "post": 226
+        },
+        {
+          "ref": "python/steering-council#issues/173",
+          "post": 229
+        }
+      ]
+    }
+  ]
+}
