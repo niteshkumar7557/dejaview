@@ -31,6 +31,7 @@
   .table tr { padding: 12px 0; border-top: 1px solid var(--rule); }
   .table td { border: 0; padding: 2px 0; }
   .table td[data-label] { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; text-align: right; }
-  .table td[data-label]::before { content: attr(data-label); color: var(--muted); font-size: var(--fs-small); text-align: left; }
+  .table td[data-label]::before { content: attr(data-label); color: var(--muted); font-size: 13px; text-align: left; }
+  .sub, .listMeta { font-size: 13px; }
   .stackNum { flex-direction: row; align-items: baseline; gap: 6px; }
 }
