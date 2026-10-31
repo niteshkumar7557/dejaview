@@ -367,6 +367,11 @@ export async function callLlm<T>(
       const stream = readOllamaStream(await response.text());
       const warning = contextWarning(stream, stage);
       if (warning) console.warn(warning);
+      if (stream.doneReason === "length") {
+        // At temperature 0 the same prompt gives the same too-long answer: retrying only wastes minutes.
+        lastError = new Error(`The model's answer was cut off at ${NUM_PREDICT} tokens`);
+        break;
+      }
       const result = parseModelOutput(stream.content, responseSchema);
 
       successfulRecord = {

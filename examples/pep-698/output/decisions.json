@@ -86,59 +86,14 @@
   "decisions": [
     {
       "key": "d1",
-      "title": "Core Proposal: Acceptance of @typing.override Decorator",
-      "kind": "proposal",
-      "status": "accepted",
-      "summary": "The main proposal introduced a new @typing.override decorator to help static type checkers detect bugs where base class methods are renamed but subclasses are not updated.",
-      "confidence": "high",
-      "decidedAt": "2023-01-30T19:23:36.344Z",
-      "model": "qwen3.5:9b",
-      "reasons": [
-        {
-          "text": "The proposal is for a new decorator @typing.override that marks a method as overriding a method in some superclass. Having this decorator - inspired by similar constructs in Java, C++, Typescript, Kotlin, Scala, Swift, and C# - will enable static type checkers to detect potential bugs where a base class method is renamed but child classes were not modified.",
-          "evidence": [
-            {
-              "postId": 1,
-              "quote": "The proposal is for a new decorator @typing.override that marks a method as overriding a method in some superclass. Having this decorator - inspired by similar constructs in Java, C++, Typescript, Kotlin, Scala, Swift, and C# - will enable static type checkers to detect potential bugs where a base class method is renamed but child classes were not modified.",
-              "verified": true,
-              "matchScore": 1
-            }
-          ]
-        },
-        {
-          "text": "The SC has decided to accept this PEP!",
-          "evidence": [
-            {
-              "postId": 11,
-              "quote": "The SC has decided to accept this PEP!",
-              "verified": true,
-              "matchScore": 1
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "key": "d2",
-      "title": "Rejection of Explicit Base Class Specification in Decorator",
+      "title": "Rejecting built-in runtime enforcement or parent-class specification due to low utility and library-level implementability",
       "kind": "alternative",
       "status": "rejected",
-      "summary": "An alternative design proposed allowing the decorator to specify the exact base class being overridden, but it was rejected due to low utility and implementation complexity.",
+      "summary": "The proposal to allow specifying the exact base class was rejected due to low utility and implementation complexity.",
       "confidence": "high",
-      "decidedAt": "2022-11-13T07:49:25.649Z",
+      "decidedAt": "2022-11-08T16:04:06.953Z",
       "model": "qwen3.5:9b",
       "reasons": [
-        {
-          "text": "I allowed for the possibility of indicating from which base class the overridden base method comes from. In some situations, that can help readers of code know where to look for the method, and it's a bit stricter (if one base class removes, say, the __call__ method, but another one adds it–and you meant to override the one from the first base class).",
-          "evidence": [
-            {
-              "postId": 2,
-              "quote": "I allowed for the possibility of indicating from which base class the overridden base method comes from. In some situations, that can help readers of code know where to look for the method, and it's a bit stricter (if one base class removes, say, the __call__ method, but another one adds it–and you meant to override the one from the first base class).",
-              "verified": true,
-              "matchScore": 1
-            }
-          ]
-        },
         {
           "text": "if in a single commit you move a method from one base to another, you as the author are likely aware of what you did, so the safety benefits are relatively small",
           "evidence": [
@@ -160,52 +115,19 @@
               "matchScore": 1
             }
           ]
-        },
-        {
-          "text": "Nobody has asked for explicitly naming the class in overrides lib in the past 10 years, so I would assume it is not needed.",
-          "evidence": [
-            {
-              "postId": 5,
-              "quote": "Nobody has asked for explicitly naming the class in overrides lib in the past 10 years, so I would assume it is not needed.",
-              "verified": true,
-              "matchScore": 1
-            }
-          ]
-        },
-        {
-          "text": "But anyway, the use of a base class could always be added later if someone makes a compelling case for it.",
-          "evidence": [
-            {
-              "postId": 4,
-              "quote": "But anyway, the use of a base class could always be added later if someone makes a compelling case for it.",
-              "verified": true,
-              "matchScore": 1
-            }
-          ]
         }
       ]
     },
     {
-      "key": "d3",
-      "title": "Rejection of Mandatory Usage for Abstract Methods",
-      "kind": "proposal",
+      "key": "d2",
+      "title": "Requiring the decorator specifically for abstract method overrides (rejected in favor of a strict mode option)",
+      "kind": "alternative",
       "status": "rejected",
-      "summary": "A proposal suggested adding a mode or flag to require the @typing.override decorator specifically when overriding @abstractmethod methods, but this was deemed unnecessary.",
-      "confidence": "high",
+      "summary": "The idea of adding a specific mode or flag to require the decorator only for abstract methods was turned down.",
+      "confidence": "medium",
       "decidedAt": "2023-01-20T17:08:47.455Z",
       "model": "qwen3.5:9b",
       "reasons": [
-        {
-          "text": "Should be any reference or relationship with @abstractmethod? For example, it would be nice, I think, some mode/flag where the override decorator is explicitly required when overriding an @abstractmethod.",
-          "evidence": [
-            {
-              "postId": 9,
-              "quote": "Should be any reference or relationship with @abstractmethod? For example, it would be nice, I think, some mode/flag where the override decorator is explicitly required when overriding an @abstractmethod.",
-              "verified": true,
-              "matchScore": 1
-            }
-          ]
-        },
         {
           "text": "I'm not sure there is much need for special treatment of abstract methods. The PEP recommends type checkers support a strict mode where all method overrides must be marked with the decorator, whether abstract or not.",
           "evidence": [
@@ -220,34 +142,34 @@
       ]
     },
     {
-      "key": "d4",
-      "title": "Acceptance of Third-Party Shim Compatibility Strategy",
+      "key": "d3",
+      "title": "Accepted proposals: providing a TYPE_CHECKING shim for third-party decorators and adopting the main @typing.override decorator",
       "kind": "proposal",
       "status": "accepted",
-      "summary": "A solution was proposed allowing third-party libraries to provide their own override decorators that act like @typing.override via a TYPE_CHECKING shim pattern.",
-      "confidence": "medium",
-      "decidedAt": "2023-01-12T11:55:53.617Z",
+      "summary": "A pattern was proposed and accepted to allow third-party libraries to define their own override decorators that mimic the standard one.",
+      "confidence": "high",
+      "decidedAt": "2023-01-30T19:23:36.344Z",
       "model": "qwen3.5:9b",
       "reasons": [
         {
-          "text": "If a third-party library provides a different override decorator, is there a good way to tell type checkers that it should act like @typing.override?",
+          "text": "One way of handling this kind of thing is to do a typing.TYPE_CHECKING shim, like so: from typing import TYPE_CHECKING if TYPE_CHECKING: from typing import override as override else: def override(func):",
           "evidence": [
             {
-              "postId": 7,
-              "quote": "If a third-party library provides a different override decorator, is there a good way to tell type checkers that it should act like @typing.override?",
+              "postId": 8,
+              "quote": "One way of handling this kind of thing is to do a typing.TYPE_CHECKING shim, like so: from typing import TYPE_CHECKING if TYPE_CHECKING: from typing import override as override else: def override(func):",
               "verified": true,
-              "matchScore": 1
+              "matchScore": 0.917
             }
           ]
         },
         {
-          "text": "One way of handling this kind of thing is to do a typing.TYPE_CHECKING shim, like so: if TYPE_CHECKING: from typing import override as override else: def override(func): # custom implementation here",
+          "text": "The SC has decided to accept this PEP!",
           "evidence": [
             {
-              "postId": 8,
-              "quote": "One way of handling this kind of thing is to do a typing.TYPE_CHECKING shim, like so: if TYPE_CHECKING: from typing import override as override else: def override(func): # custom implementation here",
-              "verified": false,
-              "matchScore": 0.765
+              "postId": 11,
+              "quote": "The SC has decided to accept this PEP!",
+              "verified": true,
+              "matchScore": 1
             }
           ]
         }

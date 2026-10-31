@@ -346,10 +346,16 @@ model reasons, code checks."
 | 1a. Clean | [`clean.ts`](../packages/pipeline/src/clean.ts) + [`text.ts`](../packages/pipeline/src/text.ts) | none | HTML → text, removes quoted replies (`<aside class="quote">`, `<blockquote>`, `> ` lines), skips empty / "+1" / "thanks" / under-5-word / duplicate posts |
 | 1b. Score | [`score.ts`](../packages/pipeline/src/score.ts) | none | Signal score from decision phrases, proposer, Steering Council / core devs, likes, position, length. A post scoring below 1 is skipped |
 | 2. Triage | [`triage.ts`](../packages/pipeline/src/triage.ts) | 4B | 5 posts per call, one label each; the prompt has 4 examples (including "I am -1 on this, it breaks old code" → objection, which the 4B got wrong without them). A `noise` label only removes posts under 40 words (`reachesExtraction`): on the real PEP 698 run the 4B called the PEP author's 500-word reply about the Rejected Alternatives "noise". A post the model forgets is kept |
-| 3. Extract | [`chunk.ts`](../packages/pipeline/src/chunk.ts) + [`extract.ts`](../packages/pipeline/src/extract.ts) | 9B | Windows of about 3,500 tokens of posts, overlapping by 3 posts; each post shown as `[post id] author (date)`, cut at 6,000 characters; the rules are repeated after the posts; JSON schema forces ideas → reasons → `{post_id, quote}` |
+| 3. Extract | [`chunk.ts`](../packages/pipeline/src/chunk.ts) + [`extract.ts`](../packages/pipeline/src/extract.ts) | 9B | Windows of about 3,500 tokens of posts, overlapping by 3 posts; each post shown as `[post id] author (date)`, cut at 6,000 characters; the rules are repeated after the posts. The answer is kept small (prompt **and** JSON schema): at most 5 ideas per chunk (most important first), 2 reasons each, 1 quote of at most 25 words per reason, because on PEP 701 an uncapped answer ran past 2,500 tokens. A chunk that fails is skipped (the run fails only if every chunk fails) |
 | 4. Verify | [`verify.ts`](../packages/pipeline/src/verify.ts) | none | Exact match = 1.0, else best window of words; ≥ 0.85 verified; wrong post → re-attached; otherwise kept as unverified |
 | 5. Consolidate | [`consolidate.ts`](../packages/pipeline/src/consolidate.ts) | 9B | Only titles + reasons go in; the model groups duplicates; code makes sure every idea lands in exactly one group, then merges reasons and quotes. Skipped when there is only one idea |
 | All | [`run-extraction.ts`](../packages/pipeline/src/run-extraction.ts) | | `runExtraction(thread, { llmStore, onProgress })` runs 1→5, reports each stage for the progress bar, gives keys `d1, d2…`, sets confidence (high = all quotes verified and ≥ 2; low = none verified), `decidedAt` = date of the latest quoted post |
+
+**Made for a slow laptop** (lessons from the first real runs): answers stream (no Cloudflare 524), each call
+may take up to 15 minutes, an answer is capped at 2,500 tokens (`num_predict`) so a model stuck repeating
+itself stops, an answer cut off for length is not retried (at temperature 0 the retry would be identical),
+and a recorded answer in `fixtures/llm/` is reused even in live mode, so the worker re-processing a thread
+we already ran answers in seconds.
 
 Every model call goes through [`llm/ask.ts`](../packages/pipeline/src/llm/ask.ts), a thin wrapper over the
 AI client ([`client.ts`](../packages/pipeline/src/llm/client.ts), section 9), so the stages can be tested
@@ -387,7 +393,7 @@ API: `GET /api/decisions/:id` and `GET /api/decisions/:id/llm-calls`. Display:
 [`apps/web/src/components/decision/`](../apps/web/src/components/decision) (`EvidenceQuote.tsx`,
 `ReasonList.tsx`, `AuditDrawer.tsx`).
 
-### 5.4 Code linking that survives renames ✅ (library), 🟡 (wired in)
+### 5.4 Code linking that survives renames ✅
 
 **What it does.** Attaches each decision to the CPython files and functions it is about.
 
@@ -415,8 +421,11 @@ dashboard shows "renamed from …".
 The CPython clone is **blobless** (`git clone --filter=blob:none`): full history, file contents downloaded
 only when needed, so it doesn't take gigabytes.
 
-**Status.** The library is built and tested. The worker's `link` job calls `linkDecision`. Renaming
-(`relocateAnchor`) is not yet called by the worker.
+**Wired into the worker** ([`apps/worker/src/cpython.ts`](../apps/worker/src/cpython.ts),
+[`handlers.ts`](../apps/worker/src/handlers.ts)): before the first link job the worker makes sure the
+blobless CPython clone exists (`CPYTHON_DIR`, default `data/cpython`, git-ignored), and every anchor from
+`linkDecision` goes through `relocateAnchor` before it is saved, so `current_path` and `relocated_by` are
+filled in.
 
 ### 5.5 The PR bot: "DejaView check" ✅ (code), 🟡 (fork not set up yet)
 
@@ -518,9 +527,9 @@ is no API route.
 (`NEXT_PUBLIC_USE_MOCKS` not set to `0`). Useful for design work and as a demo fallback. In live mode
 (`NEXT_PUBLIC_USE_MOCKS=0`) it reads the API.
 
-### 5.9 Same person across platforms ⬜
+### 5.9 Same person across platforms ✅
 
-Planned, lowest priority (P2): link a forum username, a GitHub login and a git commit author into one
+Link a forum username, a GitHub login and a git commit author into one
 **person**, with a confidence score and the evidence used:
 
 - the same username on both platforms (medium confidence);
@@ -528,9 +537,14 @@ Planned, lowest priority (P2): link a forum username, a GitHub login and a git c
 - a forum profile that links to a GitHub account (high);
 - a GitHub "noreply" or commit email that matches a GitHub login (high).
 
-Decision cards could then say "decided by *X*, last active in the repo in 2023", which ties back to the
-brief's worry about experienced contributors leaving. The database already has `people` and `identities`
-tables for it; no code uses them yet.
+**Where.** [`db/src/identityResolver.ts`](../db/src/identityResolver.ts) holds the rules above as pure
+functions (no database, easy to test): it normalizes handles and display names and judges whether two
+identities are the same person, with a confidence and the evidence. [`db/src/identity.ts`](../db/src/identity.ts)
+stores them in the `people` and `identities` tables; a merge keeps its confidence and evidence, so nobody
+has to take it on trust. The worker remembers every post author while ingesting, and the decision card's
+**people** list shows one name per human (`GET /api/decisions/:id` uses `peopleForPosts`), even when they
+posted from two accounts. This ties back to the brief's worry about experienced contributors leaving: you
+can see *who* decided, across platforms.
 
 ---
 
@@ -694,12 +708,18 @@ tiny temporary git repos to prove that rename tracking works.
 | `GET /api/health` | Is the database ready? Can we reach the AI laptop? |
 
 - `npm run render-flow -w @dejaview/api` makes the flow animation in `docs/team/` from the running system.
+- `npm run render-code-graph -w @dejaview/api` makes the **knowledge graph**
+  ([`docs/team/dejaview-graph.html`](team/dejaview-graph.html), `.gif`, `.json`): which of our source files
+  import which, and which discussion points at which CPython file (found by the linker's reference parser).
+  Every edge says how it was found.
 
 ### `apps/worker`
 
 [`index.ts`](../apps/worker/src/index.ts) (the loop, lock, lease), [`handlers.ts`](../apps/worker/src/handlers.ts)
-(what each job type does), [`adapters.ts`](../apps/worker/src/adapters.ts) (loading pipeline and linker).
-Covered in section 6.
+(what each job type does), [`adapters.ts`](../apps/worker/src/adapters.ts) (loading pipeline and linker),
+[`cpython.ts`](../apps/worker/src/cpython.ts) (makes sure the blobless CPython clone exists before linking).
+Tests: `worker.test.ts` and `llmIntegration.test.ts` (a real `callLlm` writing through the Postgres
+`llm_calls` store). Covered in section 6.
 
 ### `apps/web`
 
@@ -729,7 +749,8 @@ edits comments written by `github-actions[bot]` that carry the marker.
   the schema, in plain SQL. [`migrate.ts`](../db/migrate.ts) applies new files once each and remembers them in
   `schema_migrations`.
 - [`src/`](../db/src): one **repository** class per area (`topics.ts`, `decisions.ts`, `jobs.ts`,
-  `llmCalls.ts`, `evalRuns.ts`, `prChecks.ts`, `timeline.ts`). Raw SQL with `$1, $2` parameters, never pasted
+  `llmCalls.ts`, `evalRuns.ts`, `prChecks.ts`, `timeline.ts`, `identity.ts`), plus `identityResolver.ts`
+  (the same-person rules, pure functions; see 5.9). Raw SQL with `$1, $2` parameters, never pasted
   strings. They return exactly the shapes in `packages/shared/src/api.ts`.
 - [`src/testing.ts`](../db/src/testing.ts) creates a throwaway database for tests.
 
@@ -868,7 +889,7 @@ Environment variables (all in [`.env.example`](../.env.example)):
 | `GITHUB_TOKEN` | ingest, linker | Optional; higher GitHub rate limit |
 | `DEJAVIEW_API_TOKEN` | API, Action | The PR bot's secret |
 | `DASHBOARD_URL` | API | Where the dashboard lives, so the PR comment can link to decision cards |
-| `CPYTHON_DIR` | linker | Where the blobless CPython clone lives |
+| `CPYTHON_DIR` | worker, linker | Where the blobless CPython clone lives (default `data/cpython`; the worker clones it on first use) |
 | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_USE_MOCKS` | web | Where the API is; `0` = use it |
 
 **Deployment** ([`Dockerfile`](../Dockerfile), [`fly.toml`](../fly.toml)): one image, three processes (API,
@@ -943,7 +964,7 @@ on every PR.
 
 ## 12. What is done and what is missing
 
-*Checked on 1 Nov 2026, around 2 AM. Update this list as PRs merge.*
+*Checked on 1 Nov 2026, around 3:30 AM. Update this list as PRs merge.*
 
 | Part | Status |
 |---|---|
@@ -957,15 +978,15 @@ on every PR.
 | AI client (live / record / replay, cache, retries) | ✅ |
 | Pipeline stages (clean, score, triage, extract, verify, consolidate) and `runExtraction` | ✅ (real run on PEP 698: 4 decisions, 10 of 11 quotes verified) |
 | Evaluation (`evaluatePep`, PEP parser, judge) | ✅ (PEP 698: 1 of 4 rejected ideas recovered, reasons agree; the other 3 are not argued in that thread) |
-| Rename tracking called by the worker (`relocateAnchor`) | ⬜ |
+| CPython clone + rename tracking in the worker | ✅ |
 | CPython demo fork with the Action installed, and demo PRs | ⬜ |
-| `fixtures/llm/` (recorded AI answers) and `examples/pep-*/` (real outputs) | 🟡 PEP 698 done; PEP 701 and 695 runs in progress |
-| Same person across platforms | ⬜ (lowest priority) |
+| `fixtures/llm/` (recorded AI answers) and `examples/pep-*/` (real outputs) | 🟡 PEP 698 done; PEP 701 running; PEP 695 if time allows |
+| Same person across platforms | ✅ |
+| Deployment (Dockerfile + Fly.io; dashboard built against the real API) | ✅ config; live deploy by Mudit |
 
-Known issues, already reported to their owners:
-- `renderPrComment` only shows rejected decisions from the API's full-text search, so rejected decisions that
-  `matchPr` finds don't appear in the comment (Ansh).
-- The `Dockerfile` doesn't set `NEXT_PUBLIC_USE_MOCKS=0`, so a deployed dashboard would show sample data (Mudit).
+Fixed since the first version of this guide: rejected decisions that `matchPr` finds now appear in the PR
+comment (#16), the `Dockerfile` builds the dashboard with `NEXT_PUBLIC_USE_MOCKS=0` (#14), and the PR
+comment links to `DASHBOARD_URL`.
 
 ---
 
