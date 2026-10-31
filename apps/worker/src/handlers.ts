@@ -69,8 +69,11 @@ function payloadNumber(payload: Record<string, unknown>, key: string): number | 
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-/** Fetches the thread a job is about, from a URL or from an uploaded file. */
-export async function fetchThreadForJob(payload: Record<string, unknown>): Promise<Thread> {
+/**
+ * Fetches the thread a job is about, from a URL or from an uploaded file. GitHub allows only 60
+ * anonymous requests an hour per network, so the worker's token is sent when it has one.
+ */
+export async function fetchThreadForJob(payload: Record<string, unknown>, githubToken?: string): Promise<Thread> {
   const filePath = payloadString(payload, "filePath");
   if (filePath) {
     return threadFromUpload(filePath, {
@@ -88,7 +91,7 @@ export async function fetchThreadForJob(payload: Record<string, unknown>): Promi
     return fetchDiscourseThread(url, { topicSlug, pepNumber });
   }
   if (parseGithubUrl(url)) {
-    return fetchGithubThread(url, { topicSlug, pepNumber });
+    return fetchGithubThread(url, { topicSlug, pepNumber, githubToken });
   }
   throw new Error(`Cannot understand "${url}" - it is not a Discourse or GitHub link`);
 }
@@ -96,7 +99,7 @@ export async function fetchThreadForJob(payload: Record<string, unknown>): Promi
 /** ingest: fetch the discussion and store it, then queue the extraction. */
 export async function handleIngest(job: JobRow, context: WorkerContext): Promise<void> {
   await context.report(job, "fetching", 0, 1);
-  const thread = await fetchThreadForJob(job.payload);
+  const thread = await fetchThreadForJob(job.payload, context.githubToken);
   await context.report(job, "storing", 0, 1);
 
   const saved = await context.topics.saveThread(thread);
@@ -149,7 +152,7 @@ export async function handleExtract(job: JobRow, context: WorkerContext): Promis
     result,
     postIds,
   });
-  await context.llmCalls.linkJobCallsToDecisions(job.id, decisionIds);
+  await llmStore.linkCallsToDecisions(decisionIds);
 
   await context.jobs.enqueue("link", {
     topicId,

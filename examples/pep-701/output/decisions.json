@@ -963,7 +963,14 @@
         },
         {
           "text": "Preventing nesting entirely wouldn't be backwards compatible, f-strings can already be nested if you use different quote styles for each level.",
-          "evidence": []
+          "evidence": [
+            {
+              "postId": 80,
+              "quote": "Preventing nesting entirely wouldn't be backwards compatible, f-strings can already be nested if you use different quote styles for each level.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
         },
         {
           "text": "I believe that when PEP 498 was discussed, there was a good reason to use the latter, but somehow I can't find that reason in the PEP",
@@ -1133,7 +1140,14 @@
         },
         {
           "text": "Personally, I found the prohibition on reusing the same quote mildly annoying.",
-          "evidence": []
+          "evidence": [
+            {
+              "postId": 67,
+              "quote": "Personally, I found the prohibition on reusing the same quote mildly annoying.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
         },
         {
           "text": "Personally, I don't find any of the arguments against supporting quote reuse to be compelling",
@@ -1317,15 +1331,36 @@
         },
         {
           "text": "What these tokens (the ones in the C tokenizer, which I insist is not visible) will contain is going to be based fundamentally on what makes the implementation simpler.",
-          "evidence": []
+          "evidence": [
+            {
+              "postId": 84,
+              "quote": "What these tokens (the ones in the C tokenizer, which I insist is not visible) will contain is going to be based fundamentally on what makes the implementation simpler.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
         },
         {
           "text": "In general, you should not focus on what the tokens contain.",
-          "evidence": []
+          "evidence": [
+            {
+              "postId": 84,
+              "quote": "In general, you should not focus on what the tokens contain.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
         },
         {
           "text": "I apologize if it seems that I am overly insisting on this, but I think is important because the proposal doesn't change any user-visible thing if the tokens contain the starting quote or not",
-          "evidence": []
+          "evidence": [
+            {
+              "postId": 86,
+              "quote": "I apologize if it seems that I am overly insisting on this, but I think is important because the proposal doesn't change any user-visible thing if the tokens contain the starting quote or not",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
         },
         {
           "text": "I think it would help if there was a specification for the tokens – not for what is returned by the tokenizer, but e.g. a regular expression showing what the lexer accepts for each token.",
@@ -1425,13 +1460,20 @@
       "kind": "alternative",
       "status": "rejected",
       "summary": "The idea that syntax rules should be enforced by linters rather than the parser was rejected in favor of keeping the restriction in the grammar.",
-      "confidence": "low",
-      "decidedAt": null,
+      "confidence": "medium",
+      "decidedAt": "2022-12-22T18:26:00.002Z",
       "model": "qwen3.5:9b",
       "reasons": [
         {
           "text": "Ultimately(in my opinion), such restrictions belong in linters and code formatters rather than in the language grammar itself.",
-          "evidence": []
+          "evidence": [
+            {
+              "postId": 70,
+              "quote": "Ultimately(in my opinion), such restrictions belong in linters and code formatters rather than in the language grammar itself.",
+              "verified": true,
+              "matchScore": 1
+            }
+          ]
         }
       ]
     },

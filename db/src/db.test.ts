@@ -234,6 +234,35 @@ describe.skipIf(!databaseUrl)("the data layer (needs DATABASE_URL)", () => {
     expect(await decisions.similarRejected("the loader reads old settings files quickly")).toHaveLength(0);
   });
 
+  it("does not let a long, unrelated rejected decision match through a few common words", async () => {
+    // A real PR about functools.cache matched a PEP 701 f-string decision whose ten reasons share a few
+    // everyday words with almost any text. Matches are ranked by shared words relative to the
+    // decision's length, and a weak match is left out.
+    const saved = await topics.saveThread(sampleThread);
+    const filler = Array.from({ length: 150 }, (_, i) => `topicword${i}`).join(" ");
+    await decisions.saveExtraction({
+      topicId: saved.topicId,
+      postIds: saved.postIds,
+      result: {
+        ...sampleExtraction,
+        decisions: [
+          ...sampleExtraction.decisions,
+          {
+            ...sampleExtraction.decisions[0]!,
+            key: "d2",
+            title: "Rewrite the parser in another language",
+            summary: "Rejected after a long debate.",
+            reasons: [{ text: `The config loader is faster for users, but ${filler}`, evidence: [] }],
+          },
+        ],
+      },
+    });
+
+    const pr = "Switch the config loader to use a list instead of a dict. This breaks old code for some users, " +
+      "but the new loader is faster and easier to read, and we added a migration guide to the docs.";
+    expect((await decisions.similarRejected(pr)).map((d) => d.title)).toEqual(["Use a list instead of a dict"]);
+  });
+
   it("builds the decision card with its reasons, evidence and people", async () => {
     const saved = await topics.saveThread(sampleThread);
     const [decisionId] = await decisions.saveExtraction({
@@ -251,6 +280,22 @@ describe.skipIf(!databaseUrl)("the data layer (needs DATABASE_URL)", () => {
     expect(card?.reasons[0]?.evidence[0]?.quote).toBe("A list is simpler and faster here.");
     expect(card?.reasons[0]?.evidence[0]?.verified).toBe(true);
     expect(card?.people).toEqual(["bob"]);
+  });
+
+  it("replaces a decision's code links when the link step runs again", async () => {
+    // Re-running a link job (a retry after a crash, or a better linker) used to add every link a second time.
+    const saved = await topics.saveThread(sampleThread);
+    const [decisionId] = await decisions.saveExtraction({ topicId: saved.topicId, result: sampleExtraction, postIds: saved.postIds });
+    const anchor = (symbol: string, file: string) => ({
+      repo: "python/cpython", symbol, originalPath: file, originalCommit: null, currentPath: file,
+      relocatedBy: null, linkMethod: "symbol_mention" as const, evidencePostId: null,
+    });
+
+    await decisions.saveAnchors(decisionId ?? 0, [anchor("__init__", "Lib/a.py"), anchor("__init__", "Lib/b.py")], saved.postIds);
+    await decisions.saveAnchors(decisionId ?? 0, [anchor("typing.override", "Lib/typing.py")], saved.postIds);
+
+    const card = await decisions.getCard(decisionId ?? 0);
+    expect(card?.anchors.map((a) => a.currentPath)).toEqual(["Lib/typing.py"]);
   });
 
   it("shows the timeline with the posts that fed a decision", async () => {
@@ -391,6 +436,26 @@ describe.skipIf(!databaseUrl)("the data layer (needs DATABASE_URL)", () => {
     expect(calls).toHaveLength(1);
     expect(calls[0]?.model).toBe("qwen3.5:9b");
     expect(calls[0]?.prompt).toBe("merge these ideas");
+  });
+
+  it("keeps the audit trail when a re-run reuses earlier model answers", async () => {
+    // Ingesting a thread again answers every prompt from the stored calls; the new decisions showed
+    // "0 model calls" because only calls made by the new job were linked.
+    const first = await jobs.enqueue("extract", { topicSlug: SLUG });
+    await new PostgresLlmCallStore(pool, first.id).save({
+      promptHash: "hash-reused-later", model: "qwen3.5:9b", stage: "extract",
+      prompt: "find the ideas", response: { ideas: [] }, durationMs: 80000,
+    });
+
+    const saved = await topics.saveThread(sampleThread);
+    const [decisionId] = await decisions.saveExtraction({ topicId: saved.topicId, result: sampleExtraction, postIds: saved.postIds });
+    const rerun = await jobs.enqueue("extract", { topicSlug: SLUG });
+    const store = new PostgresLlmCallStore(pool, rerun.id);
+    expect(await store.get("hash-reused-later")).not.toBeNull();
+    await store.linkCallsToDecisions([decisionId ?? 0]);
+
+    const calls = await llmCalls.listForDecision(decisionId ?? 0);
+    expect(calls.map((c) => c.prompt)).toEqual(["find the ideas"]);
   });
 
   it("saves and reads the eval scorecard", async () => {

@@ -1,6 +1,6 @@
 import type { JobView } from "@dejaview/shared";
 import { describe, expect, it } from "vitest";
-import { jobOutcome, nextJobToFollow, overallProgress, stageIndex, stageRows, suggestSlug, validateIngestUrl, validateUpload } from "./ingest";
+import { followedJobFromQuery, followedJobQuery, jobOutcome, nextJobToFollow, overallProgress, stageIndex, stageRows, suggestSlug, validateIngestUrl, validateUpload } from "./ingest";
 
 const job = (status: JobView["status"], stage: string | null, progress: number, type: JobView["type"] = "extract"): JobView => ({
   id: 1, type, status, stage, progress, error: null, createdAt: "", updatedAt: "",
@@ -19,6 +19,10 @@ describe("stageRows", () => {
   });
   it("marks the stage that failed", () => {
     expect(stageRows(job("failed", "triage", 0.3)).map((r) => r.state)).toEqual(["done", "done", "failed", "pending", "pending", "pending", "pending"]);
+  });
+  it("does not call a stage running while the job still waits in the queue", () => {
+    expect(states(job("queued", null, 0, "ingest"))).toEqual(["pending", "pending", "pending", "pending", "pending", "pending", "pending"]);
+    expect(states(job("queued", null, 0, "extract"))).toEqual(["done", "pending", "pending", "pending", "pending", "pending", "pending"]);
   });
   it("shows everything pending before a job exists", () => {
     expect(stageRows(null).every((r) => r.state === "pending")).toBe(true);
@@ -113,4 +117,22 @@ describe("suggestSlug", () => {
     expect(suggestSlug("https://github.com/python/cpython/issues/102856")).toEqual({ slug: "gh-102856", pep: null });
   });
   it("returns nothing for an unrecognised URL", () => expect(suggestSlug("https://discuss.python.org/t/ideas/1")).toBeNull());
+});
+
+describe("the followed job in the page URL", () => {
+  it("writes the job id and the short name so a refresh can pick the job up again", () => {
+    expect(followedJobQuery(21, "attrs-445")).toBe("?job=21&topic=attrs-445");
+    expect(followedJobQuery(7, null)).toBe("?job=7");
+  });
+  it("reads back what it wrote", () => {
+    expect(followedJobFromQuery("?job=21&topic=attrs-445")).toEqual({ jobId: 21, topicSlug: "attrs-445" });
+    expect(followedJobFromQuery("job=7")).toEqual({ jobId: 7, topicSlug: null });
+  });
+  it("ignores a missing or broken job id", () => {
+    expect(followedJobFromQuery("")).toBeNull();
+    expect(followedJobFromQuery("?topic=attrs-445")).toBeNull();
+    expect(followedJobFromQuery("?job=abc")).toBeNull();
+    expect(followedJobFromQuery("?job=0")).toBeNull();
+    expect(followedJobFromQuery("?job=-3")).toBeNull();
+  });
 });

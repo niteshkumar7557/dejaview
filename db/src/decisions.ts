@@ -15,6 +15,7 @@ import type {
   TopicRef,
 } from "@dejaview/shared";
 import type { Pool } from "pg";
+import { withTransaction } from "./client.js";
 
 export interface DecisionRow {
   id: number;
@@ -83,6 +84,9 @@ function toAnchor(row: AnchorRow): CodeAnchor {
 function toIso(value: Date | null): string | null {
   return value ? value.toISOString() : null;
 }
+
+/** See similarRejected: the lowest shared-words-per-sqrt(length) score that counts as similar. */
+const MIN_SIMILARITY = 0.5;
 
 export class DecisionsRepository {
   constructor(private readonly pool: Pool) {}
@@ -171,33 +175,39 @@ export class DecisionsRepository {
     return decisionId;
   }
 
-  /** Attaches the code a decision is about. */
+  /**
+   * Sets the code a decision is about, replacing any links saved before. The link step can run again
+   * for the same decision (a retried job, or a re-link after a linker fix), and must not pile up copies.
+   */
   async saveAnchors(
     decisionId: number,
     anchors: CodeAnchor[],
     postIds: Map<string, number>,
   ): Promise<void> {
-    for (const anchor of anchors) {
-      await this.pool.query(
-        `INSERT INTO code_anchors
-           (decision_id, repo, symbol, original_path, original_commit, current_path,
-            relocated_by, link_method, evidence_post_id, last_checked_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())`,
-        [
-          decisionId,
-          anchor.repo,
-          anchor.symbol,
-          anchor.originalPath,
-          anchor.originalCommit,
-          anchor.currentPath,
-          anchor.relocatedBy,
-          anchor.linkMethod,
-          anchor.evidencePostId === null
-            ? null
-            : (postIds.get(String(anchor.evidencePostId)) ?? null),
-        ],
-      );
-    }
+    await withTransaction(this.pool, async (client) => {
+      await client.query("DELETE FROM code_anchors WHERE decision_id = $1", [decisionId]);
+      for (const anchor of anchors) {
+        await client.query(
+          `INSERT INTO code_anchors
+             (decision_id, repo, symbol, original_path, original_commit, current_path,
+              relocated_by, link_method, evidence_post_id, last_checked_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())`,
+          [
+            decisionId,
+            anchor.repo,
+            anchor.symbol,
+            anchor.originalPath,
+            anchor.originalCommit,
+            anchor.currentPath,
+            anchor.relocatedBy,
+            anchor.linkMethod,
+            anchor.evidencePostId === null
+              ? null
+              : (postIds.get(String(anchor.evidencePostId)) ?? null),
+          ],
+        );
+      }
+    });
   }
 
   private async anchorsFor(decisionIds: number[]): Promise<Map<number, CodeAnchor[]>> {
@@ -278,6 +288,13 @@ export class DecisionsRepository {
    * decision's title, summary and reasons, keep those sharing at least 3 (or every word of a shorter
    * query), and rank by how many they share.
    */
+  /**
+   * Rejected decisions that share words with a PR's text, best first. Matches are scored by shared
+   * words divided by the square root of the decision's word count: a long decision (PEP 701 has one
+   * with ten reasons) shares a few everyday words with almost any text, and must not outrank or
+   * crowd out a short decision about exactly this idea. Scores at or below MIN_SIMILARITY are left
+   * out (on the real data, unrelated matches scored 0.33-0.48 and related ones 0.56-1.1).
+   */
   async similarRejected(q: string, limit = 10): Promise<DecisionSummary[]> {
     const result = await this.pool.query<DecisionSummaryRow>(
       `WITH query AS (
@@ -285,6 +302,7 @@ export class DecisionsRepository {
        ),
        scored AS (
          SELECT d.id,
+                cardinality(tsvector_to_array(d.search)) AS size,
                 cardinality(array(
                   SELECT unnest(tsvector_to_array(d.search))
                   INTERSECT
@@ -307,9 +325,10 @@ export class DecisionsRepository {
          JOIN topics t ON t.id = d.topic_id
         WHERE s.shared > 0
           AND s.shared >= LEAST(3, (SELECT cardinality(lexemes) FROM query))
-        ORDER BY s.shared DESC, d.id DESC
+          AND s.shared / sqrt(s.size) > $3
+        ORDER BY s.shared / sqrt(s.size) DESC, d.id DESC
         LIMIT $2`,
-      [q, limit],
+      [q, limit, MIN_SIMILARITY],
     );
     const anchorsByDecision = await this.anchorsFor(result.rows.map((row) => row.id));
     return result.rows.map((row) => this.toSummary(row, anchorsByDecision.get(row.id) ?? []));

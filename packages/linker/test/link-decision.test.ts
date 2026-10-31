@@ -190,6 +190,33 @@ describe("linkDecision", () => {
     ]);
   });
 
+  it("does not link everyday names, dunders, or names too many files define", async () => {
+    // A real attrs thread linked one decision to 847 CPython files through `__init__` (805 files) and
+    // the `a`, `b`, `path` of its example code. Such names say nothing about which code is meant.
+    for (const name of ["one", "two", "three", "four"]) {
+      await writeFile(path.join(repositoryPath, "Lib", `${name}.py`), [
+        "class Thing:",
+        "    def __init__(self):",
+        "        pass",
+        "",
+        "def path(value):",
+        "    return value",
+        "",
+        "def a():",
+        "    return None",
+        "",
+        "def make_widget(value):",
+        "    return value",
+      ].join("\n"));
+    }
+    await git("add", ".");
+    await git("commit", "-m", "common names");
+
+    const body = "Build it in `__init__` from `path` and `a`, or call `make_widget` like `typing.override` does";
+    const anchors = await linkDecision(decision([1]), [post(1, body)], await context());
+    expect(anchors.map((anchor) => anchor.symbol)).toEqual(["typing.override"]);
+  });
+
   it("scans evidence posts and their direct replies, retaining the post that supplied each link", async () => {
     const posts = [
       post(10, "Decision evidence without a link"),

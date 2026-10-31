@@ -24,7 +24,7 @@ import { createAsk, type Ask } from "./llm/ask.js";
 import { scorePosts } from "./score.js";
 import { normalize, words } from "./text.js";
 import { triage } from "./triage.js";
-import { verifyQuote } from "./verify.js";
+import { evidenceFromReasonText, verifyQuote } from "./verify.js";
 
 /** One idea from one chunk, with its quotes already checked. */
 interface CheckedIdea {
@@ -128,12 +128,14 @@ export function reachesExtraction(text: string, label: TriageLabel | null): bool
 }
 
 function verifyReasons(idea: ExtractedIdea, chunk: ChunkPost[]): Reason[] {
-  return idea.reasons.map((reason) => ({
-    text: reason.text.trim(),
-    evidence: reason.evidence
+  return idea.reasons.map((reason) => {
+    const evidence = reason.evidence
       .filter((e) => e.quote.trim().length > 0)
-      .map((e) => verifyQuote(e.quote.trim(), e.post_id, chunk)),
-  }));
+      .map((e) => verifyQuote(e.quote.trim(), e.post_id, chunk));
+    // No evidence given: the reason text itself may be the quote (see evidenceFromReasonText).
+    const fromText = evidence.length === 0 ? evidenceFromReasonText(reason.text, chunk) : null;
+    return { text: reason.text.trim(), evidence: fromText ? [fromText] : evidence };
+  });
 }
 
 /** Merges the ideas of one group into one decision: reasons and quotes are unioned, never lost. */
