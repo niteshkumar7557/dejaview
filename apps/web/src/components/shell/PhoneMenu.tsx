@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { trapTab } from "@/lib/focus-trap";
+import { menuTransition } from "@/lib/menu";
 import { DUR, EASE, gsap, registerMotion, useGSAP, withMotion } from "@/lib/motion";
 import { Icon } from "./Icon";
 import { Brand, NavList } from "./Sidebar";
@@ -19,17 +21,17 @@ export function PhoneMenu({ title }: { title: string }) {
     () => {
       const el = sheet.current;
       if (!el) return;
-      if (open) {
+      const step = menuTransition(open, el.hidden !== false);
+      if (step === "open") {
         el.hidden = false;
         closeButton.current?.focus();
         withMotion(
-          () => { gsap.fromTo(el, { xPercent: -100 }, { xPercent: 0, duration: DUR, ease: EASE }); },
+          () => { gsap.fromTo(el, { xPercent: -100 }, { xPercent: 0, duration: DUR, ease: EASE, overwrite: true }); },
           () => { gsap.set(el, { xPercent: 0 }); },
         );
-      }
-      if (!el.hidden) {
+      } else if (step === "close") {
         withMotion(
-          () => { gsap.to(el, { xPercent: -100, duration: DUR, ease: EASE, onComplete: () => { el.hidden = true; } }); },
+          () => { gsap.to(el, { xPercent: -100, duration: DUR, ease: EASE, overwrite: true, onComplete: () => { el.hidden = true; } }); },
           () => { el.hidden = true; },
         );
       }
@@ -64,7 +66,7 @@ export function PhoneMenu({ title }: { title: string }) {
         aria-modal="true"
         aria-label="Menu"
         hidden
-        onKeyDown={(event) => event.key === "Escape" && close()}
+        onKeyDown={(event) => (event.key === "Escape" ? close() : trapTab(event, sheet.current))}
       >
         <div className={styles.phoneSheetHead}>
           <Brand />

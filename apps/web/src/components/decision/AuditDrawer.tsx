@@ -1,7 +1,8 @@
 "use client";
 
 import type { LlmCallView } from "@dejaview/shared";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { trapTab } from "@/lib/focus-trap";
 import { formatCount } from "@/lib/format";
 import { DUR, EASE, gsap, registerMotion, useGSAP, withMotion } from "@/lib/motion";
 import { Icon } from "../shell/Icon";
@@ -47,6 +48,14 @@ export function AuditDrawer({ calls }: { calls: LlmCallView[] }) {
     { scope: root, dependencies: [open, mounted], revertOnUpdate: false },
   );
 
+  // Lock page scroll while the drawer covers it.
+  useEffect(() => {
+    if (!mounted) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previous; };
+  }, [mounted]);
+
   function show() {
     setMounted(true);
     setOpen(true);
@@ -70,7 +79,7 @@ export function AuditDrawer({ calls }: { calls: LlmCallView[] }) {
         <>
           <div className={styles.backdrop} onClick={hide} aria-hidden="true" />
           <div ref={panel} className={styles.drawer} role="dialog" aria-modal="true" aria-labelledby="audit-drawer-title"
-            onKeyDown={(e) => e.key === "Escape" && hide()}>
+            onKeyDown={(e) => (e.key === "Escape" ? hide() : trapTab(e, panel.current))}>
             <div className={styles.drawerHead}>
               <h2 id="audit-drawer-title" className={styles.drawerTitle}>Model calls behind this decision</h2>
               <button ref={closeButton} type="button" onClick={hide} aria-label="Close" style={{ border: 0, background: "transparent", width: 32, height: 32, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>

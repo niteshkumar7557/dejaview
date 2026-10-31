@@ -17,7 +17,6 @@ export const dynamic = "force-dynamic";
 export default async function EvalPage() {
   const source = getSource();
   const [runs, decisions] = await Promise.all([source.listEvalRuns(), source.searchDecisions({})]);
-  const titles = Object.fromEntries(decisions.map((d) => [d.id, d.title]));
   const items = runs.reduce((sum, r) => sum + r.groundTruth.length, 0);
   const matched = runs.reduce((sum, r) => sum + matchedCount(r), 0);
 
@@ -32,8 +31,8 @@ export default async function EvalPage() {
         }
         actions={
           <>
-            {usingMocks && <span className={styles.disabledNote}>Runs against the live API</span>}
-            <Button variant="primary" disabled={usingMocks} title={usingMocks ? "Evaluation runs need the live API and the model laptop" : undefined}>Run evaluation</Button>
+            <span className={styles.disabledNote}>{usingMocks ? "Runs against the live API" : "Started from the worker for now"}</span>
+            <Button variant="primary" disabled title="Evaluation runs are started by the worker until the API exposes POST /api/eval/:slug to the web app">Run evaluation</Button>
           </>
         }
       />
@@ -48,7 +47,7 @@ export default async function EvalPage() {
               {ofTotal(matchedCount(run), run.groundTruth.length)} recovered · evaluated {run.createdAt.slice(0, 16).replace("T", " ")}
             </span>
           </div>
-          <GroundTruthTable run={run} titles={titles} />
+          <GroundTruthTable run={run} decisions={decisions} />
           <p className={styles.extra}>
             {run.extraIdeas === 0
               ? "Every rejected idea DejaView found is also listed in the PEP."

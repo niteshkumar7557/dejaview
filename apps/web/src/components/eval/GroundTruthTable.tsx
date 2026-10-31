@@ -1,9 +1,12 @@
 import type { EvalRunView } from "@dejaview/shared";
 import Link from "next/link";
-import { agreementText, decisionIdFromKey } from "@/lib/eval";
+import { agreementText, resolveMatch } from "@/lib/eval";
 import styles from "./eval.module.css";
 
-export function GroundTruthTable({ run, titles }: { run: EvalRunView; titles: Record<number, string> }) {
+export function GroundTruthTable({ run, decisions }: {
+  run: EvalRunView;
+  decisions: { id: number; title: string; topic: { slug: string } }[];
+}) {
   return (
     <table className={styles.table}>
       <thead>
@@ -15,7 +18,7 @@ export function GroundTruthTable({ run, titles }: { run: EvalRunView; titles: Re
       </thead>
       <tbody>
         {run.matches.map((m) => {
-          const id = decisionIdFromKey(m.decisionKey);
+          const found = resolveMatch(m.decisionKey, run.topic.slug, decisions);
           return (
             <tr key={m.groundTruth.title}>
               <td>
@@ -23,9 +26,11 @@ export function GroundTruthTable({ run, titles }: { run: EvalRunView; titles: Re
                 <div className={styles.gtText}>{m.groundTruth.text}</div>
               </td>
               <td>
-                {id !== null
-                  ? <Link className={styles.found} href={`/decisions/${id}`}>{titles[id] ?? `Decision ${id}`}</Link>
-                  : <span className={styles.missed}>Not recovered</span>}
+                {found
+                  ? <Link className={styles.found} href={`/decisions/${found.id}`}>{found.title}</Link>
+                  : m.decisionKey
+                    ? <span className={styles.missed}>Recovered as {m.decisionKey} in this run</span>
+                    : <span className={styles.missed}>Not recovered</span>}
               </td>
               <td className={m.reasonAgreement === "no" ? styles.no : undefined}>{agreementText(m.reasonAgreement)}</td>
             </tr>

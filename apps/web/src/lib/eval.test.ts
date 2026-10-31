@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { allEvalRuns } from "../mocks/views";
-import { agreementText, decisionIdFromKey, matchedCount } from "./eval";
+import { agreementText, decisionIdFromKey, matchedCount, resolveMatch } from "./eval";
 
 describe("decisionIdFromKey", () => {
   it("reads the id from a decision key", () => expect(decisionIdFromKey("d12")).toBe(12));
@@ -25,4 +25,18 @@ describe("matchedCount", () => {
       expect(matchedCount(run) / run.groundTruth.length).toBeCloseTo(run.recall);
     }
   });
+});
+
+describe("resolveMatch", () => {
+  const decisions = [
+    { id: 7, title: "Keep the STRING token", topic: { slug: "pep-701" } },
+    { id: 3, title: "Runtime enforcement", topic: { slug: "pep-698" } },
+  ];
+  it("links a key to a decision in the run's own discussion", () => {
+    expect(resolveMatch("d7", "pep-701", decisions)).toEqual({ id: 7, title: "Keep the STRING token" });
+  });
+  it("never links to a decision from another discussion", () => {
+    expect(resolveMatch("d3", "pep-701", decisions)).toBeNull();
+  });
+  it("returns null for no key", () => expect(resolveMatch(null, "pep-701", decisions)).toBeNull());
 });

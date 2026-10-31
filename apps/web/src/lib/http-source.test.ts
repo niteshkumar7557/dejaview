@@ -45,3 +45,17 @@ describe("createHttpSource", () => {
     });
   });
 });
+
+describe("createHttpSource when the API is unreachable", () => {
+  it("turns a network failure into ApiRequestError with status 0", async () => {
+    const failing = (async () => { throw new TypeError("fetch failed"); }) as typeof fetch;
+    const error = await createHttpSource("http://api.test", failing).listTopics().catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiRequestError);
+    expect((error as ApiRequestError).status).toBe(0);
+  });
+  it("gives every request a timeout signal", async () => {
+    const calls: Call[] = [];
+    await createHttpSource("http://api.test", fakeFetch(200, [], calls)).listTopics();
+    expect(calls[0]?.init?.signal).toBeInstanceOf(AbortSignal);
+  });
+});

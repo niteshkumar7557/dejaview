@@ -3,6 +3,7 @@
 import type { JobView } from "@dejaview/shared";
 import Link from "next/link";
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { errorMessage } from "@/lib/errors";
 import { formatPercent } from "@/lib/format";
 import { stageRows, suggestSlug, validateIngestUrl } from "@/lib/ingest";
 import { DUR, EASE, gsap, registerMotion, useGSAP, withMotion } from "@/lib/motion";
@@ -34,8 +35,8 @@ export function IngestPanel() {
         const next = await getSource().getJob(job.id);
         if (next) setJob(next);
         setPollError(null);
-      } catch {
-        setPollError("Couldn't reach the server. Retrying every second.");
+      } catch (e) {
+        setPollError(`${errorMessage(e)} Retrying every second.`);
       }
     }, POLL_MS);
     return () => clearInterval(timer);
@@ -68,13 +69,17 @@ export function IngestPanel() {
     const problem = validateIngestUrl(url);
     if (problem) return setError(problem);
     if (!slug.trim()) return setError("Give the discussion a short name, for example pep-701.");
-    const response = await getSource().startIngest({
-      url: url.trim(),
-      topicSlug: slug.trim(),
-      ...(pep ? { pepNumber: Number(pep) } : {}),
-    });
-    setTopicSlug(response.topicSlug);
-    setJob(await getSource().getJob(response.jobId));
+    try {
+      const response = await getSource().startIngest({
+        url: url.trim(),
+        topicSlug: slug.trim(),
+        ...(pep ? { pepNumber: Number(pep) } : {}),
+      });
+      setTopicSlug(response.topicSlug);
+      setJob(await getSource().getJob(response.jobId));
+    } catch (e) {
+      setError(errorMessage(e));
+    }
   }
 
   const rows = stageRows(job);

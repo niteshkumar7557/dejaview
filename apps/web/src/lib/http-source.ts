@@ -23,12 +23,20 @@ export class ApiRequestError extends Error {
   }
 }
 
+const TIMEOUT_MS = 10_000;
+
 /** DataSource over Mudit's Express API. 404 → null; any other non-2xx → ApiRequestError. */
 export function createHttpSource(baseUrl: string, fetchImpl: typeof fetch = fetch): DataSource {
   const base = baseUrl.replace(/\/+$/, "");
 
   async function request<T>(path: string, init?: RequestInit): Promise<T | null> {
-    const response = await fetchImpl(`${base}${path}`, init);
+    let response: Response;
+    try {
+      response = await fetchImpl(`${base}${path}`, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
+    } catch {
+      // Network failure, DNS, refused connection or timeout: status 0 means "never reached the API".
+      throw new ApiRequestError(0, "Couldn't reach the DejaView API");
+    }
     if (response.status === 404) return null;
     if (!response.ok) {
       const body = (await response.json().catch(() => null)) as ApiError | null;
