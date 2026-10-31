@@ -35,13 +35,40 @@ its "Rejected Ideas" and the reasons.
 
 **Hard deadline: final push by 6:30 AM, 1 Nov 2026 (IST).** Commits after that don't count and may cost marks.
 
-## AI agents never commit (team rule)
+## AI agents may commit and push, after a human has reviewed the work (team rule)
 
-Claude Code, MiniMax M3 or any other AI agent working in this repo **must not run `git commit`, `git push`,
-merge, or open PRs.** Humans do all of that. Creating or switching branches is fine.
+Claude Code, MiniMax M3 or any other AI agent working in this repo **may run `git commit` and `git push`** —
+but only **after a human has reviewed the change and explicitly approved it.** Human review is the gate,
+not a formality.
 
-At the end of every completed, committable task, the agent **outputs a ready-to-use commit message and a PR
-description** and stops. Use exactly this shape:
+### The rule, step by step
+
+1. **Work on a branch** (`<name>/<topic>`). Never commit straight to `main`.
+2. **Run the checks yourself**: `npm run typecheck` and `npm test` must be green. Report the real result.
+3. **Show the human the diff and stop.** Say what changed, what you tested, and ask for review.
+4. **Wait for an explicit yes.** "Looks good", "go ahead", "commit it", "push it" — anything clear. If the
+   human asks for changes, make them and show the diff again.
+5. **Only then commit and push**, using the commit message and PR description from the template below.
+6. **Open the PR** if the human asked for one.
+
+### What still belongs to the humans
+
+- **Merging to `main`.** The agent opens the PR and pushes; a human merges once CI is green.
+- **Force-pushing, amending a human's commit, rewriting published history, `git reset --hard`, or skipping
+  hooks.** Never.
+- **Pushing anything that contains a secret.** If you are not sure whether a file is safe, leave it out and
+  say so.
+- **Any push after 6:30 AM, 1 Nov 2026 (IST).** The deadline is absolute.
+
+### If there is no review
+
+If the human has not reviewed the change, the agent **stops** and hands over the commit message and the PR
+description, and does not commit. An unreviewed commit is worse than no commit: it puts unreviewed code in
+the history that nobody asked for.
+
+### The template for every commit message and PR description
+
+Use exactly this shape:
 
 ````
 **Commit message**
