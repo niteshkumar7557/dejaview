@@ -1,0 +1,17 @@
+{
+  "name": "@dejaview/linker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reference parsing and code linking for DejaView.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@dejaview/shared": "0.1.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p ."
+  }
+}

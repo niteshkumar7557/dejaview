@@ -1,0 +1,15 @@
+{
+  "repo": "python/cpython",
+  "prNumber": 1,
+  "title": "Demo: update typing.override behavior",
+  "body": "Deterministic sample request for the DejaView PR check contract. This is not a live CPython pull request.",
+  "files": [
+    {
+      "path": "Lib/typing.py",
+      "previousPath": null
+    }
+  ],
+  "symbols": [
+    "override"
+  ]
+}

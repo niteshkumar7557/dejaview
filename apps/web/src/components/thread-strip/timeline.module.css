@@ -1,0 +1,20 @@
+.timeline { display: flex; flex-direction: column; font-variant-numeric: tabular-nums; min-width: 0; }
+.post { padding: 14px 12px; margin: 0 -12px; border-top: 1px solid var(--rule); border-radius: 6px; scroll-margin-top: 96px; }
+.evidence { box-shadow: inset 3px 0 0 var(--chart-1); } /* taste-skill-ignore: a 3px data edge, not an elevation shadow */
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: var(--fs-small); }
+.author { font-weight: 500; font-size: var(--fs-body); }
+.muted { color: var(--muted); }
+.score { font-family: var(--font-mono), monospace; } /* taste-skill-ignore: score is a reference figure */
+.body { margin-top: 6px; max-width: 75ch; }
+.cites { margin-top: 6px; font-size: var(--fs-small); color: var(--muted); }
+.cites a { color: var(--text); text-decoration: underline; text-decoration-color: var(--control); text-underline-offset: 3px; }
+.filtered { border-top: 1px solid var(--rule); }
+.filtered summary {
+  display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 10px 0; cursor: pointer;
+  font-size: var(--fs-small); color: var(--muted); list-style-position: inside;
+}
+.filtered summary:hover { color: var(--text); }
+.why { color: var(--faint); }
+.show { margin-left: auto; color: var(--text); text-decoration: underline; text-decoration-color: var(--control); text-underline-offset: 3px; }
+details[open] .show { visibility: hidden; }
+.filteredList { display: flex; flex-direction: column; gap: 4px; padding: 0 0 12px 18px; font-size: var(--fs-small); color: var(--muted); }

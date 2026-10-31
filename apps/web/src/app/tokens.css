@@ -1,0 +1,43 @@
+/* Framed-sheet app style (seed 1078740707), see apps/web/.taste-skill/direction.json.
+   Every value below is from the dealt sheet; --faint is the house placeholder grey (4.5:1 on white). */
+:root {
+  --ground: #f9fbfc;
+  --surface: #ffffff;
+  --raised: #f4f6f8;
+  --active: #ebedee;
+  --border: #e8eaec;
+  --rule: #f0f1f2;
+  --control: #cdced1;
+  --text: #131416;
+  --muted: #5d5f60;
+  --faint: #6b6b6b;
+  --primary: #1d1f20;
+  --accent: #1b6c80;
+  --positive: #1e7b4f;
+  --negative: #c4242a;
+  --warning: #92400e;
+  --chart-1: #1b6c80;
+  --chart-2: #2f70bb;
+  --chart-3: #a86f0c;
+  --pill-positive-bg: #dcfae5; --pill-positive-ink: #04250e;
+  --pill-negative-bg: #ffedea; --pill-negative-ink: #831c1e;
+  --pill-warning-bg: #fffbeb;  --pill-warning-ink: #92400e;
+  --pill-neutral-bg: #ebedee;  --pill-neutral-ink: #353736;
+
+  --radius-card: 8px;
+  --radius-control: 6px;
+  --radius-sheet: 16px;
+  --sheet-inset: 8px;
+  --row-height: 48px;
+  --sidebar-width: 228px;
+  --topbar-height: 48px;
+  --gap: 24px;
+  --pad: 24px;
+  --control-height: 32px;
+
+  --fs-title: 22px;
+  --fs-section: 16px;
+  --fs-kpi: 28px;
+  --fs-body: 14px;
+  --fs-small: 12px;
+}

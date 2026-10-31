@@ -1,0 +1,20 @@
+{
+  "name": "@dejaview/db",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Postgres schema, migrations and raw-SQL data access for DejaView.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  }
+}

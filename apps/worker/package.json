@@ -1,0 +1,13 @@
+{
+  "name": "@dejaview/worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The background worker: runs the slow pipeline jobs and stores the results.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "start": "tsx src/index.ts"
+  }
+}

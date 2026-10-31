@@ -1,0 +1,4 @@
+[
+  { "filename": "Lib/typing.py", "status": "modified", "additions": 4 },
+  { "filename": "Lib/typing_helpers.py", "previous_filename": "Lib/_typing_helpers.py", "status": "renamed" }
+]
