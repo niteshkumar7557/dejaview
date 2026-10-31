@@ -1,0 +1,14 @@
+[
+  {
+    "sha": "4d4fb8fc8350bea97536eaa60f5ae1b213c3e14a",
+    "filename": "Doc/tools/extensions/pyspecific.py",
+    "status": "modified",
+    "additions": 4,
+    "deletions": 4,
+    "changes": 8,
+    "blob_url": "https://github.com/python/cpython/blob/02a87ce98d14f4d9d6e72ade7b4146201657bb33/Doc%2Ftools%2Fextensions%2Fpyspecific.py",
+    "raw_url": "https://github.com/python/cpython/raw/02a87ce98d14f4d9d6e72ade7b4146201657bb33/Doc%2Ftools%2Fextensions%2Fpyspecific.py",
+    "contents_url": "https://api.github.com/repos/python/cpython/contents/Doc%2Ftools%2Fextensions%2Fpyspecific.py?ref=02a87ce98d14f4d9d6e72ade7b4146201657bb33",
+    "patch": "@@ -34,7 +34,7 @@\n \n \n ISSUE_URI = 'https://bugs.python.org/issue%s'\n-SOURCE_URI = 'https://hg.python.org/cpython/file/3.6/%s'\n+SOURCE_URI = 'https://github.com/python/cpython/tree/master/%s'\n \n # monkey-patch reST parser to disable alphabetic and roman enumerated lists\n from docutils.parsers.rst.states import Body\n@@ -79,7 +79,7 @@ def new_depart_literal_block(self, node):\n \n def issue_role(typ, rawtext, text, lineno, inliner, options={}, content=[]):\n     issue = utils.unescape(text)\n-    text = 'issue ' + issue\n+    text = 'bpo-' + issue\n     refnode = nodes.reference(text, text, refuri=ISSUE_URI % issue)\n     return [refnode], []\n \n@@ -225,7 +225,7 @@ def run(self):\n \n # Support for including Misc/NEWS\n \n-issue_re = re.compile('([Ii])ssue #([0-9]+)')\n+issue_re = re.compile('(?:[Ii]ssue #|bpo-)([0-9]+)')\n whatsnew_re = re.compile(r\"(?im)^what's new in (.*?)\\??$\")\n \n \n@@ -253,7 +253,7 @@ def run(self):\n             text = 'The NEWS file is not available.'\n             node = nodes.strong(text, text)\n             return [node]\n-        content = issue_re.sub(r'`\\1ssue #\\2 <https://bugs.python.org/\\2>`__',\n+        content = issue_re.sub(r'`bpo-\\1 <https://bugs.python.org/issue\\1>`__',\n                                content)\n         content = whatsnew_re.sub(r'\\1', content)\n         # remove first 3 lines as they are the main heading"
+  }
+]
