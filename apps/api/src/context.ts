@@ -4,6 +4,7 @@ import {
   createPool,
   DecisionsRepository,
   EvalRunsRepository,
+  IdentityRepository,
   JobsRepository,
   PostgresLlmCallStore,
   PrChecksRepository,
@@ -22,6 +23,7 @@ export interface ApiContext {
   evalRuns: EvalRunsRepository;
   prChecks: PrChecksRepository;
   timeline: TimelineRepository;
+  identities: IdentityRepository;
   prMatcher: PrMatcher;
   /** The token the GitHub Action has to send. Undefined means the endpoint is open. */
   apiToken: string | undefined;
@@ -43,6 +45,7 @@ export function createContext(
     evalRuns: new EvalRunsRepository(pool),
     prChecks: new PrChecksRepository(pool),
     timeline: new TimelineRepository(pool),
+    identities: new IdentityRepository(pool),
     prMatcher,
     apiToken: options.apiToken,
     // The dashboard is a different service from the API, so it has its own variable.

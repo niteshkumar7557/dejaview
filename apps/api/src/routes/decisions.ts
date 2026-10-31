@@ -42,6 +42,14 @@ export function decisionsRouter(context: ApiContext): Router {
         res.status(404).json({ error: `No decision with id ${id}` });
         return;
       }
+      // Name the people, not just their handles: one human with two accounts is one name here.
+      const postIds = card.reasons
+        .flatMap((reason) => reason.evidence.map((evidence) => evidence.postId))
+        .filter((postId) => postId > 0);
+      const people = await context.identities.peopleForPosts(postIds);
+      if (people.length > 0) {
+        card.people = people.map((person) => person.displayName);
+      }
       res.json(card);
     } catch (error) {
       next(error);
