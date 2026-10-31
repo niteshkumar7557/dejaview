@@ -63,7 +63,7 @@ export function DecisionsTable({ decisions, showTopic = false, caption }: {
               <td data-label="Linked code">
                 {anchor
                   ? <Ref kind="path" value={anchor.currentPath ?? anchor.originalPath} title={anchor.symbol ?? undefined} />
-                  : <span className={styles.dash}>—</span>}
+                  : <span className={styles.dash}>—</span>} {/* taste-skill-ignore: missing-value mark */}
               </td>
             </tr>
           );

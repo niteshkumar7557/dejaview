@@ -1,7 +1,7 @@
 // Display formatting. One rule per kind of figure (app-screens §7.4): fixed decimals,
 // separators, a dash for missing values, a printed zero for real zeros.
 
-const DASH = "—";
+const DASH = "—"; // taste-skill-ignore: missing-value mark in data, not prose
 
 export function formatPercent(ratio: number | null, digits = 0): string {
   if (ratio === null || Number.isNaN(ratio)) return DASH;

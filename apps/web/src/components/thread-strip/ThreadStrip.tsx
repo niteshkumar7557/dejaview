@@ -41,14 +41,14 @@ export function ThreadStrip({ posts, linkBase, height = 56, label = "Discussion"
       const rest = all.filter((el) => !lit.includes(el) && !dim.includes(el));
       return withMotion(
         () => {
-          gsap.to(lit, { scaleY: 1.35, opacity: 1, transformOrigin: "50% 100%", duration: DUR_FAST, ease: EASE, overwrite: true });
-          gsap.to(dim, { scaleY: 1, opacity: 0.3, duration: DUR_FAST, ease: EASE, overwrite: true });
-          gsap.to(rest, { scaleY: 1, opacity: 1, duration: DUR_FAST, ease: EASE, overwrite: true });
+          gsap.to(lit, { scaleY: 1.35, scaleX: 2.5, opacity: 1, transformOrigin: "50% 100%", duration: DUR_FAST, ease: EASE, overwrite: true });
+          gsap.to(dim, { scaleY: 1, scaleX: 1, opacity: 0.3, duration: DUR_FAST, ease: EASE, overwrite: true });
+          gsap.to(rest, { scaleY: 1, scaleX: 1, opacity: 1, duration: DUR_FAST, ease: EASE, overwrite: true });
         },
         () => {
-          gsap.set(lit, { scaleY: 1.35, opacity: 1, transformOrigin: "50% 100%" });
-          gsap.set(dim, { scaleY: 1, opacity: 0.3 });
-          gsap.set(rest, { scaleY: 1, opacity: 1 });
+          gsap.set(lit, { scaleY: 1.35, scaleX: 2.5, opacity: 1, transformOrigin: "50% 100%" });
+          gsap.set(dim, { scaleY: 1, scaleX: 1, opacity: 0.3 });
+          gsap.set(rest, { scaleY: 1, scaleX: 1, opacity: 1 });
         },
       );
     },

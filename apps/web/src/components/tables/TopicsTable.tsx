@@ -41,6 +41,7 @@ export function TopicsTable({ rows }: { rows: TopicRow[] }) {
                 <span className={styles.sub}>{ofTotal(verified, quotes)}</span>
               </span>
             </td>
+            {/* taste-skill-ignore: the dash below marks a missing value */}
             <td className={styles.num} data-label="Recall">
               {topic.lastRecall === null ? <span className={styles.dash}>—</span> : formatPercent(topic.lastRecall)}
             </td>
