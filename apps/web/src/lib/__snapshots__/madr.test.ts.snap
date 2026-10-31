@@ -1,0 +1,32 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderMadr > renders a full accepted record 1`] = `
+"# Add an @override decorator to typing
+
+* Status: accepted
+* Decided: 2023-02-14
+* Source: Override decorator for static typing (PEP 698)
+* Recovered by: DejaView (qwen3.5:9b)
+
+## Context and Problem Statement
+
+Type checkers flag a method marked @override when no base class defines it, catching overrides broken by a rename.
+
+## Decision Outcome
+
+Accepted: Add an @override decorator to typing.
+
+### Reasons
+
+* Renaming a base class method silently breaks subclasses today; the decorator makes that an error.
+  * "a method meant to override a base class method no longer does once the base method is renamed" (lukas_w, 2022-11-08, verified) https://discuss.python.org/t/pep-698-override-decorator-for-static-typing/20839/1
+* It costs nothing at runtime beyond setting one attribute.
+  * "the only runtime effect is setting __override__ = True on the function" (lukas_w, 2022-12-13, verified) https://discuss.python.org/t/pep-698-override-decorator-for-static-typing/20839/22
+
+## Links
+
+* Code: \`Lib/typing.py\` (override), linked by pr_ref
+* Code: \`Lib/test/test_typing.py\` (OverrideDecoratorTests), linked by pr_ref
+* DejaView: https://dejaview.example/decisions/1
+"
+`;

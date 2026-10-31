@@ -1,0 +1,17 @@
+.stack { display: flex; flex-direction: column; gap: var(--gap); }
+.sectionTitle { font-size: var(--fs-section); font-weight: 600; }
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.field input, .field select {
+  height: var(--control-height); padding: 0 10px; min-width: 0;
+  border: 1px solid var(--control); border-radius: var(--radius-control); background: var(--surface);
+}
+.field input { width: 300px; max-width: 100%; }
+.field input::placeholder { color: var(--faint); }
+.check { display: inline-flex; align-items: center; gap: 6px; height: var(--control-height); color: var(--text); }
+.check input { width: 16px; height: 16px; accent-color: var(--primary); }
+.count { margin-left: auto; color: var(--muted); }
+.count a { color: var(--text); text-decoration: underline; text-decoration-color: var(--control); text-underline-offset: 3px; }
+@media (max-width: 640px) {
+  .field, .field input, .field select { width: 100%; }
+  .count { margin-left: 0; width: 100%; }
+}
