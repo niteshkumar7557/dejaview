@@ -134,6 +134,12 @@ export interface EvalMatch {
   groundTruth: GroundTruthItem;
   /** ExtractedDecision.key of the matching decision, or null when we missed it. */
   decisionKey: string | null;
+  /**
+   * The database id of the matching decision, so the scorecard can link to the card itself.
+   * The key is what the pipeline knows ("d1"); this is what a reader can click.
+   * Optional, so existing EvalMatch values keep typechecking.
+   */
+  decisionId?: number | null;
   reasonAgreement: ReasonAgreement | null;
 }
 

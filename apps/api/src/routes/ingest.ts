@@ -3,6 +3,9 @@
 // The route only queues the work; the worker does the fetching, because a long thread can take
 // a while and the browser should not have to wait for it.
 
+import { randomUUID } from "node:crypto";
+import { mkdirSync } from "node:fs";
+import { extname } from "node:path";
 import { Router } from "express";
 import multer from "multer";
 import { parseDiscourseUrl, parseGithubUrl } from "@dejaview/ingest";
@@ -20,7 +23,20 @@ export function defaultSlugFor(url: string): string {
 
 export function ingestRouter(context: ApiContext): Router {
   const router = Router();
-  const upload = multer({ dest: UPLOAD_DIR });
+  // multer's plain "dest" option drops the file extension, and then a .md upload would be read
+  // as plain text. The extension decides which reader we use, so it is kept.
+  const upload = multer({
+    storage: multer.diskStorage({
+      destination: (_req, _file, cb) => {
+        mkdirSync(UPLOAD_DIR, { recursive: true });
+        cb(null, UPLOAD_DIR);
+      },
+      filename: (_req, file, cb) => {
+        const extension = extname(file.originalname).toLowerCase().replace(/[^a-z0-9.]/g, "").slice(0, 10);
+        cb(null, `${randomUUID()}${extension}`);
+      },
+    }),
+  });
 
   router.post("/ingest", upload.single("file"), async (req, res, next) => {
     try {

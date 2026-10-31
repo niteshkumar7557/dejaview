@@ -3,6 +3,7 @@
 // They skip when DATABASE_URL is not set. The CI has a Postgres service and runs the migrations
 // before `npm test`, so they run there.
 
+import { rmSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
 import type { ExtractionResult, Thread } from "@dejaview/shared";
@@ -141,6 +142,38 @@ describe.skipIf(!databaseUrl)("the API (needs DATABASE_URL)", () => {
     expect(response.body.error).toMatch(/url/);
   });
 
+  it("tells the dashboard which job comes next", async () => {
+    const first = await request(app).post("/api/ingest").send({ url: "https://example.com/t/1" });
+    expect(first.status).toBe(202);
+
+    // The worker records the parent id in the child's payload.
+    await pool.query(
+      "INSERT INTO jobs (type, payload) VALUES ('extract', $1::jsonb)",
+      [JSON.stringify({ topicSlug: "x", parentJobId: first.body.jobId })],
+    );
+
+    const response = await request(app).get(`/api/jobs/${first.body.jobId}`);
+    expect(response.status).toBe(200);
+    expect(response.body.nextJobId).toBeGreaterThan(first.body.jobId);
+  });
+
+  it("keeps the extension of an uploaded file, so a .md is read as Markdown", async () => {
+    const response = await request(app)
+      .post("/api/ingest")
+      .field("topicSlug", "uploaded-md")
+      .attach("file", Buffer.from("Author: alice\nWe should use a dict.\n"), "discussion.md");
+
+    expect(response.status).toBe(202);
+
+    const job = await pool.query<{ payload: { filePath: string } }>(
+      "SELECT payload FROM jobs WHERE id = $1",
+      [response.body.jobId],
+    );
+    const filePath = job.rows[0]?.payload.filePath ?? "";
+    expect(filePath.endsWith(".md")).toBe(true);
+    if (filePath) rmSync(filePath, { force: true });
+  });
+
   it("lists the topics with their counters", async () => {
     await seed();
     const response = await request(app).get("/api/topics");
@@ -234,6 +267,8 @@ describe.skipIf(!databaseUrl)("the API (needs DATABASE_URL)", () => {
     const log = await request(app).get("/api/pr-checks");
     expect(log.status).toBe(200);
     expect(log.body[0].request.prNumber).toBe(42);
+    // The title used to come back empty.
+    expect(log.body[0].request.title).toBe("Rewrite the parser in Rust");
   });
 
   it("queues an evaluation and lists the ones we have", async () => {

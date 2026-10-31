@@ -60,7 +60,7 @@ export class JobsRepository {
         WHERE id = (
           SELECT id
             FROM jobs
-           WHERE status = 'queued'
+           WHERE (status = 'queued' AND (locked_until IS NULL OR locked_until < now()))
               OR (status = 'running' AND locked_until IS NOT NULL AND locked_until < now())
            ORDER BY id
            LIMIT 1
@@ -100,6 +100,22 @@ export class JobsRepository {
     );
   }
 
+  /**
+   * Puts a job back in the queue because it cannot be done yet, and says why.
+   * The lease in locked_until keeps it from being claimed again straight away.
+   */
+  async requeue(id: number, attempt: number, error: string, retryAfterSeconds: number): Promise<void> {
+    await this.pool.query(
+      `UPDATE jobs
+          SET status = 'queued',
+              error = $3,
+              locked_until = now() + make_interval(secs => $4::double precision),
+              updated_at = now()
+        WHERE id = $1 AND attempt = $2`,
+      [id, attempt, error, retryAfterSeconds],
+    );
+  }
+
   async fail(id: number, attempt: number, error: string): Promise<void> {
     await this.pool.query(
       `UPDATE jobs
@@ -112,6 +128,18 @@ export class JobsRepository {
   async getById(id: number): Promise<JobRow | null> {
     const result = await this.pool.query<JobRow>("SELECT * FROM jobs WHERE id = $1", [id]);
     return result.rows[0] ?? null;
+  }
+
+  /**
+   * The job this one started, if any. The worker puts the parent's id in the child's payload,
+   * so the dashboard can follow ingest -> extract -> link without guessing the ids.
+   */
+  async nextJobId(id: number): Promise<number | null> {
+    const result = await this.pool.query<{ id: number }>(
+      "SELECT id FROM jobs WHERE payload->>'parentJobId' = $1 ORDER BY id LIMIT 1",
+      [String(id)],
+    );
+    return result.rows[0]?.id ?? null;
   }
 
   async list(limit = 50): Promise<JobRow[]> {

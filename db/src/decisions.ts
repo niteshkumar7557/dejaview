@@ -26,6 +26,7 @@ export interface DecisionRow {
   confidence: "high" | "medium" | "low";
   decided_at: Date | null;
   model: string;
+  decision_key: string | null;
   created_at: Date;
 }
 
@@ -113,8 +114,8 @@ export class DecisionsRepository {
     postIds: Map<string, number>,
   ): Promise<number> {
     const inserted = await this.pool.query<{ id: number }>(
-      `INSERT INTO decisions (topic_id, title, kind, status, summary, confidence, decided_at, model)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO decisions (topic_id, title, kind, status, summary, confidence, decided_at, model, decision_key)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          RETURNING id`,
       [
         topicId,
@@ -125,6 +126,7 @@ export class DecisionsRepository {
         decision.confidence,
         decision.decidedAt,
         decision.model,
+        decision.key,
       ],
     );
     const decisionId = inserted.rows[0]?.id;
@@ -290,6 +292,15 @@ export class DecisionsRepository {
     return result.rows.map((row) => this.toSummary(row, anchorsByDecision.get(row.id) ?? []));
   }
 
+  /** The database id of the decision the pipeline called "d1" and friends. */
+  async idByKey(topicId: number, key: string): Promise<number | null> {
+    const result = await this.pool.query<{ id: number }>(
+      "SELECT id FROM decisions WHERE topic_id = $1 AND decision_key = $2 LIMIT 1",
+      [topicId, key],
+    );
+    return result.rows[0]?.id ?? null;
+  }
+
   /** Reads an extraction result back out of the database. */
   async loadExtraction(topicId: number): Promise<StoredExtraction | null> {
     const decisionsResult = await this.pool.query<DecisionRow>(
@@ -346,7 +357,7 @@ export class DecisionsRepository {
     }
 
     const decisions: ExtractedDecision[] = decisionsResult.rows.map((row) => ({
-      key: `d${row.id}`,
+      key: row.decision_key ?? `d${row.id}`,
       title: row.title,
       kind: row.kind,
       status: row.status,
@@ -361,8 +372,8 @@ export class DecisionsRepository {
     }));
 
     const decisionIds = new Map<string, number>();
-    for (const decision of decisions) {
-      decisionIds.set(decision.key, Number(decision.key.slice(1)));
+    for (const row of decisionsResult.rows) {
+      decisionIds.set(row.decision_key ?? `d${row.id}`, row.id);
     }
 
     return {

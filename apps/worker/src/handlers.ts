@@ -20,7 +20,19 @@ import {
 } from "@dejaview/ingest";
 import type { Thread } from "@dejaview/shared";
 import type { Pool } from "pg";
-import type { LinkerAdapter, PipelineAdapter } from "./adapters.js";
+import type { LinkerAdapter, Loaded, PipelineAdapter } from "./adapters.js";
+
+/**
+ * Thrown when a job cannot be done yet because another package is not there.
+ * The worker does not fail the job for this: it puts it back in the queue and tries again
+ * later, so the pipeline finishes on its own once the missing piece lands.
+ */
+export class WaitingForPackageError extends Error {
+  constructor(readonly reason: string) {
+    super(reason);
+    this.name = "WaitingForPackageError";
+  }
+}
 
 export interface WorkerContext {
   pool: Pool;
@@ -29,8 +41,8 @@ export interface WorkerContext {
   jobs: JobsRepository;
   llmCalls: PostgresLlmCallStore;
   evalRuns: EvalRunsRepository;
-  pipeline: PipelineAdapter | null;
-  linker: LinkerAdapter | null;
+  pipeline: Loaded<PipelineAdapter>;
+  linker: Loaded<LinkerAdapter>;
   /** Where the CPython clone lives, for the linker. */
   cpythonDir: string;
   githubToken: string | undefined;
@@ -55,6 +67,7 @@ export async function fetchThreadForJob(payload: Record<string, unknown>): Promi
     return threadFromUpload(filePath, {
       topicSlug: payloadString(payload, "topicSlug") || undefined,
       pepNumber: payloadNumber(payload, "pepNumber"),
+      title: payloadString(payload, "topicTitle") || undefined,
     });
   }
 
@@ -84,13 +97,15 @@ export async function handleIngest(job: JobRow, context: WorkerContext): Promise
     topicId: saved.topicId,
     sourceId: saved.sourceId,
     topicSlug: thread.topic.slug,
+    // So GET /api/jobs/:id can tell the dashboard which job comes next.
+    parentJobId: job.id,
   });
 }
 
 /** extract: let the pipeline find the decisions, then store them. */
 export async function handleExtract(job: JobRow, context: WorkerContext): Promise<void> {
-  if (!context.pipeline) {
-    throw new Error("packages/pipeline is not available yet - ask Abhijeet for the extract job");
+  if (!context.pipeline.adapter) {
+    throw new WaitingForPackageError(context.pipeline.reason);
   }
   const sourceId = payloadNumber(job.payload, "sourceId");
   const topicId = payloadNumber(job.payload, "topicId");
@@ -102,7 +117,7 @@ export async function handleExtract(job: JobRow, context: WorkerContext): Promis
   if (!thread) throw new Error(`Source ${sourceId} is not in the database`);
 
   const llmStore = new PostgresLlmCallStore(context.pool, job.id);
-  const result = await context.pipeline.runExtraction(thread, {
+  const result = await context.pipeline.adapter.runExtraction(thread, {
     llmStore,
     onProgress: async (stage, done, total) => {
       await context.report(job, stage, done, total);
@@ -123,13 +138,14 @@ export async function handleExtract(job: JobRow, context: WorkerContext): Promis
     topicId,
     sourceId,
     topicSlug: thread.topic.slug,
+    parentJobId: job.id,
   });
 }
 
 /** link: attach the decisions to the code they are about. */
 export async function handleLink(job: JobRow, context: WorkerContext): Promise<void> {
-  if (!context.linker) {
-    throw new Error("packages/linker is not available yet - ask Ansh for the link job");
+  if (!context.linker.adapter) {
+    throw new WaitingForPackageError(context.linker.reason);
   }
   const sourceId = payloadNumber(job.payload, "sourceId");
   const topicId = payloadNumber(job.payload, "topicId");
@@ -148,7 +164,7 @@ export async function handleLink(job: JobRow, context: WorkerContext): Promise<v
     await context.report(job, "linking", 0, extraction.result.decisions.length);
     const decisionId = extraction.decisionIds.get(decision.key);
     if (decisionId === undefined) continue;
-    const anchors = await context.linker.linkDecision(
+    const anchors = await context.linker.adapter.linkDecision(
       decision,
       thread.posts,
       {
@@ -163,8 +179,8 @@ export async function handleLink(job: JobRow, context: WorkerContext): Promise<v
 
 /** eval: compare what we found with the real PEP. Only the eval step is allowed to read the PEP. */
 export async function handleEval(job: JobRow, context: WorkerContext): Promise<void> {
-  if (!context.pipeline) {
-    throw new Error("packages/pipeline is not available yet - ask Abhijeet for the eval job");
+  if (!context.pipeline.adapter) {
+    throw new WaitingForPackageError(context.pipeline.reason);
   }
   const topicSlug = payloadString(job.payload, "topicSlug");
   const topic = await context.topics.getBySlug(topicSlug);
@@ -177,7 +193,7 @@ export async function handleEval(job: JobRow, context: WorkerContext): Promise<v
   if (!extraction) throw new Error(`Topic ${topicSlug} has no decisions to evaluate`);
 
   const llmStore = new PostgresLlmCallStore(context.pool, job.id);
-  const result = await context.pipeline.evaluatePep(topic.pep_number, extraction.result, { llmStore });
+  const result = await context.pipeline.adapter.evaluatePep(topic.pep_number, extraction.result, { llmStore });
   await context.evalRuns.save({ topicId: topic.id, result });
 }
 

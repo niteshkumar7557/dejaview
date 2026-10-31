@@ -24,11 +24,14 @@ import {
   handleExtract,
   handleIngest,
   handleLink,
+  WaitingForPackageError,
   type WorkerContext,
 } from "./handlers.js";
 
 /** How long we wait between looking for work when there is none. */
 const POLL_INTERVAL_MS = 2000;
+/** How long a job waits before we try it again, when it could not be done yet. */
+const RETRY_WAIT_SECONDS = 60;
 /** How often we tell the database we are still alive on a long job. */
 const HEARTBEAT_MS = 60_000;
 /** How long a worker may hold a job before another one may take it over. */
@@ -68,8 +71,16 @@ async function runJob(job: JobRow, context: WorkerContext): Promise<void> {
     console.log(`job ${job.id} (${job.type}) done`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    await context.jobs.fail(job.id, job.attempt, message);
-    console.error(`job ${job.id} (${job.type}) failed: ${message}`);
+    if (error instanceof WaitingForPackageError) {
+      // The job is not broken, the thing it needs is not here yet. Put it back and try again,
+      // so the pipeline finishes on its own once the missing package lands.
+      await context.jobs.requeue(job.id, job.attempt, message, RETRY_WAIT_SECONDS);
+      console.warn(`job ${job.id} (${job.type}) is waiting: ${message}`);
+      console.warn(`  retrying in ${RETRY_WAIT_SECONDS}s`);
+    } else {
+      await context.jobs.fail(job.id, job.attempt, message);
+      console.error(`job ${job.id} (${job.type}) failed: ${message}`);
+    }
   } finally {
     clearInterval(heartbeat);
   }
@@ -94,8 +105,10 @@ async function main(): Promise<void> {
 
   const pipeline = await loadPipeline();
   const linker = await loadLinker();
-  if (!pipeline) console.warn("packages/pipeline is not published yet - extract jobs will fail.");
-  if (!linker) console.warn("packages/linker is not published yet - link jobs will fail.");
+  if (pipeline.adapter) console.log("pipeline: loaded");
+  else console.warn(`pipeline: ${pipeline.reason}`);
+  if (linker.adapter) console.log("linker: loaded");
+  else console.warn(`linker: ${linker.reason}`);
 
   const jobs = new JobsRepository(pool);
   const context: WorkerContext = {

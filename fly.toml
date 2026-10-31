@@ -1,0 +1,83 @@
+# Fly.io deployment for DejaView.
+#
+#   flyctl launch --no-deploy          (creates the app and the three services)
+#   flyctl postgres create --name dejaview-db
+#   flyctl postgres attach dejaview-db --app dejaview
+#   flyctl secrets set LLM_BASE_URL=... LLM_API_TOKEN=... DEJAVIEW_API_TOKEN=... GITHUB_TOKEN=...
+#   flyctl deploy
+#
+# Three processes from one image: the API, the worker and the dashboard. The database is a
+# managed Postgres, attached with `flyctl postgres attach`, which sets DATABASE_URL by itself.
+#
+# The worker and the API must never run in the same process: the worker takes jobs with
+# SELECT ... FOR UPDATE SKIP LOCKED and holds a Postgres advisory lock, so a second worker would
+# simply wait. That is on purpose.
+
+app = "dejaview"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3001"
+  NODE_ENV = "production"
+  LLM_MODE = "live"
+
+# ── The API ───────────────────────────────────────────────────────────────────────────────────
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/health"
+    timeout = "5s"
+
+# ── The worker ─────────────────────────────────────────────────────────────────────────────────
+# No http_service: the worker is not a web server, it only talks to the database and the model.
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+  processes = ["worker"]
+
+# ── The dashboard ──────────────────────────────────────────────────────────────────────────────
+[http_service]
+  internal_port = 3100
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "30s"
+    method = "GET"
+    path = "/"
+    timeout = "5s"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+  processes = ["web"]
+
+# ── The processes ──────────────────────────────────────────────────────────────────────────────
+[processes]
+  api = "npm run start -w @dejaview/api"
+  worker = "npm run start -w @dejaview/worker"
+  web = "npm run start -w @dejaview/web"
+
+  [processes.web]
+    NODE_ENV = "production"

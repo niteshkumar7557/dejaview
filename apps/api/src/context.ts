@@ -45,7 +45,8 @@ export function createContext(
     timeline: new TimelineRepository(pool),
     prMatcher,
     apiToken: options.apiToken,
-    dashboardUrl: options.dashboardUrl ?? process.env.NEXT_PUBLIC_API_URL ?? "",
+    // The dashboard is a different service from the API, so it has its own variable.
+    dashboardUrl: options.dashboardUrl ?? process.env.DASHBOARD_URL ?? "",
   };
 }
 

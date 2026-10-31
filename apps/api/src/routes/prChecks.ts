@@ -71,6 +71,7 @@ export function prChecksRouter(context: ApiContext): Router {
       await context.prChecks.save({
         repo: request.repo,
         prNumber: request.prNumber,
+        title: request.title,
         matchedDecisionIds: matches.map((match) => match.id),
         similarRejectedIds: similarRejected.map((match) => match.id),
         commentBody: commentMarkdown,

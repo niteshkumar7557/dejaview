@@ -103,8 +103,8 @@ describe.skipIf(!databaseUrl)("the worker (needs DATABASE_URL)", () => {
       jobs,
       llmCalls: new PostgresLlmCallStore(pool),
       evalRuns: new EvalRunsRepository(pool),
-      pipeline: fakePipeline,
-      linker: fakeLinker,
+      pipeline: { adapter: fakePipeline, problem: "ok", reason: "loaded" },
+      linker: { adapter: fakeLinker, problem: "ok", reason: "loaded" },
       cpythonDir: "",
       githubToken: undefined,
       report: async () => {
@@ -221,9 +221,16 @@ describe.skipIf(!databaseUrl)("the worker (needs DATABASE_URL)", () => {
       topicSlug: SLUG,
     });
     const claimed = await context.jobs.claimNext();
-    const withoutPipeline = { ...context, pipeline: null };
+    const withoutPipeline = {
+      ...context,
+      pipeline: {
+        adapter: null,
+        problem: "not-published" as const,
+        reason: "packages/pipeline is not written yet",
+      },
+    };
     await expect(handleExtract(claimed as JobRow, withoutPipeline)).rejects.toThrow(
-      /pipeline is not available/,
+      /pipeline is not written yet/,
     );
   });
 
@@ -235,10 +242,38 @@ describe.skipIf(!databaseUrl)("the worker (needs DATABASE_URL)", () => {
       topicSlug: SLUG,
     });
     const claimed = await context.jobs.claimNext();
-    const withoutLinker = { ...context, linker: null };
+    const withoutLinker = {
+      ...context,
+      linker: {
+        adapter: null,
+        problem: "not-published" as const,
+        reason: "packages/linker is not written yet",
+      },
+    };
     await expect(handleLink(claimed as JobRow, withoutLinker)).rejects.toThrow(
-      /linker is not available/,
+      /linker is not written yet/,
     );
+  });
+
+  it("puts a job back in the queue when it is only waiting for a package", async () => {
+    await drainQueue();
+    const job = await context.jobs.enqueue("extract", {
+      topicId: await topicIdOf(SLUG),
+      sourceId: await sourceIdOf(SLUG),
+      topicSlug: SLUG,
+    });
+    const claimed = await context.jobs.claimNext();
+    expect(claimed?.id).toBe(job.id);
+
+    // This is what the worker does when a package it needs is not there yet.
+    await context.jobs.requeue(job.id, claimed?.attempt ?? 0, "packages/pipeline is not written yet", 60);
+
+    const row = await context.jobs.getById(job.id);
+    expect(row?.status).toBe("queued");
+    expect(row?.error).toBe("packages/pipeline is not written yet");
+
+    // It waits for its turn and is not claimed straight away.
+    expect(await context.jobs.claimNext()).toBeNull();
   });
 
   async function topicIdOf(slug: string): Promise<number> {

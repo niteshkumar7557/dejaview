@@ -3,7 +3,17 @@
 // The pipeline (Abhijeet) and the linker (Ansh) are separate packages. They are loaded when the
 // worker starts. Until they are published the worker still does everything else: it fetches
 // threads, stores them and queues the next step.
+//
+// The loading tells apart the two reasons a package can be missing, because they need different
+// fixes:
+//
+//   "not installed" — the package is on disk but npm has not linked it. The fix is `npm install`.
+//   "not published" — the package is not on disk at all. Somebody still has to write it.
+//
+// Saying the wrong one sends the team down the wrong path, so we check the disk.
 
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import type {
   CodeAnchor,
   EvalResult,
@@ -23,7 +33,7 @@ export interface PipelineAdapter {
   evaluatePep(
     pepNumber: number,
     result: ExtractionResult,
-    deps: { llmStore: LlmCallStore },
+    deps: { llmCallStore?: LlmCallStore; llmStore?: LlmCallStore },
   ): Promise<EvalResult>;
 }
 
@@ -41,31 +51,86 @@ export interface LinkerAdapter {
   ): Promise<CodeAnchor[]>;
 }
 
-export async function loadPipeline(): Promise<PipelineAdapter | null> {
-  const specifier = "@dejaview/pipeline";
-  try {
-    const module = (await import(specifier)) as Partial<PipelineAdapter>;
-    if (module.runExtraction && module.evaluatePep) {
-      return {
-        runExtraction: module.runExtraction,
-        evaluatePep: module.evaluatePep,
-      };
-    }
-  } catch {
-    // The pipeline package is not there yet.
-  }
-  return null;
+/** Why a package could not be loaded. */
+export type LoadProblem = "ok" | "not-installed" | "not-published" | "wrong-exports";
+
+export interface Loaded<T> {
+  adapter: T | null;
+  problem: LoadProblem;
+  /** A sentence the team can act on. */
+  reason: string;
 }
 
-export async function loadLinker(): Promise<LinkerAdapter | null> {
+function packageFolder(name: string): string {
+  return fileURLToPath(new URL(`../../../packages/${name}/`, import.meta.url));
+}
+
+/** Whether the package is on disk, and therefore whether npm can link it. */
+function isOnDisk(name: string): boolean {
+  return existsSync(packageFolder(name));
+}
+
+export async function loadPipeline(): Promise<Loaded<PipelineAdapter>> {
+  const name = "pipeline";
+  const specifier = "@dejaview/pipeline";
+  if (!isOnDisk(name)) {
+    return {
+      adapter: null,
+      problem: "not-published",
+      reason: `packages/${name} is not written yet - ask Abhijeet for the extract job`,
+    };
+  }
+  try {
+    const module = (await import(specifier)) as Partial<PipelineAdapter>;
+    if (!module.runExtraction || !module.evaluatePep) {
+      return {
+        adapter: null,
+        problem: "wrong-exports",
+        reason: `packages/${name} does not export runExtraction and evaluatePep yet - ask Abhijeet`,
+      };
+    }
+    return {
+      adapter: {
+        runExtraction: module.runExtraction,
+        evaluatePep: module.evaluatePep,
+      },
+      problem: "ok",
+      reason: "loaded",
+    };
+  } catch {
+    return {
+      adapter: null,
+      problem: "not-installed",
+      reason: `packages/${name} is on disk but not linked - run npm install`,
+    };
+  }
+}
+
+export async function loadLinker(): Promise<Loaded<LinkerAdapter>> {
+  const name = "linker";
   const specifier = "@dejaview/linker";
+  if (!isOnDisk(name)) {
+    return {
+      adapter: null,
+      problem: "not-published",
+      reason: `packages/${name} is not written yet - ask Ansh for the link job`,
+    };
+  }
   try {
     const module = (await import(specifier)) as Partial<LinkerAdapter>;
-    if (module.linkDecision) {
-      return { linkDecision: module.linkDecision };
+    if (!module.linkDecision) {
+      return {
+        adapter: null,
+        problem: "wrong-exports",
+        reason: `packages/${name} does not export linkDecision yet - ask Ansh`,
+      };
     }
+    return { adapter: { linkDecision: module.linkDecision }, problem: "ok", reason: "loaded" };
   } catch {
-    // The linker package is not there yet.
+    return {
+      adapter: null,
+      problem: "not-installed",
+      reason: `packages/${name} is on disk but not linked - run npm install`,
+    };
   }
-  return null;
 }

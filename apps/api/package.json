@@ -9,7 +9,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
     "start": "tsx src/server.ts",
-    "render-pr-images": "tsx scripts/render-pr-images.ts"
+    "render-pr-images": "tsx scripts/render-pr-images.ts",
+    "render-flow": "tsx scripts/render-flow.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

@@ -386,6 +386,7 @@ describe.skipIf(!databaseUrl)("the data layer (needs DATABASE_URL)", () => {
           {
             groundTruth: { title: "Rejected idea", text: "because of reasons" },
             decisionKey: "d1",
+            decisionId: null,
             reasonAgreement: "yes",
           },
         ],
@@ -402,10 +403,35 @@ describe.skipIf(!databaseUrl)("the data layer (needs DATABASE_URL)", () => {
     expect(runs[0]?.topic.slug).toBe(SLUG);
   });
 
+  it("tells which job a job started", async () => {
+    const first = await jobs.enqueue("ingest", { topicSlug: SLUG });
+    const second = await jobs.enqueue("extract", {
+      topicSlug: SLUG,
+      parentJobId: first.id,
+    });
+
+    expect(await jobs.nextJobId(first.id)).toBe(second.id);
+    expect(await jobs.nextJobId(second.id)).toBeNull();
+  });
+
+  it("keeps the key the pipeline gave a decision", async () => {
+    const saved = await topics.saveThread(sampleThread);
+    await decisions.saveExtraction({
+      topicId: saved.topicId,
+      result: sampleExtraction,
+      postIds: saved.postIds,
+    });
+
+    const id = await decisions.idByKey(saved.topicId, "d1");
+    expect(id).toBeGreaterThan(0);
+    expect(await decisions.idByKey(saved.topicId, "not-a-key")).toBeNull();
+  });
+
   it("saves and reads the PR check log", async () => {
     await prChecks.save({
       repo: "python/cpython",
       prNumber: 12345,
+      title: "Rewrite the parser in Rust",
       matchedDecisionIds: [1, 2],
       similarRejectedIds: [3],
       commentBody: "## DejaView check",
@@ -414,6 +440,7 @@ describe.skipIf(!databaseUrl)("the data layer (needs DATABASE_URL)", () => {
     const checks = await prChecks.list();
     expect(checks).toHaveLength(1);
     expect(checks[0]?.request.repo).toBe("python/cpython");
+    expect(checks[0]?.request.title).toBe("Rewrite the parser in Rust");
     expect(checks[0]?.decisionIds).toEqual([1, 2]);
     expect(checks[0]?.commentMarkdown).toBe("## DejaView check");
   });
