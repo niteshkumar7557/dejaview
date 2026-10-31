@@ -4,6 +4,24 @@ Guidance for AI coding sessions in this repo. **`design.md` is the source of tru
 features, architecture, data model, and every hackathon rule (Appendix A = official problem statement,
 Appendix B = rules). Read the relevant section of `design.md` before starting a task.
 
+## Start of every session: ask who you are working with (mandatory)
+
+The project is split between four teammates (`docs/team/README.md`). Before doing anything else:
+
+1. **Ask: "Which teammate are you: Mudit, Nitesh, Abhijeet or Ansh?"** Do not read code, plan or edit until
+   you have an answer. Skip the question only if the user already said their name in this session. If the
+   answer is not one of the four, ask again.
+2. **Read `docs/team/README.md` and `docs/team/<name>.md`** (lowercase: `mudit.md`, `nitesh.md`,
+   `abhijeet.md`, `ansh.md`), then the `design.md` sections that doc lists.
+3. **Work only on that person's part.** Create or modify files **only inside the folders their doc says they
+   own**, plus their own `docs/team/<name>.md` (tick off finished tasks there). Reading any file is fine.
+4. **If a task needs a change outside their folders** (someone else's folder, `packages/shared`, root config,
+   `.github/`, `design.md`, `CLAUDE.md`, `HACKATHON.md`): don't make it. Say which file and which owner, and
+   draft a short message the user can send to that teammate. Change `packages/shared` or root files only if the
+   user explicitly says the team agreed to it.
+5. **Branch:** if on `main`, create a branch `<name>/<topic>` before editing (e.g. `abhijeet/quote-verifier`).
+   Then follow the no-commit rule below.
+
 ## Project
 
 **DejaView** ("You've had this debate before") — team **Sipmap** (Mudit Agrawal, Nitesh Kumar,
@@ -81,8 +99,12 @@ Before handing over, the agent runs `npm run typecheck` and `npm test` and repor
 
 - **TypeScript everywhere.** Frontend: Next.js (App Router). Backend: Express. DB: Postgres with **raw SQL
   via `pg` — no ORM.** Schema lives in plain `.sql` migrations under `db/migrations`.
-- Planned layout (npm workspaces): `apps/web`, `apps/api`, `apps/worker`, `packages/core` (pure logic +
-  most unit tests), `action/` (GitHub Action), `db/migrations`, `examples/`, `fixtures/llm/`.
+- Layout (npm workspaces, owner in brackets): `packages/shared` (contract types, shared) · `packages/ingest`,
+  `apps/api`, `apps/worker`, `db/` [Mudit] · `packages/pipeline`, `fixtures/llm/` [Abhijeet] ·
+  `packages/linker`, `apps/action` [Ansh] · `apps/web` [Nitesh]. Full ownership table: `docs/team/README.md`.
+- Workspaces are named `@dejaview/<folder>`, have a `tsconfig.json` extending `../../tsconfig.base.json` and a
+  `typecheck` script. Pipeline and linker are pure libraries (no DB, no HTTP server); only Mudit's code
+  touches Postgres; only the pipeline calls the LLM.
 - Tests: Vitest; API tests with supertest against a Postgres service container in CI.
 - Job queue: a Postgres `jobs` table claimed with `SELECT … FOR UPDATE SKIP LOCKED` (no Redis).
 - Search: Postgres full-text search (`tsvector`); no embedding model.

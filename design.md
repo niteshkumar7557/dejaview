@@ -129,13 +129,18 @@ flowchart LR
 
 | Component | Tech | Responsibility |
 |---|---|---|
-| `apps/web` | Next.js (App Router), TypeScript | Dashboard: search, decision cards, thread timeline, linked code, eval scorecard, ingest form, MADR export |
+| `packages/shared` | TypeScript types | **The contract** between parts: `Thread`, `ExtractionResult`, `CodeAnchor`, `PrCheckRequest`, and every API response type |
+| `packages/ingest` | TypeScript library + CLI | Discourse / GitHub / upload → `Thread`; writes `fixtures/threads/*.json` |
+| `packages/pipeline` | TypeScript library + CLI | LLM client (record/replay, cache), cleaner, signal scorer, triage, extract, quote verifier, consolidate, PEP parser + eval. Pure: no DB |
+| `packages/linker` | TypeScript library | Reference parser, code linking, rename relocation, PR matcher, PR comment renderer. Pure: no DB |
+| `apps/web` | Next.js (App Router), TypeScript | Dashboard: search, decision cards, thread timeline, linked code, eval scorecard, ingest form, MADR export (rendered in the browser) |
 | `apps/api` | Express, TypeScript, `pg` (raw SQL) | REST API; enqueues jobs; PR-check endpoint |
-| `apps/worker` | Node + TypeScript | Polls `jobs` table, runs the pipeline stages, talks to Ollama, runs git commands |
-| `packages/core` | TypeScript library | Pure logic shared by api/worker: cleaner, signal scorer, quote verifier, reference parser, PEP parser, matcher, LLM client, prompts, JSON schemas. **Most unit tests live here.** |
-| `action/` | GitHub Action (Node 20) | Runs on PRs in the demo repo, sends diff info to the API, posts/updates one PR comment |
+| `apps/worker` | Node + TypeScript | Polls `jobs` table, runs ingest → pipeline → linker → eval, persists results |
+| `apps/action` | GitHub Action (Node) | Runs on PRs in the demo repo, sends diff info to the API, posts/updates one PR comment |
 | `db/migrations` | Plain `.sql` files | Schema; applied by a tiny migration script (no ORM) |
 | `examples/` | JSON + Markdown | Real inputs and real outputs (required by organizers) |
+
+Who owns which folder: `docs/team/README.md`.
 
 **Hosting:** Postgres + API + worker + web deployed together (e.g. Railway) so the GitHub Action can reach the
 API over HTTPS. The LLM stays on the laptop behind `llm.kumarnitesh.in`. Everything also runs locally via
@@ -540,7 +545,7 @@ CREATE TABLE pr_checks (
 | `GET  /api/decisions?q=&status=&topic=&verified=` | Full-text search |
 | `GET  /api/decisions/:id` | Card: reasons, evidence, anchors, people |
 | `GET  /api/decisions/:id/llm-calls` | Audit trail |
-| `GET  /api/decisions/:id/madr` · `GET /api/topics/:slug/madr.zip` | MADR export |
+| `GET  /api/pr-checks` | Log of PR bot checks |
 | `POST /api/eval/:slug` · `GET /api/eval` | Run / list eval scorecards |
 | `POST /api/pr-check` | Bearer-token protected; returns `{decisions, similarRejected, commentMarkdown}` |
 | `GET  /api/health` | Includes LLM reachability (for the demo) |
@@ -651,15 +656,15 @@ Summary of the rules that drive our workflow. Full consolidated rules: Appendix 
 
 ## 12. Team split (4 people) and timeline
 
-**Team Sipmap:** Mudit Agrawal, Nitesh Kumar, Abhijeet Raj Singh, Ansh Gupta. Roles A–D below are to be
-assigned by the team.
+**Team Sipmap.** Each person's detailed task list is in `docs/team/<name>.md`; the ownership map, contract
+rules and integration checkpoints are in `docs/team/README.md`.
 
-| Person | Owns |
-|---|---|
-| **A — Data & API** | Repo setup, migrations, Express API, job table + worker loop, ingest (Discourse, GitHub, upload), deployment |
-| **B — LLM pipeline** | LLM client (record/replay, cache), prompts + JSON schemas, cleaner/scorer, triage/extract/verify/consolidate, eval scorecard |
-| **C — Code & GitHub** | CPython blobless clone, reference parser, code linker + rename relocation, PR matcher, GitHub Action, demo fork + demo PRs |
-| **D — Frontend & pitch** | Next.js dashboard (all pages), MADR export UI, `examples/` README, slides, demo script, blog (optional) |
+| Person | Part | Owns |
+|---|---|---|
+| **Mudit** | Data, API and worker | Ingest (Discourse, GitHub, upload) + thread fixtures, migrations, raw-SQL data access, job worker, Express API, deployment |
+| **Abhijeet** | LLM pipeline and eval | LLM client (record/replay, cache), cleaner/scorer, triage/extract/verify/consolidate, PEP parser + eval scorecard, `examples/pep-*` |
+| **Ansh** | Code linking and PR bot | Reference parser, CPython blobless clone, code linker + rename relocation, PR matcher + comment, GitHub Action, demo fork + demo PRs |
+| **Nitesh** | Frontend and pitch | Next.js dashboard (all pages), MADR export, `examples/README.md`, slides, demo script, blog (optional) |
 
 | Time | Milestone |
 |---|---|
