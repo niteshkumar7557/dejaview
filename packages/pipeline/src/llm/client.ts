@@ -31,11 +31,66 @@ export interface CallLlmOptions<T> {
   deps: LlmClientDependencies;
 }
 
-const ollamaResponseSchema = z.object({
-  message: z.object({
-    content: z.string(),
-  }),
+const ollamaChunkSchema = z.object({
+  message: z.object({ content: z.string() }).optional(),
+  error: z.string().optional(),
+  prompt_eval_count: z.number().optional(),
+  done_reason: z.string().optional(),
 });
+
+/**
+ * Joins Ollama's answer. We ask for a streamed answer (one JSON object per line, each with a piece of
+ * the message) because the team laptop sits behind a Cloudflare tunnel that drops any request that sends
+ * nothing back for 100 seconds (HTTP 524), and the 9B takes longer than that to write a full answer.
+ * Streaming keeps bytes flowing. A single non-streamed JSON object is accepted too.
+ */
+export function joinOllamaStream(raw: string): string {
+  return readOllamaStream(raw).content;
+}
+
+export interface OllamaStreamResult {
+  content: string;
+  /** Tokens Ollama actually read from the prompt (from the last line), when it says. */
+  promptTokens: number | null;
+  /** "stop" normally; "length" means the answer was cut off at the token limit. */
+  doneReason: string | null;
+}
+
+export function readOllamaStream(raw: string): OllamaStreamResult {
+  let content = "";
+  let promptTokens: number | null = null;
+  let doneReason: string | null = null;
+  for (const line of raw.split("\n")) {
+    if (!line.trim()) continue;
+    const chunk = ollamaChunkSchema.parse(JSON.parse(line));
+    if (chunk.error) throw new Error(`Ollama error: ${chunk.error}`);
+    content += chunk.message?.content ?? "";
+    if (typeof chunk.prompt_eval_count === "number") promptTokens = chunk.prompt_eval_count;
+    if (typeof chunk.done_reason === "string") doneReason = chunk.done_reason;
+  }
+  return { content, promptTokens, doneReason };
+}
+
+export const NUM_CTX = 8192;
+
+/**
+ * The longest answer we let the model write. A small model at temperature 0 can get stuck repeating
+ * itself; without a cap one call ran past 15 minutes on the laptop. A full extraction answer is about
+ * 1,000 tokens, so 2,500 leaves room. A capped answer is cut JSON, so it fails loudly.
+ */
+export const NUM_PREDICT = 2500;
+
+/**
+ * Ollama silently drops the START of a prompt longer than num_ctx (where our instructions are), and
+ * cuts an answer that runs out of room. Neither raises an error, so we say it out loud.
+ */
+export function contextWarning(result: OllamaStreamResult, stage: string): string | null {
+  if (result.doneReason === "length") return `LLM ${stage}: the answer was cut off at the context limit`;
+  if (result.promptTokens !== null && result.promptTokens >= NUM_CTX * 0.95) {
+    return `LLM ${stage}: prompt used ${result.promptTokens} of ${NUM_CTX} tokens; its start may have been dropped`;
+  }
+  return null;
+}
 
 const defaultFixtureDir = fileURLToPath(
   new URL("../../../../fixtures/llm/", import.meta.url),
@@ -149,6 +204,19 @@ async function readFixture(
   return validated as LlmCallRecord;
 }
 
+async function readFixtureIfPresent(
+  hash: string,
+  fixtureDir: string,
+  expected: { model: string; stage: LlmStage; prompt: string },
+): Promise<LlmCallRecord | null> {
+  try {
+    return await readFixture(hash, fixtureDir, expected);
+  } catch {
+    // Missing, unreadable or for a different prompt: ask the model instead.
+    return null;
+  }
+}
+
 async function writeFixture(
   record: LlmCallRecord,
   fixtureDir: string,
@@ -218,6 +286,15 @@ export async function callLlm<T>(
     return result;
   }
 
+  // A recorded answer for this exact prompt (fixtures/llm, committed from a real run) is as good as a
+  // fresh one: same model, same prompt, temperature 0. Reusing it means the worker re-processing a
+  // thread we already ran doesn't make the laptop redo many minutes of work.
+  const recorded = await readFixtureIfPresent(hash, fixtureDir, { model, stage, prompt });
+  if (recorded !== null) {
+    await deps.llmStore.save(recorded);
+    return responseSchema.parse(recorded.response);
+  }
+
   const baseUrl =
     deps.baseUrl ?? process.env.LLM_BASE_URL ?? "http://localhost:11434";
 
@@ -272,9 +349,10 @@ export async function callLlm<T>(
             think: false,
             options: {
               temperature: 0,
-              num_ctx: 8192,
+              num_ctx: NUM_CTX,
+              num_predict: NUM_PREDICT,
             },
-            stream: false,
+            stream: true,
           }),
           signal: AbortSignal.timeout(timeoutMs),
         },
@@ -286,12 +364,10 @@ export async function callLlm<T>(
         );
       }
 
-      const rawResponse: unknown = await response.json();
-      const envelope = ollamaResponseSchema.parse(rawResponse);
-      const result = parseModelOutput(
-        envelope.message.content,
-        responseSchema,
-      );
+      const stream = readOllamaStream(await response.text());
+      const warning = contextWarning(stream, stage);
+      if (warning) console.warn(warning);
+      const result = parseModelOutput(stream.content, responseSchema);
 
       successfulRecord = {
         promptHash: hash,

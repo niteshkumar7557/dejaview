@@ -7,6 +7,9 @@ import type { LlmCallRecord, LlmCallStore } from "@dejaview/shared";
 import {
   callLlm,
   createPromptHash,
+  contextWarning,
+  joinOllamaStream,
+  readOllamaStream,
   type LlmClientDependencies,
 } from "../../src/llm/client.js";
 
@@ -70,6 +73,31 @@ function options(deps: LlmClientDependencies) {
   };
 }
 
+describe("joinOllamaStream", () => {
+  it("joins a streamed answer, one JSON object per line", () => {
+    const raw = ['{"message":{"content":"{\\"a\\":"}}', '{"message":{"content":"1}"}}', '{"done":true}', ""].join("\n");
+    expect(joinOllamaStream(raw)).toBe('{"a":1}');
+  });
+  it("accepts a single non-streamed object", () => {
+    expect(joinOllamaStream('{"message":{"content":"ok"}}')).toBe("ok");
+  });
+  it("surfaces an error line from Ollama", () => {
+    expect(() => joinOllamaStream('{"error":"model not found"}')).toThrow("Ollama error: model not found");
+  });
+});
+
+describe("contextWarning", () => {
+  it("reads the prompt token count and stop reason from the last streamed line", () => {
+    const raw = '{"message":{"content":"x"}}\n{"done":true,"done_reason":"stop","prompt_eval_count":812}';
+    expect(readOllamaStream(raw)).toEqual({ content: "x", promptTokens: 812, doneReason: "stop" });
+  });
+  it("warns when the answer was cut off or the prompt filled the window, and stays quiet otherwise", () => {
+    expect(contextWarning({ content: "", promptTokens: 100, doneReason: "length" }, "extract")).toMatch(/cut off/);
+    expect(contextWarning({ content: "", promptTokens: 8000, doneReason: "stop" }, "extract")).toMatch(/8000 of 8192/);
+    expect(contextWarning({ content: "", promptTokens: 3000, doneReason: "stop" }, "extract")).toBeNull();
+  });
+});
+
 describe("createPromptHash", () => {
   it("is deterministic and changes when model, schema, or prompt changes", () => {
     const hash = createPromptHash(model, jsonSchema, prompt);
@@ -124,8 +152,8 @@ describe("callLlm", () => {
     expect(body.messages).toEqual([{ role: "user", content: prompt }]);
     expect(body.format).toEqual(jsonSchema);
     expect(body.think).toBe(false);
-    expect(body.options).toEqual({ temperature: 0, num_ctx: 8192 });
-    expect(body.stream).toBe(false);
+    expect(body.options).toEqual({ temperature: 0, num_ctx: 8192, num_predict: 2500 });
+    expect(body.stream).toBe(true);
 
     expect(store.save).toHaveBeenCalledTimes(1);
     expect(getSaved()).toMatchObject({
@@ -377,4 +405,30 @@ describe("callLlm", () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
+});
+
+describe("callLlm reusing a recorded answer in live mode", () => {
+  it("answers from fixtures/llm without calling the model, and saves it to the store", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "dejaview-fixture-"));
+    try {
+      const schema = { type: "object" };
+      const hash = createPromptHash("m", schema, "p");
+      const record = { promptHash: hash, model: "m", stage: "extract", prompt: "p", response: { ok: true }, durationMs: 5 };
+      const { writeFile } = await import("node:fs/promises");
+      await writeFile(join(dir, `${hash}.json`), JSON.stringify(record));
+      const saved: unknown[] = [];
+      const result = await callLlm({
+        model: "m", stage: "extract", prompt: "p", jsonSchema: schema, responseSchema: z.object({ ok: z.boolean() }),
+        deps: {
+          mode: "live", fixtureDir: dir, apiToken: "t",
+          llmStore: { get: async () => null, save: async (r) => { saved.push(r); } },
+          fetchImpl: (async () => { throw new Error("must not call the model"); }) as unknown as typeof fetch,
+        },
+      });
+      expect(result).toEqual({ ok: true });
+      expect(saved).toHaveLength(1);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
 });

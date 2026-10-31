@@ -33,32 +33,32 @@ evaluatePep(pepNumber: number, result: ExtractionResult, deps: { llmStore: LlmCa
 
 ## Tasks (in order)
 
-- [ ] **1. LLM client.** Ollama `POST {LLM_BASE_URL}/api/chat` with `Authorization: Bearer $LLM_API_TOKEN`,
+- [x] **1. LLM client.** Ollama `POST {LLM_BASE_URL}/api/chat` with `Authorization: Bearer $LLM_API_TOKEN`,
   `format: <JSON schema>`, `think: false`, `options: { temperature: 0, num_ctx: 8192 }`, `stream: false`.
   Validate every response with zod; 2 retries with backoff; timeout. `promptHash = sha256(model + schema + prompt)`.
   Modes via `LLM_MODE`: `live` (call + save to `LlmCallStore`), `record` (also write
   `fixtures/llm/<hash>.json`), `replay` (read fixtures only, fail loudly if missing; **CI uses this**).
   Models from env: `TRIAGE_MODEL=qwen3.5:4b`, `EXTRACT_MODEL=qwen3.5:9b`.
-- [ ] **2. Stage 1: clean + signal score** (no LLM). Strip Discourse `<aside class="quote">` blocks and
+- [x] **2. Stage 1: clean + signal score** (no LLM). Strip Discourse `<aside class="quote">` blocks and
   GitHub `> ` lines, HTML → text, drop "+1"/thanks/emoji-only/duplicate posts, score decision phrases,
   author role (first post's author = PEP author; small hard-coded Steering Council / core dev list), likes,
   replies, position. Many unit tests.
-- [ ] **3. Stage 4: quote verifier** (no LLM, can start before fixtures). Normalize, exact substring → 1.0,
+- [x] **3. Stage 4: quote verifier** (no LLM, can start before fixtures). Normalize, exact substring → 1.0,
   else sliding-window token similarity; ≥ 0.85 verified; else search other posts in the chunk and re-attach;
   else unverified. Tests: exact, fuzzy, wrong post, invented quote.
-- [ ] **4. Stage 2: triage with `qwen3.5:4b`.** Label each kept post with a `TriageLabel` (batch short posts).
-- [ ] **5. Stage 3: extract with `qwen3.5:9b`.** Chunk relevant posts to ≤ ~5k tokens with 2-post overlap;
+- [x] **4. Stage 2: triage with `qwen3.5:4b`.** Label each kept post with a `TriageLabel` (batch short posts).
+- [x] **5. Stage 3: extract with `qwen3.5:9b`.** Chunk relevant posts to ≤ ~5k tokens with 2-post overlap;
   JSON schema from `design.md` §5.2; every reason needs a verbatim quote ≤ 40 words.
-- [ ] **6. Stage 5: consolidate with `qwen3.5:9b`.** Merge duplicate ideas across chunks, union evidence,
+- [x] **6. Stage 5: consolidate with `qwen3.5:9b`.** Merge duplicate ideas across chunks, union evidence,
   latest decision-labeled evidence wins the status. Give each decision a `key` ("d1", "d2", …).
-- [ ] **7. CLI + first real run.** `npm run extract -w @dejaview/pipeline -- fixtures/threads/pep-698.json
+- [x] **7. CLI + first real run.** (PEP 698 done; PEP 701 and 695 long runs in progress) `npm run extract -w @dejaview/pipeline -- fixtures/threads/pep-698.json
   --out examples/pep-698/output/decisions.json` (copy the input to `examples/pep-698/input/thread.json`).
   **Start the long runs on the other PEPs as early as possible (by 2 AM)**; the laptop is slow.
-- [ ] **8. Eval** (`design.md` §5.6). Only after extraction: fetch `peps/pep-NNNN.rst` from the `python/peps`
+- [x] **8. Eval** (`design.md` §5.6). Only after extraction: fetch `peps/pep-NNNN.rst` from the `python/peps`
   repo, parse "Rejected Ideas" / "Rejected Alternatives" / "Alternatives" subsections into
   `GroundTruthItem[]`, shortlist candidates by word overlap, judge with `qwen3.5:9b`, compute recall,
   reason agreement and extra ideas. CLI writes `examples/pep-NNN/output/eval.json`.
-- [ ] **9. Replay integration test.** Record one full run with `LLM_MODE=record`, commit the fixtures, and add
+- [x] **9. Replay integration test.** Record one full run with `LLM_MODE=record`, commit the fixtures, and add
   a test that replays it and checks decisions/statuses/verified counts.
 
 ## Rules that matter for scoring
@@ -77,3 +77,10 @@ cleaner, scorer, verifier, PEP parser, chunker; replay integration test green in
 
 The funnel and why (speed on a 4 GB GPU), why two model sizes, how quotes are verified (our answer to
 hallucination), how accepted vs rejected is decided, the eval method and its numbers.
+
+## Handover (1 Nov, ~01:10 IST)
+
+Abhijeet ran out of agent time, so Nitesh's agent (Claude Code) took over this part with the team's OK
+and built the whole pipeline on branch `nitesh/pipeline`: every stage in `packages/pipeline/src/`, the
+evaluation in `src/eval/`, the `extract` CLI, unit tests, and a replay test on the real PEP 698 thread with
+recorded fixtures in `fixtures/llm/`. How it works, file by file: `docs/PLATFORM.md` sections 5.2, 5.6, 7.
