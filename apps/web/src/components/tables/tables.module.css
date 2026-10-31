@@ -1,0 +1,36 @@
+.table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.table th {
+  height: 36px; padding: 0 12px; text-align: left; vertical-align: bottom; padding-bottom: 8px;
+  font-size: var(--fs-small); font-weight: 400; color: var(--muted); white-space: nowrap;
+}
+.table td { padding: 12px; border-top: 1px solid var(--rule); vertical-align: top; }
+.table th:first-child, .table td:first-child { padding-left: 0; }
+.table th:last-child, .table td:last-child { padding-right: 0; }
+.table .num { text-align: right; white-space: nowrap; }
+.table tbody tr { transition: background-color 120ms ease; }
+.table tbody tr:hover { background: var(--raised); }
+.stackNum { display: inline-flex; flex-direction: column; align-items: flex-end; }
+.identity { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.identity a.title, .title { color: var(--text); font-weight: 500; }
+.identity a.title:hover { text-decoration: underline; text-underline-offset: 3px; }
+.sub { font-size: var(--fs-small); color: var(--muted); }
+.statusCell { width: 1%; white-space: nowrap; }
+.muted { color: var(--muted); }
+.dash { color: var(--muted); }
+
+/* Compact list rows (latest PR checks) */
+.list { display: flex; flex-direction: column; }
+.listRow { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 12px; padding: 12px 0; border-top: 1px solid var(--rule); }
+.listRow:first-child { border-top: 0; padding-top: 4px; }
+.listTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.listMeta { grid-column: 2; font-size: var(--fs-small); color: var(--muted); }
+
+@media (max-width: 640px) {
+  .table thead { display: none; }
+  .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table tr { padding: 12px 0; border-top: 1px solid var(--rule); }
+  .table td { border: 0; padding: 2px 0; }
+  .table td[data-label] { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; text-align: right; }
+  .table td[data-label]::before { content: attr(data-label); color: var(--muted); font-size: var(--fs-small); text-align: left; }
+  .stackNum { flex-direction: row; align-items: baseline; gap: 6px; }
+}

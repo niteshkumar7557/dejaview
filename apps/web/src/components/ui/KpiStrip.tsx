@@ -1,10 +1,5 @@
+import type { Kpi } from "@/lib/kpi";
 import styles from "./ui.module.css";
-
-export interface Kpi {
-  label: string;
-  value: string;
-  sub?: string;
-}
 
 export function KpiStrip({ items }: { items: Kpi[] }) {
   return (
