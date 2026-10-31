@@ -58,3 +58,27 @@ ingesting PEP 698 through `POST /api/ingest`, then:
 ```sh
 curl -s -X POST localhost:3001/api/pr-check -H 'content-type: application/json' --data @examples/pr-check/input/pr.json
 ```
+
+## `pr-check-functools/`: a rejected idea proposed again, caught by the bot
+
+The end-to-end story on a real CPython issue. [python/cpython#101016](https://github.com/python/cpython/issues/101016)
+(13 posts) asked for `@functools.cache(key=...)` so functions with unhashable arguments (NumPy arrays)
+could be cached; Raymond Hettinger declined it for five stated reasons (keep the API simple, mappings
+don't auto-support mutable keys, an "attractive nuisance" that is slower for most users, a key function
+must repeat the signature, key functions take one argument).
+
+1. The issue was ingested through `POST /api/ingest` (`{"url": "https://github.com/python/cpython/issues/101016", "topicSlug": "gh-101016"}`)
+   with the worker in `LLM_MODE=live`: 3 min 35 s on the team laptop, 7 decisions (6 rejected, 1 open),
+   11 of 11 quotes verified, decisions linked to `Lib/functools.py` through `functools.cache`.
+2. A new PR that proposes the same idea in other words (`input/pr.json`: "Add a key function parameter to
+   functools.lru_cache and cache", changing `Lib/functools.py`) was sent to the PR check:
+
+```sh
+curl -s -X POST localhost:3001/api/pr-check -H 'content-type: application/json' --data @examples/pr-check-functools/input/pr.json
+```
+
+| File | What it is |
+|---|---|
+| `input/pr.json` | The `PrCheckRequest` for the new PR |
+| `output/response.json` | The API's real answer: five previously rejected ideas from #101016, best match first, and nothing from unrelated threads |
+| `output/comment.md` | The comment the bot posts, with each reason and a link to its decision card |
