@@ -528,7 +528,7 @@ export const prChecks: PrCheckView[] = [
     decisionIds: [1, 3],
     similarRejectedIds: [],
     commentMarkdown:
-      "<!-- dejaview -->\n### DejaView check: 2 past decisions touch this code\n\n**PEP 698 · Accepted: Add an @override decorator to typing**\n\nWhy: it costs nothing at runtime beyond setting one attribute.\n\n> \"the only runtime effect is setting __override__ = True on the function\" (lukas_w, verified)\n\n**PEP 698 · Rejected: Enforce @override at runtime**\n\nWhy: walking the MRO for every decorated method slows down class creation.\n\n> \"walking the MRO for every decorated method would slow down class creation for everyone\" (sato_k, verified)\n\nLinked via `Lib/typing.py` (`override`).\n\n[View decisions](/decisions?topic=pep-698)",
+      "<!-- dejaview -->\n### DejaView check: 2 past decisions touch this code\n\n**PEP 698 · Accepted: Add an @override decorator to typing**\n\nWhy: it costs nothing at runtime beyond setting one attribute.\n\n> \"the only runtime effect is setting `__override__ = True` on the function\" (lukas_w, verified)\n\n**PEP 698 · Rejected: Enforce @override at runtime**\n\nWhy: walking the MRO for every decorated method slows down class creation.\n\n> \"walking the MRO for every decorated method would slow down class creation for everyone\" (sato_k, verified)\n\nLinked via `Lib/typing.py` (`override`).\n\n[View decisions](/decisions?topic=pep-698)",
     createdAt: "2026-10-31T23:22:00Z",
   },
 ];
