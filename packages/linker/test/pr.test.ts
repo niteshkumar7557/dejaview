@@ -137,6 +137,25 @@ describe("renderPrComment", () => {
     expect(renderPrComment([accepted], [rejected], dashboard)).toMatchSnapshot();
   });
 
+  it("renders matched rejected decisions when full-text search is empty and deduplicates IDs", () => {
+    const accepted = summary({ id: 10, title: "Use typing.override" });
+    const rejected = summary({
+      id: 11,
+      status: "rejected",
+      title: "Rework typing.override as a decorator factory",
+      reasons: ["The factory would add unnecessary complexity."],
+    });
+    const comment = renderPrComment([accepted, rejected, rejected], [], dashboard);
+
+    expect(comment).toContain("**📜 DejaView check — 2 past decisions touch this code or proposal**");
+    expect(comment).toContain("### Previously rejected similar proposals");
+    expect(comment).toContain("Rework typing\\.override as a decorator factory");
+    expect(comment).not.toContain("No similar previously rejected proposals were found.");
+    expect(comment.match(/Rework typing\\\.override as a decorator factory/g)).toHaveLength(1);
+    expect(comment).toContain("ACCEPTED: Use typing\\.override");
+    expect(comment).toMatchSnapshot();
+  });
+
   it("handles a missing dashboard URL, emits the marker once, and stays deterministic", () => {
     const first = renderPrComment([summary()], [], "");
     const second = renderPrComment([summary()], [], "");
