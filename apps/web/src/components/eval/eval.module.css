@@ -34,3 +34,9 @@
   .table tr { border-top: 1px solid var(--rule); padding: 10px 0; }
   .table td { border: 0; padding: 2px 0; text-align: left !important; }
 }
+.runEval { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px 12px; min-width: 0; }
+.select { height: 40px; max-width: 280px; min-width: 0; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); }
+.select:focus { border-color: var(--control); outline: 2px solid var(--accent); outline-offset: 1px; }
+.runEval [role="status"]:empty { display: none; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.runEval .no { color: var(--negative); }

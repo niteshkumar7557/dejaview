@@ -3,9 +3,10 @@ import Link from "next/link";
 import { agreementText, resolveMatch } from "@/lib/eval";
 import styles from "./eval.module.css";
 
-export function GroundTruthTable({ run, decisions }: {
+export function GroundTruthTable({ run, decisions, keysAreIds }: {
   run: EvalRunView;
   decisions: { id: number; title: string; topic: { slug: string } }[];
+  keysAreIds: boolean;
 }) {
   return (
     <table className={styles.table}>
@@ -18,7 +19,7 @@ export function GroundTruthTable({ run, decisions }: {
       </thead>
       <tbody>
         {run.matches.map((m) => {
-          const found = resolveMatch(m.decisionKey, run.topic.slug, decisions);
+          const found = resolveMatch(m, run.topic.slug, decisions, keysAreIds);
           return (
             <tr key={m.groundTruth.title}>
               <td>

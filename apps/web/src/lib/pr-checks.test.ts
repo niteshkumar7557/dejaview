@@ -1,6 +1,6 @@
 import type { PrCheckView } from "@dejaview/shared";
 import { describe, expect, it } from "vitest";
-import { commentBody, prCheckResult, selectCheck } from "./pr-checks";
+import { commentBody, prCheckResult, prTitle, selectCheck } from "./pr-checks";
 
 const check = (decisionIds: number[], similarRejectedIds: number[]): PrCheckView => ({
   id: 1, request: { repo: "r", prNumber: 1, title: "t" }, decisionIds, similarRejectedIds, commentMarkdown: "", createdAt: "",
@@ -28,5 +28,12 @@ describe("selectCheck", () => {
 describe("commentBody", () => {
   it("removes the bot's hidden marker", () => {
     expect(commentBody("<!-- dejaview -->\n### Title")).toBe("### Title");
+  });
+});
+
+describe("prTitle", () => {
+  it("uses the PR's title", () => expect(prTitle(check([], []))).toBe("t"));
+  it("falls back to repo#number when the API sends no title", () => {
+    expect(prTitle({ request: { repo: "python/cpython", prNumber: 42, title: "" } })).toBe("python/cpython#42");
   });
 });

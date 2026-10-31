@@ -32,4 +32,8 @@ export interface DataSource {
   listPrChecks(): Promise<PrCheckView[]>;
   getJob(id: number): Promise<JobView | null>;
   startIngest(request: IngestRequest): Promise<IngestResponse>;
+  /** Multipart ingest: a `file` field plus `topicSlug`, and optionally `topicTitle` and `pepNumber`. */
+  startIngestUpload(form: FormData): Promise<IngestResponse>;
+  /** Queues an evaluation of one topic against its PEP's Rejected Ideas. */
+  startEval(slug: string): Promise<IngestResponse>;
 }

@@ -11,6 +11,6 @@ export function getSource(): DataSource {
   if (cached) return cached;
   cached = usingMocks
     ? createMockSource()
-    : createHttpSource(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000");
+    : createHttpSource(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001");
   return cached;
 }
