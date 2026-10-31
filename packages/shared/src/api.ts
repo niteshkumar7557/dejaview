@@ -141,8 +141,9 @@ export interface JobView {
   /**
    * The job this one started, if any. The worker puts the parent's id in the child's payload, so
    * the web can follow ingest -> extract -> link without guessing.
+   * Optional, so the mocks and anything else that builds a JobView keep working.
    */
-  nextJobId: number | null;
+  nextJobId?: number | null;
   createdAt: string;
   updatedAt: string;
 }

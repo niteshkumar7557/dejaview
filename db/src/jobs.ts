@@ -60,7 +60,7 @@ export class JobsRepository {
         WHERE id = (
           SELECT id
             FROM jobs
-           WHERE status = 'queued'
+           WHERE (status = 'queued' AND (locked_until IS NULL OR locked_until < now()))
               OR (status = 'running' AND locked_until IS NOT NULL AND locked_until < now())
            ORDER BY id
            LIMIT 1
@@ -97,6 +97,22 @@ export class JobsRepository {
           SET status = 'done', stage = $3, progress = 1, locked_until = NULL, updated_at = now()
         WHERE id = $1 AND attempt = $2`,
       [id, attempt, stage],
+    );
+  }
+
+  /**
+   * Puts a job back in the queue because it cannot be done yet, and says why.
+   * The lease in locked_until keeps it from being claimed again straight away.
+   */
+  async requeue(id: number, attempt: number, error: string, retryAfterSeconds: number): Promise<void> {
+    await this.pool.query(
+      `UPDATE jobs
+          SET status = 'queued',
+              error = $3,
+              locked_until = now() + make_interval(secs => $4::double precision),
+              updated_at = now()
+        WHERE id = $1 AND attempt = $2`,
+      [id, attempt, error, retryAfterSeconds],
     );
   }
 

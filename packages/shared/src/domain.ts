@@ -137,8 +137,9 @@ export interface EvalMatch {
   /**
    * The database id of the matching decision, so the scorecard can link to the card itself.
    * The key is what the pipeline knows ("d1"); this is what a reader can click.
+   * Optional, so existing EvalMatch values keep typechecking.
    */
-  decisionId: number | null;
+  decisionId?: number | null;
   reasonAgreement: ReasonAgreement | null;
 }
 
