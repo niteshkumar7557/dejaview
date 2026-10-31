@@ -1,0 +1,12 @@
+.rail { display: flex; flex-direction: column; gap: 28px; position: sticky; top: 16px; align-self: start; }
+.heading { font-size: var(--fs-section); font-weight: 600; margin-bottom: 12px; }
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bars li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
+.barLabel { color: var(--muted); }
+.barValue { text-align: right; }
+.track { grid-column: 1 / -1; height: 2px; }
+.fill { display: block; height: 2px; background: var(--muted); }
+.decisions { display: flex; flex-direction: column; }
+.decisions li { display: grid; grid-template-columns: 84px minmax(0, 1fr); align-items: start; gap: 10px; padding: 10px 0; border-top: 1px solid var(--rule); }
+.decisions li:first-child { border-top: 0; padding-top: 0; }
+.decisions a:hover { text-decoration: underline; text-underline-offset: 3px; }
