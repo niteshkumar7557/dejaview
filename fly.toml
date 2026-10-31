@@ -19,10 +19,22 @@ primary_region = "iad"
 [build]
   dockerfile = "Dockerfile"
 
+  # The dashboard is Next.js, and Next inlines the public variables when it builds. So the
+  # API URL has to be known here. NEXT_PUBLIC_USE_MOCKS=0 makes the dashboard read the API
+  # instead of its own sample data.
+  [build.args]
+    BUILD_WEB = "1"
+    NEXT_PUBLIC_API_URL = "https://dejaview.fly.dev"
+    NEXT_PUBLIC_USE_MOCKS = "0"
+
 [env]
   PORT = "3001"
   NODE_ENV = "production"
   LLM_MODE = "live"
+  # The model lives on the team laptop, behind this tunnel. No /v1 at the end.
+  LLM_BASE_URL = "https://llm.kumarnitesh.in"
+  # Where the dashboard lives, so the PR comment can link to a decision.
+  DASHBOARD_URL = "https://dejaview.fly.dev"
 
 # ── The API ───────────────────────────────────────────────────────────────────────────────────
 [http_service]
@@ -81,3 +93,8 @@ primary_region = "iad"
 
   [processes.web]
     NODE_ENV = "production"
+    NEXT_PUBLIC_USE_MOCKS = "0"
+
+  [processes.worker]
+    # The blobless CPython clone the linker resolves paths and symbols against.
+    CPYTHON_DIR = "/data/cpython"

@@ -83,6 +83,10 @@ const fakeLinker: LinkerAdapter = {
       },
     ];
   },
+  /** Pretends the file was renamed and the history found it. */
+  async relocateAnchor(anchor: CodeAnchor): Promise<CodeAnchor> {
+    return { ...anchor, currentPath: "Lib/new_parser.py", relocatedBy: "git-follow" };
+  },
 };
 
 describe.skipIf(!databaseUrl)("the worker (needs DATABASE_URL)", () => {
@@ -108,6 +112,13 @@ describe.skipIf(!databaseUrl)("the worker (needs DATABASE_URL)", () => {
       pipeline: { adapter: fakePipeline, problem: "ok", reason: "loaded" },
       linker: { adapter: fakeLinker, problem: "ok", reason: "loaded" },
       cpythonDir: "",
+      cpython: Promise.resolve({
+        ok: true,
+        path: "/tmp/dejaview-test-cpython",
+        cloned: false,
+        directory: "/tmp/dejaview-test-cpython",
+        error: null,
+      }),
       githubToken: undefined,
       report: async () => {
         // The progress reporting is exercised by the API tests.
@@ -232,6 +243,32 @@ describe.skipIf(!databaseUrl)("the worker (needs DATABASE_URL)", () => {
     expect(anchors.rows).toHaveLength(1);
     expect(anchors.rows[0]?.original_path).toBe("Lib/parser.py");
     expect(anchors.rows[0]?.link_method).toBe("path_mention");
+  });
+
+  it("relocates every anchor before it is stored, so a renamed file still links", async () => {
+    await drainQueue();
+    await context.pool.query("DELETE FROM code_anchors");
+    const sourceId = await sourceIdOf(SLUG);
+    const job = await context.jobs.enqueue("link", {
+      topicId: await topicIdOf(SLUG),
+      sourceId,
+      topicSlug: SLUG,
+    });
+    const claimed = await context.jobs.claimNext();
+    expect(claimed?.id).toBe(job.id);
+
+    await handleLink(claimed as JobRow, context);
+
+    const anchors = await context.pool.query<{
+      original_path: string;
+      current_path: string | null;
+      relocated_by: string | null;
+    }>("SELECT original_path, current_path, relocated_by FROM code_anchors");
+    expect(anchors.rows).toHaveLength(1);
+    // The original path is kept, the current one is filled in, and how it was found is recorded.
+    expect(anchors.rows[0]?.original_path).toBe("Lib/parser.py");
+    expect(anchors.rows[0]?.current_path).toBe("Lib/new_parser.py");
+    expect(anchors.rows[0]?.relocated_by).toBe("git-follow");
   });
 
   it("says clearly when the pipeline package is not there yet", async () => {

@@ -20,9 +20,10 @@ import {
   parseGithubUrl,
   threadFromUpload,
 } from "@dejaview/ingest";
-import type { Thread } from "@dejaview/shared";
+import type { CodeAnchor, Thread } from "@dejaview/shared";
 import type { Pool } from "pg";
 import type { LinkerAdapter, Loaded, PipelineAdapter } from "./adapters.js";
+import type { CpythonRepository } from "./cpython.js";
 
 /**
  * Thrown when a job cannot be done yet because another package is not there.
@@ -48,6 +49,11 @@ export interface WorkerContext {
   linker: Loaded<LinkerAdapter>;
   /** Where the CPython clone lives, for the linker. */
   cpythonDir: string;
+  /**
+   * Ready when the CPython clone is there. The worker starts it in the background so the
+   * fast jobs are not held up, and the link job waits for it.
+   */
+  cpython: Promise<CpythonRepository>;
   githubToken: string | undefined;
   /** Reports the progress of a job so the dashboard can show it. */
   report: (job: JobRow, stage: string, done: number, total: number) => Promise<void>;
@@ -170,6 +176,8 @@ export async function handleLink(job: JobRow, context: WorkerContext): Promise<v
   if (!extraction) throw new Error(`Topic ${topicId} has no decisions to link`);
 
   const postIds = await postIdsByThreadPostId(context, sourceId);
+  const cpython = await context.cpython;
+  const repoDir = cpython.path ?? cpython.directory;
 
   for (const decision of extraction.result.decisions) {
     await context.report(job, "linking", 0, extraction.result.decisions.length);
@@ -179,12 +187,19 @@ export async function handleLink(job: JobRow, context: WorkerContext): Promise<v
       decision,
       thread.posts,
       {
-        repoDir: context.cpythonDir,
+        repoDir,
         repo: "python/cpython",
         githubToken: context.githubToken,
       },
     );
-    await context.decisions.saveAnchors(decisionId, anchors, postIds);
+
+    // A file can have moved since the decision was made. Relocating each anchor fills in
+    // current_path and says how it was found, so the link still works after a rename.
+    const located: CodeAnchor[] = [];
+    for (const anchor of anchors) {
+      located.push(await context.linker.adapter.relocateAnchor(anchor, repoDir));
+    }
+    await context.decisions.saveAnchors(decisionId, located, postIds);
   }
 }
 

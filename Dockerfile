@@ -20,12 +20,16 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++
 
 # The manifests first, so a change to the source does not reinstall the dependencies.
+# Every workspace needs its package.json here: npm cannot resolve a workspace whose
+# manifest is missing, and the install would silently leave out its dependencies.
 COPY package.json package-lock.json ./
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
 COPY apps/worker/package.json ./apps/worker/
 COPY db/package.json ./db/
 COPY packages/ingest/package.json ./packages/ingest/
+COPY packages/linker/package.json ./packages/linker/
+COPY packages/pipeline/package.json ./packages/pipeline/
 COPY packages/shared/package.json ./packages/shared/
 
 RUN npm ci
@@ -40,7 +44,10 @@ RUN npm run typecheck
 #   docker build --build-arg BUILD_WEB=1 --build-arg NEXT_PUBLIC_API_URL=https://... .
 ARG BUILD_WEB=0
 ARG NEXT_PUBLIC_API_URL=http://localhost:3001
+# Without this the dashboard shows its own sample data instead of the API's.
+ARG NEXT_PUBLIC_USE_MOCKS=0
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_USE_MOCKS=$NEXT_PUBLIC_USE_MOCKS
 RUN if [ "$BUILD_WEB" = "1" ]; then npm run build -w @dejaview/web; fi
 
 ENV NODE_ENV=production

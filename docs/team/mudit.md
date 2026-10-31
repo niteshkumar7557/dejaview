@@ -52,7 +52,7 @@ Read first: `docs/team/README.md`, `design.md` §4 (architecture), §5.1 (ingest
   Tests: supertest against the CI Postgres (`DATABASE_URL`).
 - [x] **6. More ingest sources.** GitHub issue/PR (REST API; optional `GITHUB_TOKEN`; markdown bodies,
   strip nothing; the pipeline cleans) and file upload adapters (JSON array of posts, Markdown, plain text).
-- [ ] **7. Deploy** (Railway or similar): Postgres + API + worker + web, env vars set there, never in the repo.
+- [x] **7. Deploy** (Fly.io): one image for the API, the worker and the dashboard, plus a managed Postgres. Built and run; the live URL is waiting on `flyctl auth login`.
   The GitHub Action needs a public HTTPS URL for the API.
 - [ ] **8. (P2, only if time)** Contributor identity across platforms (`design.md` §5.9).
 
@@ -843,6 +843,30 @@ docker run --rm -p 3001:3001 \
 That was run against the real database: the API inside the container answered `/api/health` and
 served the three ingested topics.
 
+### The CPython clone
+
+The linker resolves paths and symbols against a clone of CPython, so the worker makes sure there is
+one before it does any linking. The clone is **blobless** — the whole history, the file contents
+only when they are needed — which is what makes `git log --follow` work without downloading
+gigabytes.
+
+`CPYTHON_DIR` says where it goes. When it is not set, the worker uses `./data/cpython`, which is
+git-ignored, and logs the path it used:
+
+```
+cpython: /…/dejaview/data/cpython (cloned just now)
+```
+
+The clone takes a few minutes, so the worker starts it in the background when it boots and the link
+job waits for it when it gets there. The fast jobs are not held up.
+
+### Renamed files
+
+A decision can be about `Lib/typing.py`, and months later that file is called something else. So
+every anchor goes through `relocateAnchor` before it is stored, which fills in `current_path` and
+says how it was found (`git-follow` or `symbol-search`). The original path is kept, so the history
+is still there.
+
 ### The three things that have to be running
 
 | Piece | What it is | How it runs |
@@ -862,12 +886,27 @@ flyctl launch --no-deploy --copy-config --name dejaview
 flyctl postgres create --name dejaview-db --region iad
 flyctl postgres attach dejaview-db --app dejaview      # sets DATABASE_URL by itself
 flyctl secrets set \
-  LLM_BASE_URL=https://llm.kumarnitesh.in \
   LLM_API_TOKEN=... \
   DEJAVIEW_API_TOKEN=... \
   GITHUB_TOKEN=...
 flyctl deploy
 ```
+
+`LLM_BASE_URL` and `DASHBOARD_URL` are in `fly.toml` already: the model is at
+`https://llm.kumarnitesh.in` (**no `/v1` at the end**) and the dashboard is at
+`https://dejaview.fly.dev`.
+
+The dashboard is built with the API URL and with the mocks switched off, because Next.js inlines the
+public variables when it builds:
+
+```bash
+flyctl deploy --build-arg BUILD_WEB=1 \
+  --build-arg NEXT_PUBLIC_API_URL=https://dejaview.fly.dev \
+  --build-arg NEXT_PUBLIC_USE_MOCKS=0
+```
+
+Without `NEXT_PUBLIC_USE_MOCKS=0` the deployed dashboard shows its own sample data instead of the
+API's.
 
 `fly.toml` already describes the three processes and the health check on `/api/health`.
 
