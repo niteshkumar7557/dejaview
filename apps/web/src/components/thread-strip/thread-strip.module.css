@@ -1,0 +1,14 @@
+.strip { margin: 0; }
+.caption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: var(--fs-small); color: var(--muted); margin-bottom: 8px; }
+.legend { display: flex; gap: 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { display: inline-block; width: 3px; height: 12px; }
+.swSkipped { background: var(--active); height: 5px !important; }
+.swRead { background: var(--muted); }
+.swEvidence { background: var(--chart-1); }
+.svg { display: block; width: 100%; overflow: visible; }
+.baseline { stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.skipped { fill: var(--active); }
+.read { fill: #a9adb1; }
+.evidence { fill: var(--chart-1); cursor: pointer; }
+a:focus-visible .evidence { outline: none; fill: var(--text); }
