@@ -1,0 +1,27 @@
+# Local Postgres for development. The CI has its own Postgres 16 service.
+#
+#   docker compose up -d
+#   npm run migrate
+#
+# The credentials here are throwaway local ones, not secrets.
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: dejaview-postgres
+    environment:
+      POSTGRES_USER: dejaview
+      POSTGRES_PASSWORD: dejaview
+      POSTGRES_DB: dejaview
+    ports:
+      - "5432:5432"
+    volumes:
+      - dejaview-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dejaview -d dejaview"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  dejaview-pgdata:

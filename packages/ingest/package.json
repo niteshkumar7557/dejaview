@@ -1,0 +1,15 @@
+{
+  "name": "@dejaview/ingest",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ingest: Discourse threads, GitHub issues/PRs and uploaded files into the DejaView Thread contract.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "fetch-thread": "tsx src/cli.ts"
+  }
+}

@@ -1,0 +1,211 @@
+[
+  {
+    "url": "https://api.github.com/repos/python/cpython/pulls/comments/100639802",
+    "pull_request_review_id": 21358527,
+    "id": 100639802,
+    "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDEwMDYzOTgwMg==",
+    "diff_hunk": "@@ -253,7 +253,7 @@ def run(self):\n             text = 'The NEWS file is not available.'\n             node = nodes.strong(text, text)\n             return [node]\n-        content = issue_re.sub(r'`\\1ssue #\\2 <https://bugs.python.org/\\2>`__',\n+        content = issue_re.sub(r'`\\bpo-\\2 <https://bugs.python.org/\\2>`__',",
+    "path": "Doc/tools/extensions/pyspecific.py",
+    "commit_id": "02a87ce98d14f4d9d6e72ade7b4146201657bb33",
+    "original_commit_id": "190074030329e6f37f58122fed3b0e7c17fe1d48",
+    "user": {
+      "login": "Carreau",
+      "id": 335567,
+      "node_id": "MDQ6VXNlcjMzNTU2Nw==",
+      "avatar_url": "https://avatars.githubusercontent.com/u/335567?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/Carreau",
+      "html_url": "https://github.com/Carreau",
+      "followers_url": "https://api.github.com/users/Carreau/followers",
+      "following_url": "https://api.github.com/users/Carreau/following{/other_user}",
+      "gists_url": "https://api.github.com/users/Carreau/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/Carreau/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/Carreau/subscriptions",
+      "organizations_url": "https://api.github.com/users/Carreau/orgs",
+      "repos_url": "https://api.github.com/users/Carreau/repos",
+      "events_url": "https://api.github.com/users/Carreau/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/Carreau/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "`\\b` ? I think you overwrote the `\\1` :-) ",
+    "created_at": "2017-02-10T22:44:39Z",
+    "updated_at": "2017-02-10T23:06:06Z",
+    "html_url": "https://github.com/python/cpython/pull/1#discussion_r100639802",
+    "pull_request_url": "https://api.github.com/repos/python/cpython/pulls/1",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/python/cpython/pulls/comments/100639802"
+      },
+      "html": {
+        "href": "https://github.com/python/cpython/pull/1#discussion_r100639802"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/python/cpython/pulls/1"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/python/cpython/pulls/comments/100639802/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": null,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 32,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/python/cpython/pulls/comments/100640038",
+    "pull_request_review_id": 21358760,
+    "id": 100640038,
+    "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDEwMDY0MDAzOA==",
+    "diff_hunk": "@@ -253,7 +253,7 @@ def run(self):\n             text = 'The NEWS file is not available.'\n             node = nodes.strong(text, text)\n             return [node]\n-        content = issue_re.sub(r'`\\1ssue #\\2 <https://bugs.python.org/\\2>`__',\n+        content = issue_re.sub(r'`\\bpo-\\2 <https://bugs.python.org/\\2>`__',",
+    "path": "Doc/tools/extensions/pyspecific.py",
+    "commit_id": "02a87ce98d14f4d9d6e72ade7b4146201657bb33",
+    "original_commit_id": "190074030329e6f37f58122fed3b0e7c17fe1d48",
+    "user": {
+      "login": "brettcannon",
+      "id": 54418,
+      "node_id": "MDQ6VXNlcjU0NDE4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54418?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/brettcannon",
+      "html_url": "https://github.com/brettcannon",
+      "followers_url": "https://api.github.com/users/brettcannon/followers",
+      "following_url": "https://api.github.com/users/brettcannon/following{/other_user}",
+      "gists_url": "https://api.github.com/users/brettcannon/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/brettcannon/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/brettcannon/subscriptions",
+      "organizations_url": "https://api.github.com/users/brettcannon/orgs",
+      "repos_url": "https://api.github.com/users/brettcannon/repos",
+      "events_url": "https://api.github.com/users/brettcannon/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/brettcannon/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": true
+    },
+    "body": "That's on purpose as the first capture group is the prefix which doesn't matter. Probably should change the regex to use a non-capture group.",
+    "created_at": "2017-02-10T22:46:07Z",
+    "updated_at": "2017-02-10T23:06:06Z",
+    "html_url": "https://github.com/python/cpython/pull/1#discussion_r100640038",
+    "pull_request_url": "https://api.github.com/repos/python/cpython/pulls/1",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/python/cpython/pulls/comments/100640038"
+      },
+      "html": {
+        "href": "https://github.com/python/cpython/pull/1#discussion_r100640038"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/python/cpython/pulls/1"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/python/cpython/pulls/comments/100640038/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": null,
+    "side": "RIGHT",
+    "in_reply_to_id": 100639802,
+    "author_association": "MEMBER",
+    "original_position": 32,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/python/cpython/pulls/comments/100640708",
+    "pull_request_review_id": 21359475,
+    "id": 100640708,
+    "node_id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDEwMDY0MDcwOA==",
+    "diff_hunk": "@@ -253,7 +253,7 @@ def run(self):\n             text = 'The NEWS file is not available.'\n             node = nodes.strong(text, text)\n             return [node]\n-        content = issue_re.sub(r'`\\1ssue #\\2 <https://bugs.python.org/\\2>`__',\n+        content = issue_re.sub(r'`\\bpo-\\2 <https://bugs.python.org/\\2>`__',",
+    "path": "Doc/tools/extensions/pyspecific.py",
+    "commit_id": "02a87ce98d14f4d9d6e72ade7b4146201657bb33",
+    "original_commit_id": "190074030329e6f37f58122fed3b0e7c17fe1d48",
+    "user": {
+      "login": "Carreau",
+      "id": 335567,
+      "node_id": "MDQ6VXNlcjMzNTU2Nw==",
+      "avatar_url": "https://avatars.githubusercontent.com/u/335567?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/Carreau",
+      "html_url": "https://github.com/Carreau",
+      "followers_url": "https://api.github.com/users/Carreau/followers",
+      "following_url": "https://api.github.com/users/Carreau/following{/other_user}",
+      "gists_url": "https://api.github.com/users/Carreau/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/Carreau/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/Carreau/subscriptions",
+      "organizations_url": "https://api.github.com/users/Carreau/orgs",
+      "repos_url": "https://api.github.com/users/Carreau/repos",
+      "events_url": "https://api.github.com/users/Carreau/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/Carreau/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Sure, you can either you use `\\1` or insert `bpo-`. But here you overwrote half the capture group by only deleting the `1` and not the `\\`. ",
+    "created_at": "2017-02-10T22:51:19Z",
+    "updated_at": "2017-02-10T23:06:06Z",
+    "html_url": "https://github.com/python/cpython/pull/1#discussion_r100640708",
+    "pull_request_url": "https://api.github.com/repos/python/cpython/pulls/1",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/python/cpython/pulls/comments/100640708"
+      },
+      "html": {
+        "href": "https://github.com/python/cpython/pull/1#discussion_r100640708"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/python/cpython/pulls/1"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/python/cpython/pulls/comments/100640708/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": null,
+    "side": "RIGHT",
+    "in_reply_to_id": 100639802,
+    "author_association": "CONTRIBUTOR",
+    "original_position": 32,
+    "position": 1,
+    "subject_type": "line"
+  }
+]
