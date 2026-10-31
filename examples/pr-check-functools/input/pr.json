@@ -1,0 +1,8 @@
+{
+  "repo": "python/cpython",
+  "prNumber": 202,
+  "title": "Add a key function parameter to functools.lru_cache and cache",
+  "body": "Let users pass key=... to @functools.lru_cache and @functools.cache so functions that take unhashable arguments, such as NumPy arrays or lists, can still be cached. The key function replaces _make_key when given.",
+  "files": [{ "path": "Lib/functools.py", "previousPath": null }],
+  "symbols": ["lru_cache", "cache", "_make_key"]
+}
