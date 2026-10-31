@@ -40,7 +40,7 @@ export function renderPrComment(
   dashboardUrl: string,
 ): string {
   const accepted = uniqueById(matches).filter((decision) => decision.status === "accepted");
-  const rejected = uniqueById(similarRejected).filter((decision) => decision.status === "rejected");
+  const rejected = uniqueById([...matches, ...similarRejected]).filter((decision) => decision.status === "rejected");
   const total = accepted.length + rejected.length;
   const lines = [
     "<!-- dejaview -->",

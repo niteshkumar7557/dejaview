@@ -37,6 +37,18 @@ renderPrComment(matches: DecisionSummary[], similarRejected: DecisionSummary[], 
 
 ## Tasks (in order)
 
+### Final sprint status
+
+- [x] **Implementation:** `renderPrComment()` now combines matched and full-text-search rejected decisions,
+  deduplicates them by ID, and counts the rendered accepted and rejected collections.
+- [x] **Regression coverage:** the linker PR-comment suite passes (17/17 tests), including the new case
+  and its snapshot.
+- [x] **Automated testing:** full `npm run typecheck` passed; full `npm test` passed (339 passed, 54
+  skipped across 40 files). The linker PR-comment suite also passed (17/17 tests).
+- [ ] **Live GitHub demo:** fork setup, secrets, real decision records, demo PRs, and real-output fixtures
+  have not been verified; the browser is signed out, upstream writes are denied, and deployment credentials
+  are unavailable in this environment.
+
 - [ ] **1. Reference parser** (no network): `gh-12345`, `bpo-12345`, `python/cpython#12345`, PR/issue URLs,
   commit SHAs, paths like `Lib/typing.py` / `Objects/typevarobject.c`, backticked symbols like
   `` `typing.override` `` / `` `PyErr_SetString` ``. Many unit tests.

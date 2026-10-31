@@ -18,6 +18,28 @@ No similar previously rejected proposals were found.
 [Open the DejaView dashboard](<https://dejaview.example/>)"
 `;
 
+exports[`renderPrComment > renders matched rejected decisions when full-text search is empty and deduplicates IDs 1`] = `
+"<!-- dejaview -->
+
+**📜 DejaView check — 2 past decisions touch this code or proposal**
+
+Historical context is informational; it does not automatically reject this pull request.
+
+### Related accepted architectural decisions
+
+**[PEP 701 · ACCEPTED: Use typing\\.override](<https://dejaview.example/decisions/10>)**
+Why: Changing the tokenizer would add unnecessary complexity\\.
+Linked via: \`Lib/typing.py\`
+Evidence and source links: [view decision](<https://dejaview.example/decisions/10>)
+
+### Previously rejected similar proposals
+
+⚠️ This looks similar to a **previously rejected idea**: “Rework typing\\.override as a decorator factory” (PEP 701). Reason: The factory would add unnecessary complexity\\.
+[View source discussion and decision](<https://dejaview.example/decisions/11>)
+
+[Open the DejaView dashboard](<https://dejaview.example/>)"
+`;
+
 exports[`renderPrComment > renders mixed decisions and safely escapes special Markdown content 1`] = `
 "<!-- dejaview -->
 
