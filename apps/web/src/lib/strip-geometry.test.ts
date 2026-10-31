@@ -22,6 +22,11 @@ describe("stripGeometry", () => {
   it("gives an unscored read post the minimum height", () => expect(ticks[2]!.h).toBe(6));
   it("marks posts cited as evidence", () => expect(ticks[3]).toMatchObject({ kind: "evidence", h: 10, decisionIds: [3] }));
   it("is empty for an empty thread", () => expect(stripGeometry([], 400, 50)).toEqual([]));
+  it("keeps real pipeline scores (not 0..1) inside the strip, scaled by the top score", () => {
+    const real = stripGeometry([post(1, { signalScore: 11 }), post(2, { signalScore: 5.5 })], 200, 50);
+    expect(real.map((t) => t.h)).toEqual([50, 25]);
+    expect(Math.max(...real.map((t) => t.h))).toBeLessThanOrEqual(50);
+  });
 });
 
 describe("stripCounts", () => {

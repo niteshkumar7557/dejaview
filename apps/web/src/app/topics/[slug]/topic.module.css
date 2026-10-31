@@ -1,4 +1,4 @@
-.stack { display: flex; flex-direction: column; gap: var(--gap); }
+.stack { display: flex; flex-direction: column; gap: var(--section-gap); }
 .sources { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: var(--fs-small); margin-top: -12px; }
 .sources a { text-decoration: underline; text-decoration-color: var(--control); text-underline-offset: 3px; }
 .muted { color: var(--muted); }

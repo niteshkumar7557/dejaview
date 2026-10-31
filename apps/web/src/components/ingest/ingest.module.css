@@ -1,6 +1,6 @@
 .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--gap); align-items: start; }
-.title { font-size: var(--fs-section); font-weight: 600; }
-.form, .progress { border: 1px solid var(--border); border-radius: var(--radius-card); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.title { font-size: var(--fs-h3); line-height: var(--lh-h3); font-weight: 600; }
+.form, .progress { border: 1px solid var(--border); border-radius: var(--radius-card); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
 .field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .field label { font-weight: 500; }
 .field input {

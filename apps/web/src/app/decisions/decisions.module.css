@@ -1,5 +1,5 @@
-.stack { display: flex; flex-direction: column; gap: var(--gap); }
-.sectionTitle { font-size: var(--fs-section); font-weight: 600; }
+.stack { display: flex; flex-direction: column; gap: var(--section-gap); }
+.sectionTitle { font-size: var(--fs-h2); line-height: var(--lh-h2); font-weight: 600; letter-spacing: -0.01em; }
 .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
 .field input, .field select {
   height: var(--control-height); padding: 0 10px; min-width: 0;

@@ -35,3 +35,16 @@ export function stageLabel(stage: string): string {
   const s = stage.trim();
   return s ? s[0]!.toUpperCase() + s.slice(1) : "Unknown stage";
 }
+
+/** "1 source", "2 sources". */
+export function plural(n: number, word: string, many = `${word}s`): string {
+  return `${formatCount(n)} ${n === 1 ? word : many}`;
+}
+
+/** "PEP 701: Syntactic formalization…", without repeating "PEP 701" when the title already starts with it. */
+export function topicHeading(pepNumber: number | null, title: string): string {
+  if (pepNumber === null) return title;
+  const prefix = `PEP ${pepNumber}`;
+  if (title.toLowerCase().startsWith(prefix.toLowerCase())) return title.replace(/^(PEP \d+)\s*[–—-]\s*/i, "$1: ");
+  return `${prefix}: ${title}`;
+}

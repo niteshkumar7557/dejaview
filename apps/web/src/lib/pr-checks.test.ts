@@ -10,6 +10,7 @@ describe("prCheckResult", () => {
   it("counts the decisions a PR touches", () => {
     expect(prCheckResult(check([1, 3], []))).toBe("2 related past decisions");
     expect(prCheckResult(check([1], []))).toBe("1 related past decision");
+    expect(prCheckResult(check([9], [7, 8]))).toBe("3 related past decisions");
   });
   it("flags a PR that repeats a rejected idea", () => expect(prCheckResult(check([], [11]))).toBe("Looks like a rejected idea"));
   it("says when nothing matched", () => expect(prCheckResult(check([], []))).toBe("No past decisions"));

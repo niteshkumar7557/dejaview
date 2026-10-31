@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCount, formatDate, formatPercent, formatScore, ofTotal, shortSha, stageLabel } from "./format";
+import { formatCount, formatDate, formatPercent, formatScore, ofTotal, plural, shortSha, stageLabel, topicHeading } from "./format";
 
 describe("formatPercent", () => {
   it("rounds a ratio to whole percent by default", () => expect(formatPercent(0.8182)).toBe("82%"));
@@ -39,5 +39,22 @@ describe("stageLabel", () => {
   it("does not throw on an empty stage", () => {
     expect(stageLabel("")).toBe("Unknown stage");
     expect(stageLabel("  ")).toBe("Unknown stage");
+  });
+});
+
+describe("plural", () => {
+  it("uses the singular for one", () => {
+    expect(plural(1, "source")).toBe("1 source");
+    expect(plural(2, "source")).toBe("2 sources");
+    expect(plural(0, "post")).toBe("0 posts");
+  });
+});
+
+describe("topicHeading", () => {
+  it("prefixes the PEP number once", () => {
+    expect(topicHeading(698, "A typing.override decorator")).toBe("PEP 698: A typing.override decorator");
+    expect(topicHeading(701, "PEP 701 – Syntactic formalization of f-strings")).toBe("PEP 701: Syntactic formalization of f-strings");
+    expect(topicHeading(698, "PEP 698: A typing.override decorator")).toBe("PEP 698: A typing.override decorator");
+    expect(topicHeading(null, "Some discussion")).toBe("Some discussion");
   });
 });

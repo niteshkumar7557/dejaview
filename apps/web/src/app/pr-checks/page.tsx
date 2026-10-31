@@ -20,7 +20,7 @@ export default async function PrChecksPage({ searchParams }: { searchParams: Sea
   const latest = checks[0]?.createdAt;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--gap)" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--section-gap)" }}>
       <PageTitle
         title="PR checks"
         subline={latest

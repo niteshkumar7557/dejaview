@@ -3,7 +3,7 @@ html, body { margin: 0; padding: 0; }
 body {
   background: var(--ground);
   color: var(--text);
-  font: 400 var(--fs-body) / 20px var(--font-sans), system-ui, sans-serif;
+  font: 400 var(--fs-body) / var(--lh-body) var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 h1, h2, h3, h4, p, ul, ol, figure, blockquote { margin: 0; }

@@ -1,19 +1,19 @@
 .layout { display: grid; grid-template-columns: minmax(0, 1fr) 384px; gap: var(--gap); align-items: start; }
 .main { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
 .rail { display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
-.summary { font-size: 16px; line-height: 24px; max-width: 70ch; }
+.summary { font-size: 16px; line-height: 26px; max-width: 70ch; }
 .notice {
   display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: var(--radius-card);
   background: var(--pill-warning-bg); border: 1px solid #fde68a; color: var(--pill-warning-ink); font-size: var(--fs-small);
 }
-.sectionTitle { font-size: var(--fs-section); font-weight: 600; margin-bottom: 12px; }
-.reasons { display: flex; flex-direction: column; gap: 24px; }
-.reasonText { font-size: var(--fs-section); line-height: 22px; font-weight: 500; margin-bottom: 10px; }
+.sectionTitle { font-size: var(--fs-h2); line-height: var(--lh-h2); font-weight: 600; letter-spacing: -0.01em; margin-bottom: 16px; }
+.reasons { display: flex; flex-direction: column; gap: 28px; }
+.reasonText { font-size: var(--fs-h3); line-height: 24px; font-weight: 600; margin-bottom: 12px; max-width: 70ch; }
 .quotes { display: flex; flex-direction: column; gap: 14px; }
 .quote { margin: 0; padding-left: 14px; border-left: 3px solid var(--rule); }
-.quote blockquote { margin: 0; font-size: 16px; line-height: 24px; max-width: 70ch; }
+.quote blockquote { margin: 0; font-size: var(--fs-body); line-height: var(--lh-lead); color: #2c2e30; max-width: 70ch; }
 .quoteUnverified { border-left-color: #fde68a; }
-.quoteMeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 6px; font-size: var(--fs-small); color: var(--muted); }
+.quoteMeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 8px; font-size: var(--fs-small); color: var(--muted); }
 .jump { color: var(--text); text-decoration: underline; text-decoration-color: var(--control); text-underline-offset: 3px; }
 .author { color: var(--text); font-weight: 500; }
 
@@ -40,7 +40,7 @@
   display: flex; flex-direction: column;
 }
 .drawerHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
-.drawerTitle { font-size: var(--fs-section); font-weight: 600; }
+.drawerTitle { font-size: var(--fs-h3); line-height: var(--lh-h3); font-weight: 600; }
 .drawerBody { overflow-y: auto; padding: 8px 20px 24px; display: flex; flex-direction: column; }
 .call { padding: 16px 0; border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 8px; }
 .call:first-child { border-top: 0; }

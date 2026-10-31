@@ -1,5 +1,5 @@
 .rail { display: flex; flex-direction: column; gap: 28px; position: sticky; top: 16px; align-self: start; }
-.heading { font-size: var(--fs-section); font-weight: 600; margin-bottom: 12px; }
+.heading { font-size: var(--fs-h3); line-height: var(--lh-h3); font-weight: 600; margin-bottom: 12px; }
 .bars { display: flex; flex-direction: column; gap: 10px; }
 .bars li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
 .barLabel { color: var(--muted); }

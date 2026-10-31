@@ -31,13 +31,20 @@
   --row-height: 48px;
   --sidebar-width: 228px;
   --topbar-height: 48px;
-  --gap: 24px;
+  --gap: 28px;           /* between blocks on a page */
+  --section-gap: 40px;   /* between the big sections of a page */
   --pad: 24px;
   --control-height: 32px;
 
-  --fs-title: 22px;
-  --fs-section: 16px;
-  --fs-kpi: 28px;
-  --fs-body: 14px;
-  --fs-small: 12px;
+  /* Type scale: one size and weight per level, so every heading level looks different.
+     h1 = the page · h2 = a section of the page · h3 = a card, panel or form · label = table headers. */
+  --fs-title: 28px;  --lh-title: 36px;
+  --fs-h2: 19px;     --lh-h2: 26px;
+  --fs-h3: 15px;     --lh-h3: 22px;
+  --fs-lead: 15px;   --lh-lead: 24px;
+  --fs-body: 14px;   --lh-body: 22px;
+  --fs-small: 12.5px; --lh-small: 18px;
+  --fs-label: 11px;
+  --fs-kpi: 30px;
+  --fs-section: var(--fs-h3);
 }
