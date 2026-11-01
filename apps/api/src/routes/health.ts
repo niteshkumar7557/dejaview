@@ -31,8 +31,13 @@ export function healthRouter(context: ApiContext): Router {
     let db = false;
     try {
       // Not just "is Postgres up" but "are our tables there".
+      //
+      // The name is unqualified on purpose: Postgres resolves it through the connection's
+      // search_path, so we ask about the schema we are actually talking to. Writing
+      // 'public.jobs' would say "no" whenever the app runs in a schema of its own (the
+      // tests use one, and a deployment may too) even though the tables are right there.
       const result = await context.pool.query<{ ready: boolean }>(
-        "SELECT to_regclass('public.jobs') IS NOT NULL AS ready",
+        "SELECT to_regclass('jobs') IS NOT NULL AS ready",
       );
       db = result.rows[0]?.ready ?? false;
     } catch {
