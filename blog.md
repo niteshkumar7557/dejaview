@@ -12,12 +12,14 @@ organisers walking the problems out one by one. Problem six landed on the screen
 
 > *Build a system that reads old discussions and recovers the decisions that were made in them.*
 
-Twelve hours. Four of us. We said yes before the slide was even finished being read. Then we went
-and found the smallest room we could book, because the main auditorium was far too big for four
-people who were about to spend the night arguing about database schemas.
+Twelve hours. Four of us. We said yes before the slide was even finished being read. And the
+first thing we did afterwards was exactly what you'd expect from four engineers who each
+happened to be carrying their own laptop: we spread out, opened them, and did the ideation on
+our own screens. Four laptops, four sets of notes, one argument we kept coming back to.
 
-Somewhere in the first hour, in that too-small room, someone said the phrase that decided our
-night: **"you've had this debate before."**
+The brainstorming was loud and fast and half of it was nonsense, and we knew that at the time.
+Somewhere in the middle of it, someone said the phrase that decided our night: **"you've had
+this debate before."**
 
 Think about a chess game. A good player doesn't just remember who won. They remember the moves
 that *almost* worked, the gambits that were refuted, the positions that looked winning until the
