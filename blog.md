@@ -1,19 +1,23 @@
 # We had this debate before. Nobody wrote it down.
 
-**Team Sipmap — Hacktoberfest Hack Day Sonipat, 31 Oct–1 Nov 2026**
+**Team Sipmap — Hacktoberfest Hack Day Sonipat, 31 Oct–1 Nov 2025**
 Problem 06: Open Source Decision Intelligence and Knowledge Recovery
 
 ---
 
-## The audition
+## Orientation, main auditorium
 
-The room was too small and the whiteboard was too big. Four of us, one laptop between two of
-us, and a problem statement that read like it was written to be impossible in twelve hours:
+It started in the main auditorium, everybody in the room, a projector at the front, and the
+organisers walking the problems out one by one. Problem six landed on the screen:
 
 > *Build a system that reads old discussions and recovers the decisions that were made in them.*
 
-Somewhere in the second hour, someone said the phrase that decided our night: **"you've had this
-debate before."**
+Twelve hours. Four of us. We said yes before the slide was even finished being read. Then we went
+and found the smallest room we could book, because the main auditorium was far too big for four
+people who were about to spend the night arguing about database schemas.
+
+Somewhere in the first hour, in that too-small room, someone said the phrase that decided our
+night: **"you've had this debate before."**
 
 Think about a chess game. A good player doesn't just remember who won. They remember the moves
 that *almost* worked, the gambits that were refuted, the positions that looked winning until the
