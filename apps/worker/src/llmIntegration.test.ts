@@ -30,7 +30,10 @@ function fakeOllama(content: string): typeof fetch {
     });
 }
 
-describe.skipIf(!callLlm)("the model call and the audit trail (needs DATABASE_URL)", () => {
+// The test needs two things: a database to hold the audit trail, and the pipeline to export
+// callLlm. Checking only for callLlm meant that without DATABASE_URL the suite tried to open a
+// connection to a host named "base" and failed the file instead of skipping it.
+describe.skipIf(!databaseUrl || !callLlm)("the model call and the audit trail (needs DATABASE_URL)", () => {
   let pool: Pool;
   let database: TestDatabase;
   let store: PostgresLlmCallStore;
