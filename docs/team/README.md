@@ -4,16 +4,18 @@ DejaView is split into **four parts that can be built at the same time**. Each p
 works on their own branches, and raises PRs as they go. The parts talk to each other only through the
 **shared contract** in `packages/shared` (TypeScript types), so nobody waits on anybody's code.
 
-| Person | Part | Owns (only they edit these) | Doc |
-|---|---|---|---|
-| **Mudit** | Data, API and worker | `db/`, `apps/api/`, `apps/worker/`, `packages/ingest/`, `fixtures/threads/`, `docker-compose.yml`, `.env.example`, deployment | [mudit.md](mudit.md) |
-| **Abhijeet** | LLM pipeline and self-evaluation | `packages/pipeline/`, `fixtures/llm/`, `examples/pep-*/` | [abhijeet.md](abhijeet.md) |
-| **Ansh** | Code linking and PR bot | `packages/linker/`, `apps/action/`, `examples/pr-check/`, the demo CPython fork | [ansh.md](ansh.md) |
-| **Nitesh** | Frontend and pitch | `apps/web/`, `examples/README.md`, pitch slides | [nitesh.md](nitesh.md) |
+| Person | Part | Owns (only they edit these) |
+|---|---|---|
+| **Mudit** | Data, API and worker | `db/`, `apps/api/`, `apps/worker/`, `packages/ingest/`, `fixtures/threads/`, `docker-compose.yml`, `.env.example`, deployment |
+| **Abhijeet** | LLM pipeline and self-evaluation | `packages/pipeline/`, `fixtures/llm/`, `examples/pep-*/` |
+| **Ansh** | Code linking and PR bot | `packages/linker/`, `apps/action/`, `examples/pr-check/`, the demo CPython fork |
+| **Nitesh** | Frontend and pitch | `apps/web/`, `examples/README.md`, pitch slides |
+
+The table shows who built what originally. Since 1 Nov, around 3:40 AM, Nitesh has owned every part (see
+`docs/PLATFORM.md` §13).
 
 **Shared (change only with everyone's OK):** `packages/shared/`, root `package.json`, `package-lock.json`,
 `tsconfig*.json`, `.github/`, `CLAUDE.md`, `design.md`, `HACKATHON.md`, `docs/team/README.md`.
-Each person may edit their **own** `docs/team/<name>.md` (tick off tasks as you go).
 
 ## How the parts fit
 
@@ -67,19 +69,3 @@ Each person may edit their **own** `docs/team/<name>.md` (tick off tasks as you 
 - Secrets only in `.env` (git-ignored). Variables: `DATABASE_URL`, `LLM_BASE_URL`, `LLM_API_TOKEN`,
   `TRIAGE_MODEL`, `EXTRACT_MODEL`, `LLM_MODE`, `GITHUB_TOKEN`, `DEJAVIEW_API_TOKEN`, `CPYTHON_DIR`,
   `NEXT_PUBLIC_API_URL`.
-
-## Integration checkpoints (tonight)
-
-| Time | Everyone has… |
-|---|---|
-| **10:30 PM** | Mudit: at least one real thread in `fixtures/threads/` (unblocks Abhijeet and Ansh). Nitesh: web app runs on mocks. |
-| **12:00 AM** | Each part's main function works on fixture files with tests. Mentors leave at midnight, so ask questions before then. |
-| **2:00 AM** | **End to end on PEP #1:** worker runs pipeline + linker, API serves it, web shows real data. Long LLM runs started for the other PEPs. |
-| **3:30 AM** | PR bot comments on the CPython fork. Eval scorecard visible in the web app. |
-| **5:00 AM** | `examples/` filled with real outputs. All feature PRs merged. |
-| **5:30 AM** | Feature freeze. Only fixes. |
-| **6:15 AM** | Last merge. CI green on `main`. (Repo frozen at 6:30 AM.) |
-
-Dev PEPs (confirm in the first hour that each has a discuss.python.org thread and a Rejected Ideas section):
-PEP 698 (`typing.override`, small, use first), PEP 701 (f-strings), PEP 695 (type parameters). Swap in
-the organizers' PEPs as soon as they give them.

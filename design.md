@@ -656,8 +656,7 @@ Summary of the rules that drive our workflow. Full consolidated rules: Appendix 
 
 ## 12. Team split (4 people) and timeline
 
-**Team Sipmap.** Each person's detailed task list is in `docs/team/<name>.md`; the ownership map, contract
-rules and integration checkpoints are in `docs/team/README.md`.
+**Team Sipmap.** The ownership map and contract rules are in `docs/team/README.md`.
 
 | Person | Part | Owns |
 |---|---|---|

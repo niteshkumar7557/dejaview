@@ -11,10 +11,9 @@ The project is split between four teammates (`docs/team/README.md`). Before doin
 1. **Ask: "Which teammate are you: Mudit, Nitesh, Abhijeet or Ansh?"** Do not read code, plan or edit until
    you have an answer. Skip the question only if the user already said their name in this session. If the
    answer is not one of the four, ask again.
-2. **Read `docs/team/README.md` and `docs/team/<name>.md`** (lowercase: `mudit.md`, `nitesh.md`,
-   `abhijeet.md`, `ansh.md`), then the `design.md` sections that doc lists.
-3. **Work only on that person's part.** Create or modify files **only inside the folders their doc says they
-   own**, plus their own `docs/team/<name>.md` (tick off finished tasks there). Reading any file is fine.
+2. **Read `docs/team/README.md`**, then the `design.md` sections for that person's part.
+3. **Work only on that person's part.** Create or modify files **only inside the folders that doc says they
+   own**. Reading any file is fine.
 4. **If a task needs a change outside their folders** (someone else's folder, `packages/shared`, root config,
    `.github/`, `design.md`, `CLAUDE.md`, `HACKATHON.md`): don't make it. Say which file and which owner, and
    draft a short message the user can send to that teammate. Change `packages/shared` or root files only if the

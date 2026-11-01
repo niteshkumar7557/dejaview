@@ -10,7 +10,7 @@
 >
 > - How to run and present the demo, page by page, and the improvements backlog: [`docs/DEMO.md`](DEMO.md).
 > - Who owns which folder: [`docs/team/README.md`](team/README.md).
-> - This file describes the code **as it is in the repo** (status checked on 31 Oct 2026, around midnight).
+> - This file describes the code **as it is in the repo** (status checked on 1 Nov 2026, 6:15 AM).
 >   Section 12 says what is finished and what is still missing.
 
 ---
@@ -642,7 +642,7 @@ dejaview/
 │   └── llm/             recorded AI answers, replayed in CI (filled by real runs)   [Abhijeet]
 ├── examples/            real inputs and real outputs (required by the organizers)
 ├── scripts/             the commit/PR convention checker
-├── docs/team/           who builds what, per-person task lists, flow animation
+├── docs/team/           who builds what, flow animation, code graph
 ├── .github/             CI workflows + PR template
 ├── design.md            the full design and the hackathon rules
 ├── HACKATHON.md         team, problem, models and why (first commit)
@@ -742,7 +742,6 @@ Tests: `worker.test.ts` and `llmIntegration.test.ts` (a real `callLlm` writing t
   - `api-paths.ts` (URL building), `ingest.ts` (stage rows, job outcome, upload checks), `use-job.ts` (polling
     a job and following `nextJobId`), `madr.ts` (MADR export), `eval.ts` (scorecard helpers), `verified.ts`.
 - [`src/mocks/`](../apps/web/src/mocks): the sample dataset, typed with the contract.
-- [`docs/plan.md`](../apps/web/docs/plan.md): the frontend's design plan and review notes.
 
 ### `apps/action`
 
@@ -971,7 +970,7 @@ on every PR.
 
 ## 12. What is done and what is missing
 
-*Checked on 1 Nov 2026, around 4:15 AM. Update this list as PRs merge.*
+*Final status, checked on 1 Nov 2026, 6:15 AM, before the repo freeze.*
 
 | Part | Status |
 |---|---|
@@ -983,11 +982,11 @@ on every PR.
 | Linker library (references, linking, rename tracking, PR matching, comment) | ✅ |
 | GitHub Action code | ✅ |
 | AI client (live / record / replay, cache, retries) | ✅ |
-| Pipeline stages (clean, score, triage, extract, verify, consolidate) and `runExtraction` | ✅ PEP 698: 3 decisions, 5/5 quotes verified · PEP 701: 16 decisions, 52/52 quotes verified |
+| Pipeline stages (clean, score, triage, extract, verify, consolidate) and `runExtraction` | ✅ PEP 698: 3 decisions, 5/5 quotes verified · PEP 701: 16 decisions, 58/58 quotes verified |
 | Evaluation (`evaluatePep`, PEP parser, judge) | ✅ PEP 698: recall 1/4 (the other 3 are barely argued in that thread) · PEP 701: recall 2/3 (both through one merged decision, see 14) |
 | CPython clone + rename tracking in the worker | ✅ |
 | CPython demo fork with the Action installed, and demo PRs | ⬜ |
-| `fixtures/llm/` (recorded AI answers) and `examples/` (real outputs) | ✅ PEP 698, PEP 701, and a real PR check · PEP 695 after the demo |
+| `fixtures/llm/` (recorded AI answers) and `examples/` (real outputs) | ✅ PEP 698, PEP 701, and two real PR checks (`pr-check`, `pr-check-functools`) · PEP 695 thread ingested, not yet extracted |
 | Whole stack end to end on real data (ingest → extract → link → eval → PR check) | ✅ run locally on PEP 698 and 701 |
 | Same person across platforms | ✅ |
 | Deployment (Dockerfile + Fly.io; dashboard built against the real API) | ✅ config; live deploy by Mudit |
@@ -1057,8 +1056,7 @@ time first (the pipeline was built by Nitesh's agent in #15 and #19), then the r
 The table shows who built what originally.
 
 Shared files (change only with everyone's OK): `packages/shared/`, root `package.json` and lockfile,
-`tsconfig*.json`, `.github/`, `CLAUDE.md`, `design.md`, `HACKATHON.md`, `docs/team/README.md`. Each
-person's task list is in `docs/team/<name>.md`.
+`tsconfig*.json`, `.github/`, `CLAUDE.md`, `design.md`, `HACKATHON.md`, `docs/team/README.md`.
 
 ### The demo (8 minutes)
 

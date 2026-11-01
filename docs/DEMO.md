@@ -1,7 +1,8 @@
 # DejaView: the demo, page by page
 
 How to run the live demo, what to show on each page and what to say, plus the list of known issues to
-improve. For how the code works, see [`PLATFORM.md`](PLATFORM.md).
+improve. For how the code works, see [`PLATFORM.md`](PLATFORM.md). Pitch deck:
+https://claude.ai/artifact/MXjrZkCimXQwnbEzCSduRY (fill its `[__]` numbers from `examples/`).
 
 ---
 
@@ -48,8 +49,9 @@ the PEP**, and see whether it recovers the rejected ideas and why."
 
 ### Overview page (`/`), 30 s
 - Four numbers at the top: **decisions recovered, rejected ideas, quotes verified, recall against the PEP**.
-  Say: "Every number is from real runs: 19 decisions from 2 discussions, and **every one of the 57 quotes
-  was found word for word in its post**."
+  Say: "Every number is from real runs: 19 decisions from 2 discussions, and **every one of the 63 quotes
+  was found word for word in its post**." (These are the PEP 698 and PEP 701 totals. If `gh-101016` is also
+  loaded, read the numbers off the page instead.)
 - **Discussions** table: one row per PEP with its counts. **Rejected ideas** list: the most useful thing for
   a newcomer. **Latest PR checks**: what the bot said recently.
 
